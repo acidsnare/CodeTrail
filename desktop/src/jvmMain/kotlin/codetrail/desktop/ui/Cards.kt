@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.core.command.Command
 import codetrail.core.model.Dir
+import codetrail.desktop.sound.Sfx
 import codetrail.desktop.res.*
 import org.jetbrains.compose.resources.stringResource
 
@@ -133,12 +134,13 @@ fun EmptySlot(index: Int, size: Int = 56) {
 fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
     // Follows the surrounding content colour so it reads on both dark and light chrome.
     val content = LocalContentColor.current
+    val sounds = LocalSounds.current
     Box(
         Modifier
             .padding(2.dp)
             .background(if (selected) Color.White else Color.Transparent, RoundedCornerShape(8.dp))
             .border(2.dp, if (selected) Color.White else content.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .clickable { sounds.play(Sfx.CLICK); onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Text(text, color = if (selected) Ink else content, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)

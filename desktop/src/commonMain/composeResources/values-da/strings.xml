@@ -140,4 +140,8 @@
     <string name="hint_ready">Programmet ser færdigt ud. Tryk Kør!</string>
     <string name="won_payout">+%1$d ★</string>
     <string name="tier_multiplier">×%1$d ★</string>
+    <string name="settings_sound">Lyd</string>
+    <string name="on">Til</string>
+    <string name="off">Fra</string>
+    <string name="level_done">Banen er klaret! Tryk Ny bane for den næste.</string>
 </resources>

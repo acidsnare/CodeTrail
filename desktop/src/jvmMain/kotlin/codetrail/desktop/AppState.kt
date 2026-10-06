@@ -8,6 +8,8 @@ import codetrail.core.progress.Profile
 import codetrail.core.progress.ProfileRepository
 import codetrail.core.progress.Settings
 import codetrail.core.progress.SettingsStore
+import codetrail.desktop.sound.Sfx
+import codetrail.desktop.sound.SoundPlayer
 import codetrail.desktop.theme.Character
 import codetrail.desktop.theme.WorldTheme
 import java.util.UUID
@@ -18,6 +20,7 @@ enum class Screen { MENU, PROFILES, PLAY, GAME, SETTINGS, STATS }
 class AppState(
     private val profiles: ProfileRepository,
     private val settingsStore: SettingsStore,
+    val sounds: SoundPlayer = SoundPlayer.Silent,
 ) {
     var screen by mutableStateOf(Screen.MENU)
         private set
@@ -40,6 +43,7 @@ class AppState(
         get() = AppLanguage.entries.firstOrNull { it.tag == settings.language } ?: AppLanguage.SYSTEM
 
     init {
+        sounds.enabled = settings.sound
         current = allProfiles.firstOrNull { it.id == settings.lastProfileId } ?: allProfiles.firstOrNull()
         // First launch: go straight to profile creation.
         if (current == null) screen = Screen.PROFILES
@@ -122,7 +126,7 @@ class AppState(
 
     fun startGame(theme: WorldTheme, tier: Int, mode: GameMode = GameMode.FORWARD, resume: codetrail.core.progress.SaveSlot? = null) {
         val p = current ?: return
-        game = GameState(p, theme, tier, resume, mode, onProfileChanged = ::updateProfile)
+        game = GameState(p, theme, tier, resume, mode, sounds = sounds, onProfileChanged = ::updateProfile)
         paused = false
         screen = Screen.GAME
     }
@@ -139,6 +143,12 @@ class AppState(
     // ---- settings ----
 
     fun setLanguage(l: AppLanguage) = saveSettings(settings.copy(language = l.tag))
+
+    fun setSound(on: Boolean) {
+        sounds.enabled = on
+        saveSettings(settings.copy(sound = on))
+        if (on) sounds.play(Sfx.CLICK)
+    }
 
     private fun saveSettings(s: Settings) {
         settings = s

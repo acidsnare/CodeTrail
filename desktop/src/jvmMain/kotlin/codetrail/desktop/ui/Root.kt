@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import codetrail.desktop.res.Res
 import codetrail.desktop.res.cancel
 import codetrail.desktop.res.quit_body
@@ -23,6 +24,7 @@ import codetrail.desktop.Screen
 @Composable
 fun Root(app: AppState, onQuit: () -> Unit) {
     ProvideAppLanguage(app.language) {
+        CompositionLocalProvider(LocalSounds provides app.sounds) {
         MaterialTheme {
             Box {
             AnimatedContent(
@@ -54,6 +56,7 @@ fun Root(app: AppState, onQuit: () -> Unit) {
                 )
             }
             }
+        }
         }
     }
 }

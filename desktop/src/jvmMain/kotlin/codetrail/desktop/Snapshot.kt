@@ -72,7 +72,14 @@ fun main(args: Array<String>) {
                 val l = state.level
                 Solver.solve(l.grid, l.start, l.startDir, l.goal, l.commandSet)!!.program.forEach(state::addCommand)
                 runBlocking { state.run() }
-                println("phase=${state.phase} stars=${state.stars} profileStars=${state.profile.progress.totalStars}")
+                println("phase=${state.phase} stars=${state.stars} payout=${state.payout} profileStars=${state.profile.progress.totalStars}")
+                // replay the same level: must not pay again
+                runBlocking { state.run() }
+                println("replay: payout=${state.payout} profileStars=${state.profile.progress.totalStars}")
+                state.restartLevel()
+                Solver.solve(l.grid, l.start, l.startDir, l.goal, l.commandSet)!!.program.forEach(state::addCommand)
+                runBlocking { state.run() }
+                println("restart+solve: payout=${state.payout} profileStars=${state.profile.progress.totalStars} rewarded=${state.profile.progress.rewarded}")
             } else if (args.getOrNull(3) == "fail") {
                 // Walk straight off the path so the failure scene plays; sample the pose while it runs.
                 val l = state.level

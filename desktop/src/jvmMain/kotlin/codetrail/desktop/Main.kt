@@ -11,13 +11,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import codetrail.desktop.sound.JvmSoundPlayer
 import codetrail.desktop.ui.Root
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 
 fun main() = application {
     val storage = remember { FileStorage() }
-    val app = remember { AppState(storage, storage) }
+    val app = remember { AppState(storage, storage, JvmSoundPlayer()) }
     val icon: Painter = remember { BitmapPainter(useResource("icon/codetrail_512.png") { loadImageBitmap(it) }) }
 
     // The dock / taskbar icon is not taken from the window icon when running from Gradle, set it explicitly.

@@ -34,11 +34,12 @@ compose.resources {
 compose.desktop {
     application {
         mainClass = "codetrail.desktop.MainKt"
-        jvmArgs("--enable-native-access=ALL-UNNAMED")
+        // -Xdock:name fixes the "java" dock tooltip when running from Gradle on macOS
+        jvmArgs("--enable-native-access=ALL-UNNAMED", "-Xdock:name=CodeTrail")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CodeTrail"
-            packageVersion = "1.0.0"
+            packageVersion = "1.1.0"
             description = "Program your hero's path"
             vendor = "CodeTrail"
             macOS {
@@ -94,4 +95,15 @@ tasks.register<JavaExec>("renderIcon") {
         rootProject.file(providers.gradleProperty("png").getOrElse("assets/icon/codetrail_1024.png")).path,
         providers.gradleProperty("size").getOrElse("1024"),
     )
+}
+
+tasks.register<JavaExec>("renderSounds") {
+    group = "verification"
+    description = "Write all synthesized sound effects to build/sounds/*.wav"
+    val main = kotlin.jvm().compilations.getByName("main")
+    dependsOn(main.compileTaskProvider)
+    classpath = main.output.allOutputs + main.runtimeDependencyFiles
+    mainClass.set("codetrail.desktop.sound.SoundRenderKt")
+    jvmArgs("-Djava.awt.headless=true")
+    args = listOf(layout.buildDirectory.dir("sounds").get().asFile.path)
 }

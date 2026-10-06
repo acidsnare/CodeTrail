@@ -26,13 +26,18 @@ class FileStorage(
 
     override fun load(): Settings {
         val p = read(settingsFile) ?: return Settings()
-        return Settings(language = p.getProperty("language"), lastProfileId = p.getProperty("lastProfile"))
+        return Settings(
+            language = p.getProperty("language"),
+            lastProfileId = p.getProperty("lastProfile"),
+            sound = p.getProperty("sound")?.toBooleanStrictOrNull() ?: true,
+        )
     }
 
     override fun save(settings: Settings) {
         val p = Properties()
         settings.language?.let { p["language"] = it }
         settings.lastProfileId?.let { p["lastProfile"] = it }
+        p["sound"] = settings.sound.toString()
         write(settingsFile, p, "CodeTrail settings")
     }
 
