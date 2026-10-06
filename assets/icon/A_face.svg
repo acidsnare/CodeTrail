@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2BB3DB"/><stop offset="1" stop-color="#157A9E"/></linearGradient>
+<linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE082"/><stop offset="1" stop-color="#FFB300"/></linearGradient>
+<clipPath id="clip"><path d="M 512 0 C 160 0 0 160 0 512 C 0 864 160 1024 512 1024 C 864 1024 1024 864 1024 512 C 1024 160 864 0 512 0 Z"/></clipPath>
+</defs><path d="M 512 0 C 160 0 0 160 0 512 C 0 864 160 1024 512 1024 C 864 1024 1024 864 1024 512 C 1024 160 864 0 512 0 Z" fill="url(#sea)" /><g clip-path="url(#clip)" opacity=".14" stroke="#fff" stroke-width="6"><line x1="170.66666666666666" y1="0" x2="170.66666666666666" y2="1024"/><line x1="0" y1="170.66666666666666" x2="1024" y2="170.66666666666666"/><line x1="341.3333333333333" y1="0" x2="341.3333333333333" y2="1024"/><line x1="0" y1="341.3333333333333" x2="1024" y2="341.3333333333333"/><line x1="512.0" y1="0" x2="512.0" y2="1024"/><line x1="0" y1="512.0" x2="1024" y2="512.0"/><line x1="682.6666666666666" y1="0" x2="682.6666666666666" y2="1024"/><line x1="0" y1="682.6666666666666" x2="1024" y2="682.6666666666666"/><line x1="853.3333333333334" y1="0" x2="853.3333333333334" y2="1024"/><line x1="0" y1="853.3333333333334" x2="1024" y2="853.3333333333334"/></g><g transform="translate(112 112) scale(3.1250)">
+  <!-- tail (behind) -->
+  <g transform="translate(200 198) rotate(-30)">
+    <rect fill="#D9602B" x="-18" y="-13" width="76" height="26" rx="13"/>
+    <rect fill="#4A2A1C" x="4" y="-13" width="12" height="26"/>
+    <rect fill="#4A2A1C" x="30" y="-13" width="12" height="26"/>
+    <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="-18" y="-13" width="76" height="26" rx="13"/>
+  </g>
+  <!-- ears: pointed, white-rimmed like a real red panda -->
+  <path d="M26 112 Q16 40 44 16 Q60 22 110 64 Z" fill="#D9602B" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/><path d="M44 100 Q38 50 50 34 Q62 44 96 72 Z" fill="#FFFFFF"/><path d="M56 96 Q52 62 58 50 Q68 58 90 78 Z" fill="#F7E6CF"/>
+  <path d="M230 112 Q240 40 212 16 Q196 22 146 64 Z" fill="#D9602B" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/><path d="M212 100 Q218 50 206 34 Q194 44 160 72 Z" fill="#FFFFFF"/><path d="M200 96 Q204 62 198 50 Q188 58 166 78 Z" fill="#F7E6CF"/>
+  <!-- head -->
+  <ellipse fill="#D9602B" cx="128" cy="140" rx="100" ry="90"/>
+  <ellipse fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="128" cy="140" rx="100" ry="90"/>
+  <!-- tear streaks: start below eye, run to cheek -->
+  <path fill="#4A2A1C" d="M62 150 Q50 178 66 206 Q80 182 76 150Z"/>
+  <path fill="#4A2A1C" d="M194 150 Q206 178 190 206 Q176 182 180 150Z"/>
+  <!-- brow spots -->
+  <ellipse fill="#F7E6CF" cx="90" cy="98" rx="20" ry="13"/><ellipse fill="#F7E6CF" cx="166" cy="98" rx="20" ry="13"/>
+  <!-- eye patches -->
+  <ellipse fill="#FFFFFF" cx="92" cy="128" rx="24" ry="20"/><ellipse fill="#FFFFFF" cx="164" cy="128" rx="24" ry="20"/>
+  <!-- muzzle -->
+  <ellipse fill="#FFFFFF" cx="128" cy="178" rx="48" ry="38"/>
+  <!-- eyes -->
+  <circle fill="#2B1B14" cx="96" cy="130" r="9"/><circle fill="#2B1B14" cx="160" cy="130" r="9"/>
+  <circle fill="#FFFFFF" cx="99" cy="126" r="3"/><circle fill="#FFFFFF" cx="163" cy="126" r="3"/>
+  <!-- nose + mouth -->
+  <ellipse fill="#2B1B14" cx="128" cy="166" rx="13" ry="9"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M128 175 L128 186 M128 186 Q116 196 106 186 M128 186 Q140 196 150 186"/>
+  <!-- blush -->
+  <ellipse fill="#F09A7A" opacity=".6" cx="84" cy="176" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="172" cy="176" rx="12" ry="8"/>
+</g></svg>

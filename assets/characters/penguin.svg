@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- flipper -->
+  <g transform="translate(200 200) rotate(-30)">
+    <rect fill="#2F3A4A" x="-18" y="-13" width="70" height="26" rx="13"/>
+    <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="-18" y="-13" width="70" height="26" rx="13"/>
+  </g>
+  <!-- head -->
+  <ellipse fill="#2F3A4A" cx="128" cy="140" rx="100" ry="90"/>
+  <ellipse fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="128" cy="140" rx="100" ry="90"/>
+  <!-- white face -->
+  <path fill="#FFFFFF" d="M56 150 Q70 100 128 100 Q186 100 200 150 Q196 220 128 226 Q60 220 56 150Z"/>
+  <!-- eyes -->
+  <circle fill="#2B1B14" cx="96" cy="130" r="9"/><circle fill="#2B1B14" cx="160" cy="130" r="9"/>
+  <circle fill="#FFFFFF" cx="99" cy="126" r="3"/><circle fill="#FFFFFF" cx="163" cy="126" r="3"/>
+  <!-- beak -->
+  <path fill="#F4B23E" d="M104 160 L152 160 L128 190 Z"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M104 160 L152 160 L128 190 Z"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M104 160 L152 160"/>
+  <ellipse fill="#F09A7A" opacity=".6" cx="80" cy="172" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="176" cy="172" rx="12" ry="8"/>
+</svg>
