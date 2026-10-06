@@ -52,8 +52,12 @@ compose.desktop {
             windows {
                 iconFile.set(rootProject.file("assets/icon/codetrail.ico"))
                 menu = true
+                menuGroup = "CodeTrail"
                 shortcut = true
-                perUserInstall = true
+                // Machine-wide install into Program Files. Needs an admin prompt, but per-user
+                // installs into AppData look like malware droppers to antivirus heuristics.
+                perUserInstall = false
+                dirChooser = true
                 upgradeUuid = "4a2d1c5e-7b3f-4e8a-9c1d-2f6b8e0a7d31"
             }
             linux { iconFile.set(rootProject.file("assets/icon/codetrail_512.png")) }
