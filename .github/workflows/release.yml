@@ -41,7 +41,7 @@ jobs:
         shell: pwsh
 
       - name: Build installer
-        run: ./gradlew :desktop:${{ matrix.task }} --no-daemon --console=plain
+        run: ./gradlew :desktop:createDistributable :desktop:${{ matrix.task }} --no-daemon --console=plain
 
       # Smoke test: the packaged launcher must start its bundled JVM and stay alive for a few
       # seconds. Catches broken JVM options or missing modules that only show up at run time.
@@ -50,26 +50,43 @@ jobs:
         shell: bash
         run: |
           set -e
-          if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get install -y -qq xvfb >/dev/null; export DISPLAY=:99; Xvfb :99 -screen 0 1280x800x24 & sleep 2; fi
-          "${{ matrix.launcher }}" > launcher.log 2>&1 &
+          APP=desktop/build/compose/binaries/main/app
+          echo "--- app image"; find "$APP" -maxdepth 3 | head -40
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq xvfb >/dev/null
+            Xvfb :99 -screen 0 1280x800x24 >/dev/null 2>&1 &
+            sleep 2
+            export DISPLAY=:99 SKIKO_RENDER_API=SOFTWARE
+          fi
+          LAUNCHER=$(find "$APP" -type f -iname codetrail -perm -u+x | head -1)
+          if [ -z "$LAUNCHER" ]; then echo "launcher not found"; exit 1; fi
+          echo "launcher: $LAUNCHER"
+          "$LAUNCHER" > launcher.log 2>&1 &
           PID=$!
-          sleep 20
-          if ! kill -0 $PID 2>/dev/null; then echo "launcher exited early"; cat launcher.log; exit 1; fi
-          if grep -qiE "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread" launcher.log; then cat launcher.log; exit 1; fi
+          sleep 25
+          echo "--- launcher.log"; cat launcher.log || true
+          if ! kill -0 $PID 2>/dev/null; then echo "launcher exited early"; exit 1; fi
+          if grep -qiE "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread" launcher.log; then exit 1; fi
           kill $PID || true
-          echo "launcher alive after 20s"
+          echo "launcher alive after 25s"
 
       - name: Smoke test launcher (windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "${{ matrix.launcher }}" -PassThru -RedirectStandardOutput out.log -RedirectStandardError err.log
-          Start-Sleep -Seconds 20
-          if ($p.HasExited) { Write-Host "launcher exited early with $($p.ExitCode)"; Get-Content out.log, err.log; exit 1 }
+          $app = "desktop/build/compose/binaries/main/app"
+          Write-Host "--- app image"; Get-ChildItem -Recurse -Depth 2 $app | Select-Object -First 40 | ForEach-Object { $_.FullName }
+          $exe = Get-ChildItem -Recurse -Filter CodeTrail.exe $app | Select-Object -First 1
+          if (-not $exe) { Write-Host "launcher not found"; exit 1 }
+          Write-Host "launcher: $($exe.FullName)"
+          $p = Start-Process -FilePath $exe.FullName -PassThru -RedirectStandardOutput out.log -RedirectStandardError err.log
+          Start-Sleep -Seconds 25
+          Write-Host "--- logs"; Get-Content out.log, err.log -ErrorAction SilentlyContinue
+          if ($p.HasExited) { Write-Host "launcher exited early with $($p.ExitCode)"; exit 1 }
           $log = (Get-Content out.log, err.log -ErrorAction SilentlyContinue) -join "`n"
-          if ($log -match "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread") { Write-Host $log; exit 1 }
+          if ($log -match "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread") { exit 1 }
           Stop-Process -Id $p.Id -Force
-          Write-Host "launcher alive after 20s"
+          Write-Host "launcher alive after 25s"
 
       - uses: actions/upload-artifact@v4
         with:
