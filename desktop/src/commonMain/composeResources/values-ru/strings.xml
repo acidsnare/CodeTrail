@@ -142,4 +142,8 @@
     <string name="hint_ready">Программа выглядит готовой. Жми Запуск!</string>
     <string name="won_payout">+%1$d ★</string>
     <string name="tier_multiplier">×%1$d ★</string>
+    <string name="settings_sound">Звук</string>
+    <string name="on">Вкл</string>
+    <string name="off">Выкл</string>
+    <string name="level_done">Уровень пройден! Жми «Новый уровень», чтобы продолжить.</string>
 </resources>

@@ -33,6 +33,9 @@ import codetrail.desktop.res.settings_reset_body
 import codetrail.desktop.res.settings_reset_confirm
 import codetrail.desktop.res.settings_data
 import codetrail.desktop.res.settings_language
+import codetrail.desktop.res.settings_sound
+import codetrail.desktop.res.on
+import codetrail.desktop.res.off
 import codetrail.desktop.res.settings_title
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -54,6 +57,14 @@ fun SettingsScreen(app: AppState) {
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     for (l in AppLanguage.entries) Chip(l.label, selected = app.language == l) { app.setLanguage(l) }
+                }
+
+                Spacer(Modifier.height(32.dp))
+                Text(stringResource(Res.string.settings_sound), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Chip(stringResource(Res.string.on), selected = app.settings.sound) { app.setSound(true) }
+                    Chip(stringResource(Res.string.off), selected = !app.settings.sound) { app.setSound(false) }
                 }
 
                 val profile = app.current

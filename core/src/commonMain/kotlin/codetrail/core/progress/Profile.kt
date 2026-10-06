@@ -33,6 +33,7 @@ data class SaveSlot(
 data class Settings(
     val language: String? = null,
     val lastProfileId: String? = null,
+    val sound: Boolean = true,
 )
 
 interface ProfileRepository {

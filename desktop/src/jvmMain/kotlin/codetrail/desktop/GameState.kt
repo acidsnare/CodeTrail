@@ -10,6 +10,8 @@ import codetrail.core.engine.PredictPuzzle
 import codetrail.core.engine.PredictPuzzles
 import codetrail.core.engine.Solver
 import codetrail.core.model.Pos
+import codetrail.desktop.sound.Sfx
+import codetrail.desktop.sound.SoundPlayer
 import codetrail.core.engine.Failure
 import codetrail.core.engine.HeroState
 import codetrail.core.engine.Interpreter
@@ -58,8 +60,11 @@ class GameState(
     tier: Int,
     resume: SaveSlot? = null,
     val mode: GameMode = GameMode.FORWARD,
+    private val sounds: SoundPlayer = SoundPlayer.Silent,
     private val onProfileChanged: (Profile) -> Unit = {},
 ) {
+    private var stepToggle = false
+
     private val generator = LevelGenerator()
 
     var profile by mutableStateOf(profile)
@@ -127,7 +132,13 @@ class GameState(
     val character: Character
         get() = Character.byId(profile.characterId)?.takeIf { isUnlocked(it) } ?: Character.All.first()
 
-    val canEdit: Boolean get() = phase != Phase.RUNNING && mode == GameMode.FORWARD
+    /** A level is locked once it has been solved, in this session or earlier: no edits, no reruns, only New level. */
+    val completed: Boolean
+        get() = phase == Phase.WON || profile.progress.isRewarded(level.difficulty, rewardKey())
+
+    val canEdit: Boolean get() = phase != Phase.RUNNING && mode == GameMode.FORWARD && !completed
+
+    private fun rewardKey() = if (mode == GameMode.PREDICT) level.seed xor 0x5EED else level.seed
 
     init {
         if (mode == GameMode.PREDICT) {
@@ -150,10 +161,11 @@ class GameState(
 
     /** Predict mode: the player points at the cell where the hero will stop. */
     fun selectGuess(p: Pos) {
-        if (mode != GameMode.PREDICT || phase == Phase.RUNNING || phase == Phase.WON) return
+        if (mode != GameMode.PREDICT || phase == Phase.RUNNING || completed) return
         if (!level.grid.contains(p)) return
         if (phase == Phase.FAILED) { resetRun(); predictResult = null }
         guess = p
+        sounds.play(Sfx.GUESS)
     }
 
     /** Hint: compare the program with the shortest solution and point at the next step. Caps the level at 2 stars. */
@@ -162,6 +174,7 @@ class GameState(
         val sol = solution ?: Solver.solve(level.grid, level.start, level.startDir, level.goal, level.commandSet)?.program?.also { solution = it } ?: return
         hintUsed = true
         clearHint()
+        sounds.play(Sfx.HINT)
         val current = program.toList()
         when {
             current.size <= sol.size && current == sol.take(current.size) -> {
@@ -194,6 +207,7 @@ class GameState(
 
     /** Same level, empty program. */
     fun restartLevel() {
+        if (completed) { newLevel(); return }
         if (mode == GameMode.PREDICT) { resetRun(); setupPredict(); persist(); return }
         program.clear()
         clearHint()
@@ -206,6 +220,7 @@ class GameState(
         if (phase != Phase.EDITING) resetRun()
         program += c
         clearHint()
+        sounds.play(Sfx.CARD_ADD)
         persist()
     }
 
@@ -214,6 +229,7 @@ class GameState(
         if (phase != Phase.EDITING) resetRun()
         program.removeAt(index)
         clearHint()
+        sounds.play(Sfx.CARD_REMOVE)
         persist()
     }
 
@@ -235,7 +251,7 @@ class GameState(
 
     /** Plays the trace step by step. Suspends until the run is over. */
     suspend fun run() {
-        if (phase == Phase.RUNNING || program.isEmpty()) return
+        if (phase == Phase.RUNNING || program.isEmpty() || completed) return
         if (mode == GameMode.PREDICT && guess == null) return
         resetRun()
         phase = Phase.RUNNING
@@ -259,8 +275,9 @@ class GameState(
             stars = rate(program.size, level.optimalLength).let { if (hintUsed) minOf(it, 2) else it }
             activeCommand = null
             award(stars)
+            sounds.play(if (stars == 3) Sfx.WIN_BIG else Sfx.WIN)
             victoryHop()
-            if (justUnlocked != null) unlockSplash = true
+            if (justUnlocked != null) { unlockSplash = true; sounds.play(Sfx.UNLOCK) }
         } else {
             phase = Phase.FAILED
             failure = f
@@ -280,12 +297,14 @@ class GameState(
                 val (tx, ty) = fallTarget(f.at.x.toFloat(), f.at.y.toFloat())
                 walkTo(tx, ty, frames = 12)
                 runId++
+                sounds.play(Sfx.SPLASH)
                 sinkAndRespawn()
             }
             is Failure.BadLanding -> {
                 val (tx, ty) = fallTarget(f.at.x.toFloat(), f.at.y.toFloat())
                 hopTo(tx, ty, frames = 18)
                 runId++
+                sounds.play(Sfx.SPLASH)
                 sinkAndRespawn()
             }
             is Failure.Bumped -> {
@@ -294,6 +313,7 @@ class GameState(
                 val dy = (f.into.y - from.y) * 0.3f
                 walkTo(from.x + dx, from.y + dy, frames = 5)
                 runId++
+                sounds.play(Sfx.BUMP)
                 // recoil back with a dizzy wobble
                 for (i in 1..22) {
                     val t = i / 22f
@@ -306,6 +326,7 @@ class GameState(
             }
             is Failure.NotAtGoal -> {
                 runId++
+                sounds.play(Sfx.SAD)
                 headShake()
             }
             else -> runId++
@@ -380,11 +401,13 @@ class GameState(
             stars = when (predictAttempts) { 1 -> 3; 2 -> 2; else -> 1 }
             activeCommand = null
             award(stars)
+            sounds.play(if (stars == 3) Sfx.WIN_BIG else Sfx.WIN)
             victoryHop()
-            if (justUnlocked != null) unlockSplash = true
+            if (justUnlocked != null) { unlockSplash = true; sounds.play(Sfx.UNLOCK) }
         } else {
             predictResult = false
             phase = Phase.FAILED
+            sounds.play(Sfx.SAD)
             headShake()
         }
     }
@@ -408,7 +431,7 @@ class GameState(
     private fun award(stars: Int) {
         val progress = profile.progress
         // predict puzzles are rewarded separately from building the same level
-        val seedKey = if (mode == GameMode.PREDICT) level.seed xor 0x5EED else level.seed
+        val seedKey = rewardKey()
         payout = 0
         if (!progress.isRewarded(level.difficulty, seedKey)) {
             // harder tiers pay more: the 1-3 rating is multiplied by the tier number
@@ -434,6 +457,11 @@ class GameState(
     }
 
     private suspend fun animate(step: Step) {
+        when (step) {
+            is Step.Walk -> { sounds.play(if (stepToggle) Sfx.STEP_A else Sfx.STEP_B); stepToggle = !stepToggle }
+            is Step.Rotate -> sounds.play(Sfx.TURN)
+            is Step.Hop -> sounds.play(Sfx.HOP)
+        }
         val from = HeroVisual.of(step.before)
         val to = HeroVisual.of(step.after)
         val frames = when (step) {

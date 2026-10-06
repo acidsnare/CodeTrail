@@ -101,12 +101,12 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier) {
             }
         }
 
-        if (state.mode == GameMode.FORWARD) CommandTray(state, level.commandSet)
+        if (state.mode == GameMode.FORWARD && !state.completed) CommandTray(state, level.commandSet)
 
         Button(
             onClick = { scope.launch { state.run() } },
-            enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() &&
-                (state.mode == GameMode.FORWARD || (state.guess != null && state.phase != Phase.WON)),
+            enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() && !state.completed &&
+                (state.mode == GameMode.FORWARD || state.guess != null),
             colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Accent.copy(alpha = 0.35f)),
             shape = RoundedCornerShape(18.dp),
             modifier = Modifier.fillMaxWidth().height(64.dp),

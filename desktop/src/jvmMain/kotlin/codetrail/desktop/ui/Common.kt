@@ -42,6 +42,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.desktop.theme.Character
+import androidx.compose.runtime.staticCompositionLocalOf
+import codetrail.desktop.sound.Sfx
+import codetrail.desktop.sound.SoundPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +54,9 @@ import codetrail.core.progress.Profile
 import codetrail.desktop.res.Res
 import codetrail.desktop.res.hero_title
 import org.jetbrains.compose.resources.stringResource
+
+/** Sound player for UI clicks; screens read it instead of threading it through every call. */
+val LocalSounds = staticCompositionLocalOf<SoundPlayer> { SoundPlayer.Silent }
 
 val Ink = Color(0xFF2B1B14)
 val MenuBackground = Color(0xFF163B4A)
@@ -76,13 +82,14 @@ fun Avatar(
 ) {
     val painter = characterPainter(c)
     val grey = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
+    val sounds = LocalSounds.current
     Box(
         Modifier
             .size(size)
             .clip(CircleShape)
             .background(if (selected) Color.White else Color.White.copy(alpha = if (unlocked) 0.4f else 0.25f))
             .border(if (selected) 3.dp else 1.dp, if (selected) Ink else Color(0x552B1B14), CircleShape)
-            .then(if (onClick != null && unlocked) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null && unlocked) Modifier.clickable { sounds.play(Sfx.CLICK); onClick() } else Modifier)
             .padding(size * 0.08f),
         contentAlignment = Alignment.Center,
     ) {
@@ -107,8 +114,9 @@ fun MenuButton(text: String, color: Color = Color.White, textColor: Color = Ink,
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.95f else 1f, spring(dampingRatio = 0.6f, stiffness = 900f))
+    val sounds = LocalSounds.current
     Button(
-        onClick = onClick,
+        onClick = { sounds.play(Sfx.CLICK); onClick() },
         enabled = enabled,
         interactionSource = interaction,
         colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = textColor, disabledContainerColor = color.copy(alpha = 0.3f)),
@@ -192,3 +200,4 @@ fun ConfirmDialog(
         }
     }
 }
+

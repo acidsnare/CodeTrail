@@ -50,6 +50,7 @@ import codetrail.desktop.res.hint
 import codetrail.desktop.res.hint_next
 import codetrail.desktop.res.hint_ready
 import codetrail.desktop.res.hint_remove
+import codetrail.desktop.res.level_done
 import codetrail.desktop.res.predict_correct
 import codetrail.desktop.res.predict_prompt
 import codetrail.desktop.res.predict_wrong
@@ -112,7 +113,7 @@ fun GameScreen(app: AppState, state: GameState) {
                                 SmallAction("💡  " + stringResource(Res.string.hint), enabled = state.canEdit) { state.hint() }
                             }
                             Spacer(Modifier.weight(1f))
-                            SmallAction("↺  " + stringResource(Res.string.reset), enabled = state.phase != Phase.RUNNING) { state.resetRun() }
+                            SmallAction("↺  " + stringResource(Res.string.reset), enabled = state.phase != Phase.RUNNING && !state.completed) { state.resetRun() }
                             if (state.mode == GameMode.FORWARD) {
                                 SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty()) { state.clearProgram() }
                             }
@@ -213,6 +214,7 @@ private fun SpeechBubble(state: GameState) {
 
 @Composable
 private fun statusText(state: GameState): String {
+    if (state.completed && state.phase != Phase.WON) return stringResource(Res.string.level_done)
     if (state.mode == GameMode.PREDICT) return predictText(state)
     state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
     if (state.hintRemoveLast) return stringResource(Res.string.hint_remove)
