@@ -30,7 +30,7 @@ fun main() = application {
     }
 
     Window(
-        onCloseRequest = { app.exitToMenu(); exitApplication() },
+        onCloseRequest = { app.requestQuit() },
         title = "CodeTrail",
         icon = icon,
         state = WindowState(size = DpSize(1280.dp, 800.dp)),

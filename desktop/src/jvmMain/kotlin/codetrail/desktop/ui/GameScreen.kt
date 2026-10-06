@@ -44,14 +44,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.core.engine.Failure
 import codetrail.desktop.AppState
+import codetrail.desktop.GameMode
 import codetrail.desktop.GameState
+import codetrail.desktop.res.hint
+import codetrail.desktop.res.hint_next
+import codetrail.desktop.res.hint_ready
+import codetrail.desktop.res.hint_remove
+import codetrail.desktop.res.predict_correct
+import codetrail.desktop.res.predict_prompt
+import codetrail.desktop.res.predict_wrong
 import codetrail.desktop.Phase
 import codetrail.desktop.res.Res
 import codetrail.desktop.res.clear
 import codetrail.desktop.res.commands_count
 import codetrail.desktop.res.fail_bad_landing
 import codetrail.desktop.res.fail_bumped
-import codetrail.desktop.res.fail_fell
 import codetrail.desktop.res.fail_not_allowed
 import codetrail.desktop.res.fail_not_at_goal
 import codetrail.desktop.res.fail_too_many
@@ -71,6 +78,7 @@ import codetrail.desktop.res.status_won
 import codetrail.desktop.res.unlock_great
 import codetrail.desktop.res.unlock_title
 import codetrail.desktop.res.unlocked_message
+import codetrail.desktop.res.won_payout
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -94,16 +102,24 @@ fun GameScreen(app: AppState, state: GameState) {
                             won = state.phase == Phase.WON,
                             stars = state.stars,
                             failure = state.failure,
+                            guess = if (state.mode == GameMode.PREDICT) state.guess else null,
+                            answer = if (state.mode == GameMode.PREDICT && state.phase == Phase.WON) state.predict?.answer else null,
+                            onCellClick = if (state.mode == GameMode.PREDICT) ({ state.selectGuess(it) }) else null,
                         )
                         SpeechBubble(state)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                            if (state.mode == GameMode.FORWARD) {
+                                SmallAction("💡  " + stringResource(Res.string.hint), enabled = state.canEdit) { state.hint() }
+                            }
                             Spacer(Modifier.weight(1f))
                             SmallAction("↺  " + stringResource(Res.string.reset), enabled = state.phase != Phase.RUNNING) { state.resetRun() }
-                            SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty()) { state.clearProgram() }
+                            if (state.mode == GameMode.FORWARD) {
+                                SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty()) { state.clearProgram() }
+                            }
                             SmallAction("✦  " + stringResource(Res.string.new_level), enabled = state.phase != Phase.RUNNING, filled = true) { state.newLevel() }
                         }
                     }
-                    ProgramPanel(state, Modifier.weight(1f).fillMaxHeight())
+                    ProgramPanel(state, Modifier.weight(1f))
                 }
             }
         }
@@ -163,9 +179,9 @@ private fun SmallAction(text: String, enabled: Boolean, filled: Boolean = false,
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         colors = if (filled) {
-            ButtonDefaults.buttonColors(containerColor = Accent2, disabledContainerColor = Accent2.copy(alpha = 0.35f))
+            ButtonDefaults.buttonColors(containerColor = Accent2, disabledContainerColor = Accent2.copy(alpha = 0.5f), disabledContentColor = Color.White.copy(alpha = 0.7f))
         } else {
-            ButtonDefaults.buttonColors(containerColor = Pill, contentColor = LocalContentColor.current, disabledContainerColor = Pill.copy(alpha = 0.3f), disabledContentColor = LocalContentColor.current.copy(alpha = 0.4f))
+            ButtonDefaults.buttonColors(containerColor = Pill, contentColor = LocalContentColor.current, disabledContainerColor = Pill.copy(alpha = 0.6f), disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f))
         },
     ) { Text(text, fontWeight = FontWeight.Bold) }
 }
@@ -196,7 +212,25 @@ private fun SpeechBubble(state: GameState) {
 }
 
 @Composable
-private fun statusText(state: GameState): String = when (state.phase) {
+private fun statusText(state: GameState): String {
+    if (state.mode == GameMode.PREDICT) return predictText(state)
+    state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
+    if (state.hintRemoveLast) return stringResource(Res.string.hint_remove)
+    if (state.hintReady) return stringResource(Res.string.hint_ready)
+    return forwardText(state)
+}
+
+@Composable
+private fun predictText(state: GameState): String = when (state.phase) {
+    Phase.WON -> stringResource(Res.string.predict_correct) + " " + "★".repeat(state.stars) + "☆".repeat(3 - state.stars) +
+        (if (state.payout > 0) "  " + stringResource(Res.string.won_payout, state.payout) else "")
+    Phase.FAILED -> stringResource(Res.string.predict_wrong)
+    Phase.RUNNING -> stringResource(Res.string.status_running)
+    Phase.EDITING -> stringResource(Res.string.predict_prompt, stringResource(state.character.name))
+}
+
+@Composable
+private fun forwardText(state: GameState): String = when (state.phase) {
     Phase.EDITING -> stringResource(
         Res.string.status_goal,
         stringResource(state.character.name),
@@ -205,12 +239,13 @@ private fun statusText(state: GameState): String = when (state.phase) {
     )
     Phase.RUNNING -> stringResource(Res.string.status_running)
     Phase.WON -> {
-        val base = stringResource(Res.string.status_won) + " " + "★".repeat(state.stars) + "☆".repeat(3 - state.stars)
+        val base = stringResource(Res.string.status_won) + " " + "★".repeat(state.stars) + "☆".repeat(3 - state.stars) +
+            (if (state.payout > 0) "  " + stringResource(Res.string.won_payout, state.payout) else "")
         val unlocked = state.justUnlocked
         if (unlocked != null) base + "  " + stringResource(Res.string.unlocked_message, stringResource(unlocked.name)) else base
     }
     Phase.FAILED -> when (state.failure) {
-        is Failure.Fell -> stringResource(Res.string.fail_fell)
+        is Failure.Fell -> stringResource(state.theme.fallMessage)
         is Failure.Bumped -> stringResource(Res.string.fail_bumped)
         is Failure.BadLanding -> stringResource(Res.string.fail_bad_landing)
         is Failure.NotAtGoal -> stringResource(Res.string.fail_not_at_goal)

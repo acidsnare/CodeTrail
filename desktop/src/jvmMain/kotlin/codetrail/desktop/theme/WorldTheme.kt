@@ -2,12 +2,7 @@ package codetrail.desktop.theme
 
 import androidx.compose.ui.graphics.Color
 import codetrail.desktop.res.Res
-import codetrail.desktop.res.goal_berries
-import codetrail.desktop.res.goal_lake
-import codetrail.desktop.res.goal_rocket
-import codetrail.desktop.res.world_forest
-import codetrail.desktop.res.world_islands
-import codetrail.desktop.res.world_space
+import codetrail.desktop.res.*
 import org.jetbrains.compose.resources.StringResource
 
 /**
@@ -22,6 +17,8 @@ data class WorldTheme(
     val id: String,
     val name: StringResource,
     val goalName: StringResource,
+    /** What the hero says after stepping onto BLOCKED terrain in this world. */
+    val fallMessage: StringResource,
     /** App chrome behind the board. */
     val background: Color,
     val dark: Boolean,
@@ -43,6 +40,7 @@ data class WorldTheme(
             id = "islands",
             name = Res.string.world_islands,
             goalName = Res.string.goal_lake,
+            fallMessage = Res.string.fall_islands,
             background = Color(0xFF163B4A),
             dark = true,
             seaTop = Color(0xFF1FA2C9),
@@ -57,6 +55,7 @@ data class WorldTheme(
             id = "forest",
             name = Res.string.world_forest,
             goalName = Res.string.goal_berries,
+            fallMessage = Res.string.fall_forest,
             background = Color(0xFF1E3321),
             dark = true,
             seaTop = Color(0xFF3F8C4B),
@@ -71,6 +70,7 @@ data class WorldTheme(
             id = "space",
             name = Res.string.world_space,
             goalName = Res.string.goal_rocket,
+            fallMessage = Res.string.fall_space,
             background = Color(0xFF0E1026),
             dark = true,
             seaTop = Color(0xFF262C55),
@@ -81,7 +81,53 @@ data class WorldTheme(
             landEdge = Color(0xFF8A94C4),
             art = SpaceArt,
         )
-        val All = listOf(Islands, Forest, Space)
+        val Ice = WorldTheme(
+            id = "ice",
+            name = Res.string.world_ice,
+            goalName = Res.string.goal_igloo,
+            fallMessage = Res.string.fall_ice,
+            background = Color(0xFF1C3A52),
+            dark = true,
+            seaTop = Color(0xFF5FB6E0),
+            seaBottom = Color(0xFF2E7FB0),
+            gridLine = Color(0x00000000),
+            halo = Color(0xB3BFE9F7),
+            // The floe itself is drawn by IceArt.drawTileFace as a jagged shape, so the base tile is invisible.
+            land = Color(0x00000000),
+            landEdge = Color(0x00000000),
+            art = IceArt,
+        )
+        val City = WorldTheme(
+            id = "city",
+            name = Res.string.world_city,
+            goalName = Res.string.goal_house,
+            fallMessage = Res.string.fall_city,
+            background = Color(0xFF2F3B2A),
+            dark = true,
+            seaTop = Color(0xFF86BE74),
+            seaBottom = Color(0xFF6FA860),
+            gridLine = Color(0x14FFFFFF),
+            halo = Color(0xCC5E8E4E),
+            land = Color(0xFF8D6E63),
+            landEdge = Color(0xFF5D4037),
+            art = CityArt,
+        )
+        val Lava = WorldTheme(
+            id = "lava",
+            name = Res.string.world_lava,
+            goalName = Res.string.goal_treasure,
+            fallMessage = Res.string.fall_lava,
+            background = Color(0xFF2A1410),
+            dark = true,
+            seaTop = Color(0xFFFFB03A),
+            seaBottom = Color(0xFFF2541B),
+            gridLine = Color(0x00000000),
+            halo = Color(0xFFFFD27A),
+            land = Color(0xFF3C3542),
+            landEdge = Color(0xFF241F28),
+            art = LavaArt,
+        )
+        val All = listOf(Islands, Forest, Space, Ice, City, Lava)
 
         fun byId(id: String?) = All.firstOrNull { it.id == id }
     }

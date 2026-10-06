@@ -1,14 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <!-- tail -->
-  <g transform="translate(200 200) rotate(-30)">
-    <rect fill="#E8862E" x="-18" y="-14" width="78" height="28" rx="14"/>
-    <path fill="#FFFFFF" d="M38 -14 h22 a14 14 0 0 1 0 28 h-22 z"/>
-    <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="-18" y="-14" width="78" height="28" rx="14"/>
-  </g>
-  <!-- pointed ears -->
-  <path fill="#E8862E" d="M36 110 L48 24 L110 72 Z"/><path fill="#E8862E" d="M220 110 L208 24 L146 72 Z"/>
-  <path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M36 110 L48 24 L110 72 Z"/><path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M220 110 L208 24 L146 72 Z"/>
-  <path fill="#3B2418" d="M58 96 L60 48 L96 78 Z"/><path fill="#3B2418" d="M198 96 L196 48 L160 78 Z"/>
+  <!-- tail: root runs well behind the right cheek, body under the chin toward the middle, pointed white tip -->
+  <path d="M182 116 C 206 150, 170 182, 126 190 C 110 194, 96 200, 84 208 C 100 230, 138 238, 176 230 C 210 222, 238 198, 242 168 C 244 150, 232 128, 182 116 Z" fill="#E8862E" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M84 208 C 96 200, 110 194, 126 190 L 136 198 L 124 206 L 138 216 L 126 224 C 112 228, 96 224, 84 208 Z" fill="#FFFFFF" stroke="#2B1B14" stroke-width="4" stroke-linejoin="round"/>
+  <g transform="translate(-6 -12) scale(0.9)">
+  <!-- pointed ears: orange, white inner, dark core -->
+  <path d="M36 110 L48 24 L110 72 Z" fill="#E8862E"/><path d="M220 110 L208 24 L146 72 Z" fill="#E8862E"/>
+  <path d="M36 110 L48 24 L110 72 Z" fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/><path d="M220 110 L208 24 L146 72 Z" fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M45 97 L53 38 L95 71 Z" fill="#FFFFFF"/><path d="M211 97 L203 38 L161 71 Z" fill="#FFFFFF"/>
+  <path d="M53 85 L58 51 L83 70 Z" fill="#3B2418"/><path d="M203 85 L198 51 L173 70 Z" fill="#3B2418"/>
   <!-- head -->
   <ellipse fill="#E8862E" cx="128" cy="140" rx="100" ry="90"/>
   <ellipse fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="128" cy="140" rx="100" ry="90"/>
@@ -23,4 +22,5 @@
   <ellipse fill="#2B1B14" cx="128" cy="170" rx="13" ry="9"/>
   <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M128 179 L128 190 M128 190 Q116 200 106 190 M128 190 Q140 200 150 190"/>
   <ellipse fill="#F09A7A" opacity=".6" cx="80" cy="176" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="176" cy="176" rx="12" ry="8"/>
+  </g>
 </svg>

@@ -56,6 +56,7 @@ class FileStorage(
             p["progress.totalStars"] = totalStars.toString()
             p["progress.levelsWon"] = levelsWon.toString()
             wonPerTier.forEach { (tier, n) -> p["progress.wonPerTier.$tier"] = n.toString() }
+            wonPerWorld.forEach { (w, n) -> p["progress.wonPerWorld.$w"] = n.toString() }
             p["progress.rewarded"] = rewarded.joinToString(",")
         }
         profile.autosave?.let { a ->
@@ -63,6 +64,7 @@ class FileStorage(
             p["autosave.seed"] = a.seed.toString()
             p["autosave.world"] = a.worldId
             p["autosave.program"] = ProgramCodec.encode(a.program)
+            p["autosave.mode"] = a.mode
         }
         write(File(profilesDir, "${profile.id}.properties"), p, "CodeTrail profile")
     }
@@ -76,12 +78,16 @@ class FileStorage(
             .filter { it.startsWith("progress.wonPerTier.") }
             .mapNotNull { k -> k.removePrefix("progress.wonPerTier.").toIntOrNull()?.let { it to (p.getProperty(k).toIntOrNull() ?: 0) } }
             .toMap()
+        val perWorld = p.stringPropertyNames()
+            .filter { it.startsWith("progress.wonPerWorld.") }
+            .associate { k -> k.removePrefix("progress.wonPerWorld.") to (p.getProperty(k).toIntOrNull() ?: 0) }
         val autosave = p.getProperty("autosave.seed")?.toLongOrNull()?.let { seed ->
             SaveSlot(
                 tier = p.getProperty("autosave.tier")?.toIntOrNull() ?: 1,
                 seed = seed,
                 worldId = p.getProperty("autosave.world") ?: "islands",
                 program = ProgramCodec.decode(p.getProperty("autosave.program") ?: ""),
+                mode = p.getProperty("autosave.mode") ?: "forward",
             )
         }
         return Profile(
@@ -93,6 +99,7 @@ class FileStorage(
                 totalStars = p.getProperty("progress.totalStars")?.toIntOrNull() ?: 0,
                 levelsWon = p.getProperty("progress.levelsWon")?.toIntOrNull() ?: 0,
                 wonPerTier = perTier,
+                wonPerWorld = perWorld,
                 rewarded = p.getProperty("progress.rewarded", "").split(',').filter { it.isNotBlank() }.toSet(),
             ),
             characterId = p.getProperty("character"),

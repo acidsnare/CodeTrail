@@ -5,6 +5,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import codetrail.core.command.Command
+import codetrail.core.command.Program
+import codetrail.core.engine.PredictPuzzle
+import codetrail.core.engine.PredictPuzzles
+import codetrail.core.engine.Solver
+import codetrail.core.model.Pos
 import codetrail.core.engine.Failure
 import codetrail.core.engine.HeroState
 import codetrail.core.engine.Interpreter
@@ -19,6 +24,10 @@ import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 enum class Phase { EDITING, RUNNING, WON, FAILED }
+
+enum class GameMode(val id: String) { FORWARD("forward"), PREDICT("predict");
+    companion object { fun of(id: String?) = entries.firstOrNull { it.id == id } ?: FORWARD }
+}
 
 /**
  * Where and how the hero sprite is drawn, in fractional cell coordinates for smooth motion.
@@ -48,6 +57,7 @@ class GameState(
     val theme: WorldTheme,
     tier: Int,
     resume: SaveSlot? = null,
+    val mode: GameMode = GameMode.FORWARD,
     private val onProfileChanged: (Profile) -> Unit = {},
 ) {
     private val generator = LevelGenerator()
@@ -57,7 +67,31 @@ class GameState(
 
     var tier by mutableStateOf(tier)
         private set
-    var level by mutableStateOf(generator.generate(tier, resume?.seed ?: Random.nextLong()))
+    var level by mutableStateOf(generator.generate(tier, resume?.seed ?: Random.nextLong(), obstacles = mode == GameMode.FORWARD))
+        private set
+
+    // ---- predict mode ----
+    var predict by mutableStateOf<PredictPuzzle?>(null)
+        private set
+    var guess by mutableStateOf<Pos?>(null)
+        private set
+    var predictAttempts by mutableStateOf(0)
+        private set
+    var predictResult by mutableStateOf<Boolean?>(null)
+        private set
+
+    // ---- hints ----
+    private var solution: Program? = null
+    var hintUsed by mutableStateOf(false)
+        private set
+    /** Command the palette should pulse, if the hint says "add this next". */
+    var hintCommand by mutableStateOf<Command?>(null)
+        private set
+    /** Hint says the last card is wrong. */
+    var hintRemoveLast by mutableStateOf(false)
+        private set
+    /** Hint says the program is already complete. */
+    var hintReady by mutableStateOf(false)
         private set
     val program = mutableStateListOf<Command>()
 
@@ -70,6 +104,10 @@ class GameState(
     var failure by mutableStateOf<Failure?>(null)
         private set
     var stars by mutableStateOf(0)
+        private set
+
+    /** Stars actually added to the profile by the last win: rating x difficulty tier. */
+    var payout by mutableStateOf(0)
         private set
 
     /** Character unlocked by the most recent win, shown once in the status line. */
@@ -89,27 +127,76 @@ class GameState(
     val character: Character
         get() = Character.byId(profile.characterId)?.takeIf { isUnlocked(it) } ?: Character.All.first()
 
-    val canEdit: Boolean get() = phase != Phase.RUNNING
+    val canEdit: Boolean get() = phase != Phase.RUNNING && mode == GameMode.FORWARD
 
     init {
-        resume?.program?.filter { level.commandSet.accepts(it) }?.take(level.maxSlots)?.let { program.addAll(it) }
+        if (mode == GameMode.PREDICT) {
+            setupPredict()
+        } else {
+            resume?.program?.filter { level.commandSet.accepts(it) }?.take(level.maxSlots)?.let { program.addAll(it) }
+        }
         persist()
+    }
+
+    private fun setupPredict() {
+        val puzzle = PredictPuzzles.make(level)
+        predict = puzzle
+        program.clear()
+        program.addAll(puzzle.program)
+        guess = null
+        predictAttempts = 0
+        predictResult = null
+    }
+
+    /** Predict mode: the player points at the cell where the hero will stop. */
+    fun selectGuess(p: Pos) {
+        if (mode != GameMode.PREDICT || phase == Phase.RUNNING || phase == Phase.WON) return
+        if (!level.grid.contains(p)) return
+        if (phase == Phase.FAILED) { resetRun(); predictResult = null }
+        guess = p
+    }
+
+    /** Hint: compare the program with the shortest solution and point at the next step. Caps the level at 2 stars. */
+    fun hint() {
+        if (mode != GameMode.FORWARD || !canEdit) return
+        val sol = solution ?: Solver.solve(level.grid, level.start, level.startDir, level.goal, level.commandSet)?.program?.also { solution = it } ?: return
+        hintUsed = true
+        clearHint()
+        val current = program.toList()
+        when {
+            current.size <= sol.size && current == sol.take(current.size) -> {
+                if (current.size == sol.size) hintReady = true else hintCommand = sol[current.size]
+            }
+            else -> hintRemoveLast = true
+        }
+    }
+
+    private fun clearHint() {
+        hintCommand = null
+        hintRemoveLast = false
+        hintReady = false
     }
 
     fun isUnlocked(c: Character) = profile.progress.totalStars >= c.unlockStars
 
     fun newLevel(newTier: Int = tier, seed: Long = Random.nextLong()) {
         tier = newTier
-        level = generator.generate(newTier, seed)
+        level = generator.generate(newTier, seed, obstacles = mode == GameMode.FORWARD)
+        solution = null
+        hintUsed = false
+        clearHint()
         program.clear()
         resetRun()
+        if (mode == GameMode.PREDICT) setupPredict()
         justUnlocked = null
         persist()
     }
 
     /** Same level, empty program. */
     fun restartLevel() {
+        if (mode == GameMode.PREDICT) { resetRun(); setupPredict(); persist(); return }
         program.clear()
+        clearHint()
         resetRun()
         persist()
     }
@@ -118,6 +205,7 @@ class GameState(
         if (!canEdit || program.size >= level.maxSlots) return
         if (phase != Phase.EDITING) resetRun()
         program += c
+        clearHint()
         persist()
     }
 
@@ -125,6 +213,7 @@ class GameState(
         if (!canEdit || index !in program.indices) return
         if (phase != Phase.EDITING) resetRun()
         program.removeAt(index)
+        clearHint()
         persist()
     }
 
@@ -136,6 +225,7 @@ class GameState(
     }
 
     fun resetRun() {
+        payout = 0
         phase = Phase.EDITING
         hero = HeroVisual.of(HeroState(level.start, level.startDir))
         activeCommand = null
@@ -146,9 +236,10 @@ class GameState(
     /** Plays the trace step by step. Suspends until the run is over. */
     suspend fun run() {
         if (phase == Phase.RUNNING || program.isEmpty()) return
+        if (mode == GameMode.PREDICT && guess == null) return
         resetRun()
         phase = Phase.RUNNING
-        val trace = Interpreter.run(level, program.toList())
+        val trace = Interpreter.run(level.copy(maxSlots = Int.MAX_VALUE), program.toList())
 
         for (step in trace.steps) {
             activeCommand = step.commandIndex
@@ -156,11 +247,16 @@ class GameState(
             delay(STEP_PAUSE_MS)
         }
 
+        if (mode == GameMode.PREDICT) {
+            finishPredict()
+            return
+        }
+
         val f = trace.failure
         if (f == null) {
             runId++
             phase = Phase.WON
-            stars = rate(program.size, level.optimalLength)
+            stars = rate(program.size, level.optimalLength).let { if (hintUsed) minOf(it, 2) else it }
             activeCommand = null
             award(stars)
             victoryHop()
@@ -273,6 +369,26 @@ class GameState(
         hero = from
     }
 
+    /** Predict mode outcome: the hero has walked the program, now compare with the guess. */
+    private suspend fun finishPredict() {
+        val answer = predict?.answer ?: return
+        predictAttempts++
+        runId++
+        if (guess == answer) {
+            predictResult = true
+            phase = Phase.WON
+            stars = when (predictAttempts) { 1 -> 3; 2 -> 2; else -> 1 }
+            activeCommand = null
+            award(stars)
+            victoryHop()
+            if (justUnlocked != null) unlockSplash = true
+        } else {
+            predictResult = false
+            phase = Phase.FAILED
+            headShake()
+        }
+    }
+
     fun dismissUnlock() { unlockSplash = false }
 
     /** Two happy bounces on the goal tile. */
@@ -291,9 +407,14 @@ class GameState(
     /** Pays out stars once per level and reports a character that just crossed its threshold. */
     private fun award(stars: Int) {
         val progress = profile.progress
-        if (!progress.isRewarded(level.difficulty, level.seed)) {
+        // predict puzzles are rewarded separately from building the same level
+        val seedKey = if (mode == GameMode.PREDICT) level.seed xor 0x5EED else level.seed
+        payout = 0
+        if (!progress.isRewarded(level.difficulty, seedKey)) {
+            // harder tiers pay more: the 1-3 rating is multiplied by the tier number
+            payout = stars * level.difficulty
             val before = progress.totalStars
-            val after = progress.reward(level.difficulty, level.seed, stars)
+            val after = progress.reward(level.difficulty, seedKey, payout, theme.id)
             profile = profile.copy(progress = after)
             justUnlocked = Character.All.firstOrNull { it.unlockStars in (before + 1)..after.totalStars }
         }
@@ -302,7 +423,7 @@ class GameState(
 
     /** Writes the profile back: progress, choices, and the level in progress (none once it is won). */
     fun persist() {
-        val slot = if (phase == Phase.WON) null else SaveSlot(tier, level.seed, theme.id, program.toList())
+        val slot = if (phase == Phase.WON) null else SaveSlot(tier, level.seed, theme.id, if (mode == GameMode.FORWARD) program.toList() else emptyList(), mode.id)
         profile = profile.copy(
             lastPlayedAt = System.currentTimeMillis(),
             worldId = theme.id,
