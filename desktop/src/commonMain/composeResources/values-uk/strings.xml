@@ -48,7 +48,7 @@
     <string name="cmd_forward">Вперед %1$d</string>
     <string name="cmd_turn_left">Поворот ліворуч</string>
     <string name="cmd_turn_right">Поворот праворуч</string>
-    <string name="cmd_turn_degrees">Поворот на %1$d°</string>
+    <string name="cmd_repeat">Повторити ×%1$d</string>
     <string name="cmd_jump">Стрибок через 1</string>
     <string name="stars_total">%1$d ★</string>
     <string name="unlock_hint">Відкриється при %1$d ★</string>
@@ -83,7 +83,7 @@
     <string name="diff_2">Довгі шляхи</string>
     <string name="diff_3">Повороти</string>
     <string name="diff_4">Стрибки</string>
-    <string name="diff_5">Градуси</string>
+    <string name="diff_5">Цикли</string>
     <string name="game_level">Рівень %1$d</string>
 
     <string name="pause_title">Пауза</string>
@@ -146,4 +146,12 @@
     <string name="on">Увімк</string>
     <string name="off">Вимк</string>
     <string name="level_done">Рівень пройдено! Тисни «Новий рівень», щоб продовжити.</string>
+    <string name="settings_speed">Швидкість анімації</string>
+    <string name="speed_slow">Повільно</string>
+    <string name="speed_normal">Звичайно</string>
+    <string name="speed_fast">Швидко</string>
+    <string name="cmd_call">Блок A</string>
+    <string name="diff_6">Блоки</string>
+    <string name="block_hint">Блок A: натисни сюди, додай 2-4 картки, потім викликай його карткою A.</string>
+    <string name="hint_remove_block">Остання картка в блоці A зайва. Прибери її.</string>
 </resources>

@@ -30,6 +30,7 @@ class FileStorage(
             language = p.getProperty("language"),
             lastProfileId = p.getProperty("lastProfile"),
             sound = p.getProperty("sound")?.toBooleanStrictOrNull() ?: true,
+            speed = p.getProperty("speed") ?: "normal",
         )
     }
 
@@ -38,6 +39,7 @@ class FileStorage(
         settings.language?.let { p["language"] = it }
         settings.lastProfileId?.let { p["lastProfile"] = it }
         p["sound"] = settings.sound.toString()
+        p["speed"] = settings.speed
         write(settingsFile, p, "CodeTrail settings")
     }
 
@@ -70,6 +72,7 @@ class FileStorage(
             p["autosave.world"] = a.worldId
             p["autosave.program"] = ProgramCodec.encode(a.program)
             p["autosave.mode"] = a.mode
+            p["autosave.function"] = ProgramCodec.encode(a.function)
         }
         write(File(profilesDir, "${profile.id}.properties"), p, "CodeTrail profile")
     }
@@ -93,6 +96,7 @@ class FileStorage(
                 worldId = p.getProperty("autosave.world") ?: "islands",
                 program = ProgramCodec.decode(p.getProperty("autosave.program") ?: ""),
                 mode = p.getProperty("autosave.mode") ?: "forward",
+                function = ProgramCodec.decode(p.getProperty("autosave.function") ?: ""),
             )
         }
         return Profile(
@@ -109,7 +113,7 @@ class FileStorage(
             ),
             characterId = p.getProperty("character"),
             worldId = p.getProperty("world"),
-            tier = p.getProperty("tier")?.toIntOrNull()?.coerceIn(1, 5) ?: 1,
+            tier = p.getProperty("tier")?.toIntOrNull()?.coerceIn(1, 6) ?: 1,
             autosave = autosave,
         )
     }

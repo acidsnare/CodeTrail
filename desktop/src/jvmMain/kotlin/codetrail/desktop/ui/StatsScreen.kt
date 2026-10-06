@@ -73,7 +73,7 @@ fun StatsScreen(app: AppState) {
                 Column(Modifier.weight(1f).background(Panel, RoundedCornerShape(20.dp)).padding(20.dp)) {
                     Text(stringResource(Res.string.stats_by_difficulty), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Spacer(Modifier.height(12.dp))
-                    for (t in 1..5) {
+                    for (t in 1..codetrail.core.gen.Difficulty.TIERS.size) {
                         BarRow("$t  ${stringResource(DifficultyNames[t - 1])}", progress.wonPerTier[t] ?: 0, maxTier, Accent)
                     }
                 }

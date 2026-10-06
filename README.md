@@ -13,12 +13,17 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Generated levels** - every level is built on the fly and is guaranteed solvable.
   The generator carves a single thin corridor first, then fills the rest with water, lava or
   space. A BFS solver verifies each level and computes the shortest program for star ratings.
-- **Five difficulty tiers**, following the worksheet progression:
+  Loop and block levels are built around a repeated shape (a staircase, a snake or a run of
+  hops): chained for loops, spread along the path for blocks. The shortest program is folded
+  into loops and a block before rating, so the slot budget rewards the idea being taught.
+- **Six difficulty tiers**, following the worksheet progression and then going one step further:
   1. arrows: up / down / left / right
   2. longer paths
   3. relative commands: forward X, turn left / right
   4. jumps over obstacles
-  5. turns in degrees (90 / 180 / 270) with a tight slot budget
+  5. loops: "repeat N times" on a bigger board with more obstacles and a slot budget that
+     only fits a looping program
+  6. blocks: one reusable "block A" of 3-4 cards, defined once and called from several places
 - **Two modes** - build the path, or read a given program and guess where the hero stops.
 - **Six worlds** - Islands, Forest, Space, Ice, City, Lava - all drawn procedurally on a Canvas.
 - **Five heroes** unlocked with stars: turtle, penguin, fox, bear and the red panda.
@@ -103,3 +108,7 @@ Plain text; delete a file to remove a profile.
 
 Code and art in this repository are original work. Hero illustrations and world art are
 hand-drawn SVG / Canvas, no third-party asset packs are used.
+
+The UI font is [Nunito](https://github.com/googlefonts/nunito), bundled under the SIL Open Font
+License (see `desktop/src/commonMain/composeResources/font/OFL-Nunito.txt`). Bundling it keeps
+text metrics identical on macOS, Windows and Linux.

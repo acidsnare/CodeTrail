@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import codetrail.core.command.Command
 import codetrail.core.command.Program
+import codetrail.core.command.slotCount
+import codetrail.core.engine.CommandRef
 import codetrail.core.engine.PredictPuzzle
 import codetrail.core.engine.PredictPuzzles
 import codetrail.core.engine.Solver
@@ -26,6 +28,13 @@ import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 enum class Phase { EDITING, RUNNING, WON, FAILED }
+
+/** Where a card from the tray goes: the program, inside a loop, or into block A. */
+sealed interface EditTarget {
+    data object Main : EditTarget
+    data class Loop(val index: Int) : EditTarget
+    data object Function : EditTarget
+}
 
 enum class GameMode(val id: String) { FORWARD("forward"), PREDICT("predict");
     companion object { fun of(id: String?) = entries.firstOrNull { it.id == id } ?: FORWARD }
@@ -61,6 +70,8 @@ class GameState(
     resume: SaveSlot? = null,
     val mode: GameMode = GameMode.FORWARD,
     private val sounds: SoundPlayer = SoundPlayer.Silent,
+    /** Animation time scale, read on every tick so a settings change applies at once. */
+    private val speed: () -> Float = { 1f },
     private val onProfileChanged: (Profile) -> Unit = {},
 ) {
     private var stepToggle = false
@@ -86,25 +97,47 @@ class GameState(
         private set
 
     // ---- hints ----
-    private var solution: Program? = null
-    var hintUsed by mutableStateOf(false)
+    private var solution: Solver.Solution? = null
+    /** Hints taken on this level. Each one costs a star, the level never drops below one. */
+    var hintsUsed by mutableStateOf(0)
         private set
+
+    /** Best rating still reachable after the hints taken so far. */
+    val maxStars: Int get() = (3 - hintsUsed).coerceAtLeast(1)
     /** Command the palette should pulse, if the hint says "add this next". */
     var hintCommand by mutableStateOf<Command?>(null)
         private set
     /** Hint says the last card is wrong. */
     var hintRemoveLast by mutableStateOf(false)
         private set
+    /** Hint says the last card of block A is wrong. */
+    var hintRemoveLastFunction by mutableStateOf(false)
+        private set
     /** Hint says the program is already complete. */
     var hintReady by mutableStateOf(false)
         private set
     val program = mutableStateListOf<Command>()
 
+    /** Block A: the reusable group of cards on the block tier. */
+    val function = mutableStateListOf<Command>()
+
+    /** Where new cards go. */
+    var target by mutableStateOf<EditTarget>(EditTarget.Main)
+        private set
+
+    /** Top-level index of the loop that receives new cards, or null. */
+    val openLoop: Int? get() = (target as? EditTarget.Loop)?.index
+
+    val editingFunction: Boolean get() = target == EditTarget.Function
+
+    /** Slots in use: program, loop bodies and block A together. */
+    val slotsUsed: Int get() = program.slotCount() + function.size
+
     var phase by mutableStateOf(Phase.EDITING)
         private set
     var hero by mutableStateOf(HeroVisual.of(HeroState(level.start, level.startDir)))
         private set
-    var activeCommand by mutableStateOf<Int?>(null)
+    var activeCommand by mutableStateOf<CommandRef?>(null)
         private set
     var failure by mutableStateOf<Failure?>(null)
         private set
@@ -128,6 +161,7 @@ class GameState(
         private set
 
     var forwardCount by mutableStateOf(1)
+    var repeatCount by mutableStateOf(2)
 
     val character: Character
         get() = Character.byId(profile.characterId)?.takeIf { isUnlocked(it) } ?: Character.All.first()
@@ -144,7 +178,9 @@ class GameState(
         if (mode == GameMode.PREDICT) {
             setupPredict()
         } else {
-            resume?.program?.filter { level.commandSet.accepts(it) }?.take(level.maxSlots)?.let { program.addAll(it) }
+            resume?.function?.filter { level.commandSet.acceptsInFunction(it) }?.let { function.addAll(it) }
+            resume?.program?.filter { level.commandSet.accepts(it) }?.let { program.addAll(it) }
+            while (slotsUsed > level.maxSlots && program.isNotEmpty()) program.removeAt(program.lastIndex)
         }
         persist()
     }
@@ -154,6 +190,8 @@ class GameState(
         predict = puzzle
         program.clear()
         program.addAll(puzzle.program)
+        function.clear()
+        function.addAll(puzzle.function)
         guess = null
         predictAttempts = 0
         predictResult = null
@@ -171,14 +209,43 @@ class GameState(
     /** Hint: compare the program with the shortest solution and point at the next step. Caps the level at 2 stars. */
     fun hint() {
         if (mode != GameMode.FORWARD || !canEdit) return
-        val sol = solution ?: Solver.solve(level.grid, level.start, level.startDir, level.goal, level.commandSet)?.program?.also { solution = it } ?: return
-        hintUsed = true
+        val full = solution ?: Solver.solve(level.grid, level.start, level.startDir, level.goal, level.commandSet)?.also { solution = it } ?: return
+        hintsUsed++
         clearHint()
         sounds.play(Sfx.HINT)
+        // Block A first: the program only makes sense once the block it calls is right.
+        val fn = function.toList()
+        if (fn != full.function) {
+            if (fn.size < full.function.size && fn == full.function.take(fn.size)) {
+                hintCommand = full.function[fn.size]
+                target = EditTarget.Function
+            } else {
+                hintRemoveLastFunction = true
+            }
+            return
+        }
+        val sol = full.program
         val current = program.toList()
+        val last = current.lastOrNull()
+        val expected = sol.getOrNull(current.lastIndex)
         when {
             current.size <= sol.size && current == sol.take(current.size) -> {
-                if (current.size == sol.size) hintReady = true else hintCommand = sol[current.size]
+                if (current.size == sol.size) {
+                    hintReady = true
+                } else {
+                    val next = sol[current.size]
+                    // A loop is suggested empty: first place the loop card, then fill it.
+                    hintCommand = if (next is Command.Repeat) Command.Repeat(next.times, emptyList()) else next
+                    if (next is Command.Repeat) repeatCount = next.times
+                    target = EditTarget.Main
+                }
+            }
+            // Inside a half-built loop that matches the solution so far: point at the next body card.
+            last is Command.Repeat && expected is Command.Repeat && last.times == expected.times &&
+                current.dropLast(1) == sol.take(current.size - 1) &&
+                last.body.size < expected.body.size && last.body == expected.body.take(last.body.size) -> {
+                hintCommand = expected.body[last.body.size]
+                target = EditTarget.Loop(current.lastIndex)
             }
             else -> hintRemoveLast = true
         }
@@ -187,6 +254,7 @@ class GameState(
     private fun clearHint() {
         hintCommand = null
         hintRemoveLast = false
+        hintRemoveLastFunction = false
         hintReady = false
     }
 
@@ -196,9 +264,11 @@ class GameState(
         tier = newTier
         level = generator.generate(newTier, seed, obstacles = mode == GameMode.FORWARD)
         solution = null
-        hintUsed = false
+        hintsUsed = 0
         clearHint()
         program.clear()
+        function.clear()
+        target = EditTarget.Main
         resetRun()
         if (mode == GameMode.PREDICT) setupPredict()
         justUnlocked = null
@@ -210,24 +280,86 @@ class GameState(
         if (completed) { newLevel(); return }
         if (mode == GameMode.PREDICT) { resetRun(); setupPredict(); persist(); return }
         program.clear()
+        function.clear()
+        target = EditTarget.Main
         clearHint()
         resetRun()
         persist()
     }
 
+    /** Adds a card where the focus is: the program, the open loop, or block A. */
     fun addCommand(c: Command) {
-        if (!canEdit || program.size >= level.maxSlots) return
+        if (!canEdit || slotsUsed >= level.maxSlots) return
         if (phase != Phase.EDITING) resetRun()
-        program += c
+        when (val t = target) {
+            EditTarget.Function -> {
+                if (!level.commandSet.acceptsInFunction(c)) return
+                function += c
+            }
+            is EditTarget.Loop -> {
+                val loop = program.getOrNull(t.index) as? Command.Repeat
+                when {
+                    c is Command.Repeat -> { program += c; target = EditTarget.Loop(program.lastIndex) }
+                    loop != null -> program[t.index] = loop.copy(body = loop.body + c)
+                    else -> { program += c; target = EditTarget.Main }
+                }
+            }
+            EditTarget.Main -> {
+                program += c
+                if (c is Command.Repeat) target = EditTarget.Loop(program.lastIndex)
+            }
+        }
         clearHint()
         sounds.play(Sfx.CARD_ADD)
         persist()
     }
 
-    fun removeCommand(index: Int) {
+    /** Tapping anywhere on a loop focuses it: new cards go inside until focus is lost. */
+    fun focusLoop(index: Int) {
+        if (!canEdit || program.getOrNull(index) !is Command.Repeat || openLoop == index) return
+        target = EditTarget.Loop(index)
+        sounds.play(Sfx.CLICK)
+    }
+
+    /** Tapping block A focuses it: new cards go into the block. */
+    fun focusFunction() {
+        if (!canEdit || !level.commandSet.functions || editingFunction) return
+        target = EditTarget.Function
+        sounds.play(Sfx.CLICK)
+    }
+
+    /** Tapping outside drops the focus; new cards go to the program again. */
+    fun closeLoop() {
+        target = EditTarget.Main
+    }
+
+    /** Removes a top-level card (a loop goes with its body) or one card inside a loop. */
+    fun removeCommand(index: Int, bodyIndex: Int? = null) {
         if (!canEdit || index !in program.indices) return
         if (phase != Phase.EDITING) resetRun()
-        program.removeAt(index)
+        val loop = program[index] as? Command.Repeat
+        if (bodyIndex != null && loop != null && bodyIndex in loop.body.indices) {
+            program[index] = loop.copy(body = loop.body.filterIndexed { i, _ -> i != bodyIndex })
+        } else {
+            program.removeAt(index)
+            val open = openLoop
+            target = when {
+                open == null -> target
+                open == index -> EditTarget.Main
+                open > index -> EditTarget.Loop(open - 1)
+                else -> target
+            }
+        }
+        clearHint()
+        sounds.play(Sfx.CARD_REMOVE)
+        persist()
+    }
+
+    /** Removes one card of block A. */
+    fun removeFunctionCommand(index: Int) {
+        if (!canEdit || index !in function.indices) return
+        if (phase != Phase.EDITING) resetRun()
+        function.removeAt(index)
         clearHint()
         sounds.play(Sfx.CARD_REMOVE)
         persist()
@@ -236,6 +368,8 @@ class GameState(
     fun clearProgram() {
         if (!canEdit) return
         program.clear()
+        function.clear()
+        target = EditTarget.Main
         resetRun()
         persist()
     }
@@ -254,13 +388,14 @@ class GameState(
         if (phase == Phase.RUNNING || program.isEmpty() || completed) return
         if (mode == GameMode.PREDICT && guess == null) return
         resetRun()
+        target = EditTarget.Main
         phase = Phase.RUNNING
-        val trace = Interpreter.run(level.copy(maxSlots = Int.MAX_VALUE), program.toList())
+        val trace = Interpreter.run(level.copy(maxSlots = Int.MAX_VALUE), program.toList(), function.toList())
 
         for (step in trace.steps) {
-            activeCommand = step.commandIndex
+            activeCommand = step.at
             animate(step)
-            delay(STEP_PAUSE_MS)
+            tick(STEP_PAUSE_MS)
         }
 
         if (mode == GameMode.PREDICT) {
@@ -272,7 +407,7 @@ class GameState(
         if (f == null) {
             runId++
             phase = Phase.WON
-            stars = rate(program.size, level.optimalLength).let { if (hintUsed) minOf(it, 2) else it }
+            stars = minOf(rate(slotsUsed, level.optimalLength), maxStars)
             activeCommand = null
             award(stars)
             sounds.play(if (stars == 3) Sfx.WIN_BIG else Sfx.WIN)
@@ -281,7 +416,7 @@ class GameState(
         } else {
             phase = Phase.FAILED
             failure = f
-            activeCommand = trace.failedCommandIndex
+            activeCommand = trace.failedAt
             playFailure(f)
         }
     }
@@ -320,7 +455,7 @@ class GameState(
                     val back = 1f - easeOut(minOf(1f, t * 2f))
                     val wobble = (kotlin.math.sin(t * 5f * Math.PI).toFloat()) * 14f * (1f - t)
                     hero = from.copy(x = from.x + dx * back, y = from.y + dy * back, tilt = wobble)
-                    delay(FRAME_MS)
+                    tick(FRAME_MS)
                 }
                 hero = from
             }
@@ -345,7 +480,7 @@ class GameState(
         for (i in 1..frames) {
             val e = easeInOut(i / frames.toFloat())
             hero = from.copy(x = lerp(from.x, x, e), y = lerp(from.y, y, e))
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
     }
 
@@ -355,7 +490,7 @@ class GameState(
             val t = i / frames.toFloat()
             val e = easeInOut(t)
             hero = from.copy(x = lerp(from.x, x, e), y = lerp(from.y, y, e), lift = (1f - (2 * t - 1f) * (2 * t - 1f)) * 0.6f)
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
         hero = from.copy(x = x, y = y, lift = 0f)
     }
@@ -366,15 +501,15 @@ class GameState(
         for (i in 1..22) {
             val t = i / 22f
             hero = from.copy(scale = 1f - 0.75f * t, alpha = 1f - t, lift = -0.25f * t, tilt = 25f * t)
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
-        delay(350)
+        tick(350)
         val home = HeroVisual.of(HeroState(level.start, level.startDir))
         for (i in 1..16) {
             val t = i / 16f
             val pop = overshoot(t)
             hero = home.copy(scale = pop, alpha = minOf(1f, t * 2f), lift = (1f - t) * 0.5f)
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
         hero = home
     }
@@ -385,7 +520,7 @@ class GameState(
         for (i in 1..30) {
             val t = i / 30f
             hero = from.copy(tilt = (kotlin.math.sin(t * 6f * Math.PI).toFloat()) * 12f * (1f - t * 0.5f))
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
         hero = from
     }
@@ -421,7 +556,7 @@ class GameState(
             for (i in 1..14) {
                 val t = i / 14f
                 hero = base.copy(lift = (1f - (2 * t - 1f) * (2 * t - 1f)) * 0.35f)
-                delay(FRAME_MS)
+                tick(FRAME_MS)
             }
         }
         hero = base
@@ -446,7 +581,8 @@ class GameState(
 
     /** Writes the profile back: progress, choices, and the level in progress (none once it is won). */
     fun persist() {
-        val slot = if (phase == Phase.WON) null else SaveSlot(tier, level.seed, theme.id, if (mode == GameMode.FORWARD) program.toList() else emptyList(), mode.id)
+        val forward = mode == GameMode.FORWARD
+        val slot = if (phase == Phase.WON) null else SaveSlot(tier, level.seed, theme.id, if (forward) program.toList() else emptyList(), mode.id, if (forward) function.toList() else emptyList())
         profile = profile.copy(
             lastPlayedAt = System.currentTimeMillis(),
             worldId = theme.id,
@@ -480,10 +616,13 @@ class GameState(
                 dirDegrees = lerp(from.dirDegrees, toDeg, e),
                 lift = lift,
             )
-            delay(FRAME_MS)
+            tick(FRAME_MS)
         }
         hero = to
     }
+
+    /** A delay scaled by the animation speed setting. */
+    private suspend fun tick(ms: Long) = delay((ms * speed()).toLong().coerceAtLeast(1L))
 
     private fun rate(used: Int, optimal: Int): Int = when {
         used <= optimal -> 3

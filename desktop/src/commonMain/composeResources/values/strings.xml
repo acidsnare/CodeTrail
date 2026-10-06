@@ -46,7 +46,7 @@
     <string name="cmd_forward">Forward %1$d</string>
     <string name="cmd_turn_left">Turn left</string>
     <string name="cmd_turn_right">Turn right</string>
-    <string name="cmd_turn_degrees">Turn %1$d°</string>
+    <string name="cmd_repeat">Repeat ×%1$d</string>
     <string name="cmd_jump">Jump over 1</string>
     <string name="stars_total">%1$d ★</string>
     <string name="unlock_hint">Unlocks at %1$d ★</string>
@@ -81,7 +81,7 @@
     <string name="diff_2">Longer paths</string>
     <string name="diff_3">Turn and go</string>
     <string name="diff_4">Jump over</string>
-    <string name="diff_5">Degrees</string>
+    <string name="diff_5">Loops</string>
     <string name="game_level">Level %1$d</string>
 
     <string name="pause_title">Paused</string>
@@ -144,4 +144,12 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="level_done">Level complete! Press New level for the next one.</string>
+    <string name="settings_speed">Animation speed</string>
+    <string name="speed_slow">Slow</string>
+    <string name="speed_normal">Normal</string>
+    <string name="speed_fast">Fast</string>
+    <string name="cmd_call">Block A</string>
+    <string name="diff_6">Blocks</string>
+    <string name="block_hint">Block A: tap here, add 2-4 cards, then call it with the A card.</string>
+    <string name="hint_remove_block">The last card in block A is wrong. Remove it.</string>
 </resources>

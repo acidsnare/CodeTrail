@@ -3,18 +3,23 @@ package codetrail.core.engine
 import codetrail.core.command.Command
 import codetrail.core.command.CommandSet
 import codetrail.core.command.Program
+import codetrail.core.command.Compiled
 import codetrail.core.model.Dir
 import codetrail.core.model.Grid
 import codetrail.core.model.Pos
 
 /**
  * Breadth-first search over (position, heading) where every command costs 1.
- * Gives the optimal program length for star rating and validates generated levels.
+ * Gives the optimal flat program for star rating and validates generated levels.
+ * Loops are not searched: the flat optimum is compressed afterwards by [LoopCompressor],
+ * which is exact here because the corridor is unique and so is its flat program.
  */
 object Solver {
 
-    data class Solution(val program: Program) {
-        val length: Int get() = program.size
+    data class Solution(val program: Program, val function: Program = emptyList()) {
+        /** Slots the program occupies, loops and block A already folded in. */
+        val length: Int get() = Compiled(program, function).slots
+        val flat: Program get() = Compiled(program, function).flatten()
     }
 
     fun solve(grid: Grid, start: Pos, startDir: Dir, goal: Pos, set: CommandSet): Solution? {
@@ -27,7 +32,11 @@ object Solver {
 
         while (queue.isNotEmpty()) {
             val cur = queue.removeFirst()
-            if (cur.pos == goal) return Solution(reconstruct(origin, cur, parent))
+            if (cur.pos == goal) {
+                val flat = reconstruct(origin, cur, parent)
+                val folded = ProgramCompressor.compress(flat, set)
+                return Solution(folded.program, folded.function)
+            }
             for ((cmd, next) in edges(grid, cur, set)) {
                 if (visited.add(next)) {
                     parent[next] = cur to cmd
@@ -73,12 +82,8 @@ object Solver {
             out += Command.Forward(n) to s.copy(pos = p)
         }
 
-        if (set.degreeTurns) {
-            for (deg in intArrayOf(90, 180, 270)) out += Command.Turn(deg) to s.copy(dir = s.dir.rotate(deg))
-        } else {
-            out += Command.TurnLeft to s.copy(dir = s.dir.left())
-            out += Command.TurnRight to s.copy(dir = s.dir.right())
-        }
+        out += Command.TurnLeft to s.copy(dir = s.dir.left())
+        out += Command.TurnRight to s.copy(dir = s.dir.right())
 
         if (set.jump) {
             val landing = s.pos.step(s.dir, 2)

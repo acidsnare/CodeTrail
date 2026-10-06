@@ -46,7 +46,8 @@ object Ascii {
         is Command.Forward -> "F${c.cells}"
         Command.TurnLeft -> "L"
         Command.TurnRight -> "R"
-        is Command.Turn -> "T${c.degrees}"
         Command.Jump -> "J"
+        Command.Call -> "A"
+        is Command.Repeat -> "${c.times}x[${program(c.body)}]"
     }
 }

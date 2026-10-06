@@ -6,7 +6,7 @@ import codetrail.core.command.CommandSet
  * A fully generated puzzle. Immutable from the player's point of view.
  *
  * @property maxSlots how many commands the program may contain.
- * @property optimalLength shortest known program length, used for star rating.
+ * @property optimalLength slots used by the shortest known program (loops folded), used for star rating.
  * @property seed lets the same level be regenerated or shared.
  */
 data class Level(

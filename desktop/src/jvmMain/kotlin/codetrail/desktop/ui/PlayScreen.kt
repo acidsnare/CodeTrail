@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.desktop.AppState
+import codetrail.core.gen.Difficulty
 import codetrail.desktop.GameMode
 import codetrail.desktop.res.mode_forward
 import codetrail.desktop.res.mode_forward_desc
@@ -46,6 +47,7 @@ import codetrail.desktop.res.diff_2
 import codetrail.desktop.res.diff_3
 import codetrail.desktop.res.diff_4
 import codetrail.desktop.res.diff_5
+import codetrail.desktop.res.diff_6
 import codetrail.desktop.res.play_difficulty
 import codetrail.desktop.res.play_solved
 import codetrail.desktop.res.play_start
@@ -56,7 +58,7 @@ import codetrail.desktop.theme.WorldTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-val DifficultyNames: List<StringResource> = listOf(Res.string.diff_1, Res.string.diff_2, Res.string.diff_3, Res.string.diff_4, Res.string.diff_5)
+val DifficultyNames: List<StringResource> = listOf(Res.string.diff_1, Res.string.diff_2, Res.string.diff_3, Res.string.diff_4, Res.string.diff_5, Res.string.diff_6)
 
 @Composable
 fun PlayScreen(app: AppState) {
@@ -84,7 +86,7 @@ fun PlayScreen(app: AppState) {
             Text(stringResource(Res.string.play_difficulty), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                for (t in 1..5) {
+                for (t in 1..Difficulty.TIERS.size) {
                     TierCard(t, stringResource(DifficultyNames[t - 1]), profile.progress.wonPerTier[t] ?: 0, selected = tier == t) { tier = t }
                 }
             }
