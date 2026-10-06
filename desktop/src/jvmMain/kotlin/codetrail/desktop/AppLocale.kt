@@ -12,10 +12,11 @@ enum class AppLanguage(val tag: String?, val label: String) {
     SYSTEM(null, "Auto"),
     EN("en", "EN"),
     RU("ru", "RU"),
+    UA("uk", "UA"),
     DA("da", "DA");
 
     companion object {
-        val Supported = setOf("en", "ru", "da")
+        val Supported = setOf("en", "ru", "uk", "da")
     }
 }
 

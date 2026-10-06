@@ -27,7 +27,7 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
   profile and the game resumes exactly where it was left.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
-- **English, Russian and Danish** UI.
+- **English, Russian, Ukrainian and Danish** UI.
 
 ## Project layout
 
@@ -93,7 +93,7 @@ Plain text; delete a file to remove a profile.
 ## Adding content
 
 - **A world**: add a `WorldTheme` (palette) and a `WorldArt` object (goal, obstacle, props)
-  in `desktop/.../theme/`, plus name / goal / fall-message strings in the three
+  in `desktop/.../theme/`, plus name / goal / fall-message strings in the four
   `strings.xml` files.
 - **A hero**: drop an SVG into `assets/characters/`, add a `Character` entry with its unlock
   threshold and body colours, and a name string.
