@@ -1,0 +1,99 @@
+<resources>
+    <string name="app_name">CodeTrail</string>
+    <string name="level_label">Niveau</string>
+    <string name="world_label">Verden</string>
+    <string name="language_label">Sprog</string>
+    <string name="program_title">Program  %1$d / %2$d</string>
+    <string name="commands_title">Kommandoer</string>
+    <string name="forward_by">Frem med</string>
+    <string name="run">Kør</string>
+    <string name="reset">Forfra</string>
+    <string name="clear">Ryd</string>
+    <string name="new_level">Ny bane</string>
+
+    <string name="status_goal">Flyt %1$s hen til %2$s. Bedst: %3$s.</string>
+    <string name="status_running">Kører...</string>
+    <string name="status_won">Du klarede det!</string>
+    <string name="fail_fell">Plask! Det felt er ikke sikkert.</string>
+    <string name="fail_bumped">Bump! Noget er i vejen. Prøv et hop.</string>
+    <string name="fail_bad_landing">Det hop har ingen steder at lande.</string>
+    <string name="fail_not_at_goal">Ikke fremme endnu. Fortsæt!</string>
+    <string name="fail_too_many">For mange kommandoer.</string>
+    <string name="fail_not_allowed">Den kommando kan ikke bruges her.</string>
+
+    <plurals name="commands_count">
+        <item quantity="one">%1$d kommando</item>
+        <item quantity="other">%1$d kommandoer</item>
+    </plurals>
+
+    <string name="world_islands">Øer</string>
+    <string name="world_forest">Skov</string>
+    <string name="world_space">Rummet</string>
+    <string name="goal_lake">søen</string>
+    <string name="goal_berries">bærrene</string>
+    <string name="goal_rocket">raketten</string>
+
+    <string name="char_red_panda">Rød panda</string>
+    <string name="char_fox">Ræv</string>
+    <string name="char_penguin">Pingvin</string>
+    <string name="char_capybara">Kapivar</string>
+
+    <string name="cmd_move_north">Op</string>
+    <string name="cmd_move_south">Ned</string>
+    <string name="cmd_move_west">Venstre</string>
+    <string name="cmd_move_east">Højre</string>
+    <string name="cmd_forward">Frem %1$d felter</string>
+    <string name="cmd_turn_left">Roter mod venstre</string>
+    <string name="cmd_turn_right">Roter mod højre</string>
+    <string name="cmd_turn_degrees">Roter %1$d°</string>
+    <string name="cmd_jump">Hop over 1 felt</string>
+    <string name="stars_total">%1$d ★</string>
+    <string name="unlock_hint">Låses op ved %1$d ★</string>
+    <string name="unlocked_message">Ny ven låst op: %1$s!</string>
+    <string name="levels_won">%1$d baner løst</string>
+    <string name="menu_subtitle">Programmer din helts vej</string>
+    <string name="menu_continue">Fortsæt</string>
+    <string name="menu_play">Spil</string>
+    <string name="menu_profiles">Profiler</string>
+    <string name="menu_settings">Indstillinger</string>
+    <string name="menu_quit">Afslut</string>
+    <string name="back">Tilbage</string>
+
+    <string name="profiles_title">Hvem spiller?</string>
+    <string name="profiles_new">Ny profil</string>
+    <string name="profiles_name_hint">Navn</string>
+    <string name="profiles_create">Opret</string>
+    <string name="profiles_delete">Slet</string>
+    <string name="profiles_confirm_delete">Slet helt sikkert?</string>
+    <string name="profiles_select">Vælg</string>
+    <string name="profiles_current">Spiller</string>
+    <string name="profiles_stats">%1$d ★  ·  %2$s</string>
+    <string name="profiles_empty">Ingen profiler endnu. Opret en for at begynde.</string>
+    <string name="hero_title">Din helt</string>
+
+    <string name="play_title">Vælg dit eventyr</string>
+    <string name="play_world">Verden</string>
+    <string name="play_difficulty">Sværhedsgrad</string>
+    <string name="play_start">Start</string>
+    <string name="play_solved">%1$d løst</string>
+    <string name="diff_1">Første skridt</string>
+    <string name="diff_2">Længere veje</string>
+    <string name="diff_3">Drej og gå</string>
+    <string name="diff_4">Hop over</string>
+    <string name="diff_5">Grader</string>
+    <string name="game_level">Niveau %1$d</string>
+
+    <string name="pause_title">Pause</string>
+    <string name="pause_resume">Fortsæt</string>
+    <string name="pause_restart">Start banen forfra</string>
+    <string name="pause_new_level">Ny bane</string>
+    <string name="pause_exit">Gem og afslut</string>
+
+    <string name="settings_title">Indstillinger</string>
+    <string name="settings_language">Sprog</string>
+    <string name="settings_data">Gemte filer: %1$s</string>
+    <string name="unlock_title">Ny ven!</string>
+    <string name="unlock_great">Fedt!</string>
+    <string name="game_menu">Menu</string>
+    <string name="hero_change_hint">Klik for at skifte helt</string>
+</resources>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- small round ears -->
+  <circle fill="#B07A4A" cx="64" cy="72" r="24"/><circle fill="#B07A4A" cx="192" cy="72" r="24"/>
+  <circle fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="64" cy="72" r="24"/><circle fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="192" cy="72" r="24"/>
+  <circle fill="#6B4428" cx="64" cy="74" r="12"/><circle fill="#6B4428" cx="192" cy="74" r="12"/>
+  <!-- head: boxier -->
+  <rect fill="#B07A4A" x="28" y="56" width="200" height="176" rx="80"/>
+  <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="28" y="56" width="200" height="176" rx="80"/>
+  <!-- big muzzle block -->
+  <rect fill="#D9B48C" x="64" y="150" width="128" height="72" rx="36"/>
+  <!-- eyes: sleepy half-lids -->
+  <circle fill="#2B1B14" cx="92" cy="128" r="9"/><circle fill="#2B1B14" cx="164" cy="128" r="9"/>
+  <path fill="#B07A4A" d="M80 118 h24 v8 h-24z"/><path fill="#B07A4A" d="M152 118 h24 v8 h-24z"/>
+  <circle fill="#FFFFFF" cx="95" cy="129" r="3"/><circle fill="#FFFFFF" cx="167" cy="129" r="3"/>
+  <!-- nose: wide -->
+  <ellipse fill="#2B1B14" cx="128" cy="170" rx="22" ry="10"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M128 180 L128 192 M128 192 Q114 204 102 192 M128 192 Q142 204 154 192"/>
+  <ellipse fill="#F09A7A" opacity=".6" cx="72" cy="178" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="184" cy="178" rx="12" ry="8"/>
+</svg>

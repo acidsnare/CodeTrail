@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- tail -->
+  <g transform="translate(200 200) rotate(-30)">
+    <rect fill="#E8862E" x="-18" y="-14" width="78" height="28" rx="14"/>
+    <path fill="#FFFFFF" d="M38 -14 h22 a14 14 0 0 1 0 28 h-22 z"/>
+    <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="-18" y="-14" width="78" height="28" rx="14"/>
+  </g>
+  <!-- pointed ears -->
+  <path fill="#E8862E" d="M36 110 L48 24 L110 72 Z"/><path fill="#E8862E" d="M220 110 L208 24 L146 72 Z"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M36 110 L48 24 L110 72 Z"/><path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M220 110 L208 24 L146 72 Z"/>
+  <path fill="#3B2418" d="M58 96 L60 48 L96 78 Z"/><path fill="#3B2418" d="M198 96 L196 48 L160 78 Z"/>
+  <!-- head -->
+  <ellipse fill="#E8862E" cx="128" cy="140" rx="100" ry="90"/>
+  <ellipse fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" cx="128" cy="140" rx="100" ry="90"/>
+  <!-- white cheeks + muzzle (fox mask) -->
+  <path fill="#FFF3E0" d="M40 150 Q60 120 92 128 L128 150 L164 128 Q196 120 216 150 Q200 226 128 228 Q56 226 40 150Z"/>
+  <!-- eye patches -->
+  <ellipse fill="#FFFFFF" cx="92" cy="128" rx="24" ry="20"/><ellipse fill="#FFFFFF" cx="164" cy="128" rx="24" ry="20"/>
+  <!-- eyes -->
+  <circle fill="#2B1B14" cx="96" cy="130" r="9"/><circle fill="#2B1B14" cx="160" cy="130" r="9"/>
+  <circle fill="#FFFFFF" cx="99" cy="126" r="3"/><circle fill="#FFFFFF" cx="163" cy="126" r="3"/>
+  <!-- nose + mouth -->
+  <ellipse fill="#2B1B14" cx="128" cy="170" rx="13" ry="9"/>
+  <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M128 179 L128 190 M128 190 Q116 200 106 190 M128 190 Q140 200 150 190"/>
+  <ellipse fill="#F09A7A" opacity=".6" cx="80" cy="176" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="176" cy="176" rx="12" ry="8"/>
+</svg>

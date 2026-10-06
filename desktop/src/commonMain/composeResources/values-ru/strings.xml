@@ -1,0 +1,101 @@
+<resources>
+    <string name="app_name">CodeTrail</string>
+    <string name="level_label">Уровень</string>
+    <string name="world_label">Мир</string>
+    <string name="language_label">Язык</string>
+    <string name="program_title">Программа  %1$d / %2$d</string>
+    <string name="commands_title">Команды</string>
+    <string name="forward_by">Вперёд на</string>
+    <string name="run">Запуск</string>
+    <string name="reset">Сначала</string>
+    <string name="clear">Очистить</string>
+    <string name="new_level">Новый уровень</string>
+
+    <string name="status_goal">Герой: %1$s. Цель: %2$s. Лучший результат: %3$s.</string>
+    <string name="status_running">Выполняю...</string>
+    <string name="status_won">Получилось!</string>
+    <string name="fail_fell">Бултых! Эта клетка небезопасна.</string>
+    <string name="fail_bumped">Бум! Что-то мешает. Попробуй прыжок.</string>
+    <string name="fail_bad_landing">Этому прыжку некуда приземлиться.</string>
+    <string name="fail_not_at_goal">Ещё не дошли. Продолжай!</string>
+    <string name="fail_too_many">Слишком много команд.</string>
+    <string name="fail_not_allowed">Эта команда здесь недоступна.</string>
+
+    <plurals name="commands_count">
+        <item quantity="one">%1$d команда</item>
+        <item quantity="few">%1$d команды</item>
+        <item quantity="many">%1$d команд</item>
+        <item quantity="other">%1$d команды</item>
+    </plurals>
+
+    <string name="world_islands">Острова</string>
+    <string name="world_forest">Лес</string>
+    <string name="world_space">Космос</string>
+    <string name="goal_lake">озеро</string>
+    <string name="goal_berries">ягоды</string>
+    <string name="goal_rocket">ракета</string>
+
+    <string name="char_red_panda">Красная панда</string>
+    <string name="char_fox">Лиса</string>
+    <string name="char_penguin">Пингвин</string>
+    <string name="char_capybara">Капибара</string>
+
+    <string name="cmd_move_north">Вверх</string>
+    <string name="cmd_move_south">Вниз</string>
+    <string name="cmd_move_west">Влево</string>
+    <string name="cmd_move_east">Вправо</string>
+    <string name="cmd_forward">Вперёд %1$d</string>
+    <string name="cmd_turn_left">Поворот налево</string>
+    <string name="cmd_turn_right">Поворот направо</string>
+    <string name="cmd_turn_degrees">Поворот на %1$d°</string>
+    <string name="cmd_jump">Прыжок через 1</string>
+    <string name="stars_total">%1$d ★</string>
+    <string name="unlock_hint">Откроется при %1$d ★</string>
+    <string name="unlocked_message">Новый друг открыт: %1$s!</string>
+    <string name="levels_won">Пройдено уровней: %1$d</string>
+    <string name="menu_subtitle">Запрограммируй путь героя</string>
+    <string name="menu_continue">Продолжить</string>
+    <string name="menu_play">Играть</string>
+    <string name="menu_profiles">Профили</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_quit">Выход</string>
+    <string name="back">Назад</string>
+
+    <string name="profiles_title">Кто играет?</string>
+    <string name="profiles_new">Новый профиль</string>
+    <string name="profiles_name_hint">Имя</string>
+    <string name="profiles_create">Создать</string>
+    <string name="profiles_delete">Удалить</string>
+    <string name="profiles_confirm_delete">Точно удалить?</string>
+    <string name="profiles_select">Выбрать</string>
+    <string name="profiles_current">Играет</string>
+    <string name="profiles_stats">%1$d ★  ·  %2$s</string>
+    <string name="profiles_empty">Профилей пока нет. Создай первый, чтобы начать.</string>
+    <string name="hero_title">Твой герой</string>
+
+    <string name="play_title">Выбери приключение</string>
+    <string name="play_world">Мир</string>
+    <string name="play_difficulty">Сложность</string>
+    <string name="play_start">Старт</string>
+    <string name="play_solved">пройдено %1$d</string>
+    <string name="diff_1">Первые шаги</string>
+    <string name="diff_2">Длинные пути</string>
+    <string name="diff_3">Повороты</string>
+    <string name="diff_4">Прыжки</string>
+    <string name="diff_5">Градусы</string>
+    <string name="game_level">Уровень %1$d</string>
+
+    <string name="pause_title">Пауза</string>
+    <string name="pause_resume">Продолжить</string>
+    <string name="pause_restart">Начать уровень заново</string>
+    <string name="pause_new_level">Новый уровень</string>
+    <string name="pause_exit">Сохранить и выйти</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_data">Файлы сохранений: %1$s</string>
+    <string name="unlock_title">Новый друг!</string>
+    <string name="unlock_great">Ура!</string>
+    <string name="game_menu">Меню</string>
+    <string name="hero_change_hint">Нажми, чтобы сменить героя</string>
+</resources>
