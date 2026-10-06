@@ -14,12 +14,15 @@ jobs:
           - os: macos-latest
             task: packageDmg
             artifact: desktop/build/compose/binaries/main/dmg/*.dmg
+            launcher: desktop/build/compose/binaries/main/app/CodeTrail.app/Contents/MacOS/CodeTrail
           - os: windows-latest
             task: packageMsi
             artifact: desktop/build/compose/binaries/main/msi/*.msi
+            launcher: desktop/build/compose/binaries/main/app/CodeTrail/CodeTrail.exe
           - os: ubuntu-latest
             task: packageDeb
             artifact: desktop/build/compose/binaries/main/deb/*.deb
+            launcher: desktop/build/compose/binaries/main/app/CodeTrail/bin/CodeTrail
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +42,34 @@ jobs:
 
       - name: Build installer
         run: ./gradlew :desktop:${{ matrix.task }} --no-daemon --console=plain
+
+      # Smoke test: the packaged launcher must start its bundled JVM and stay alive for a few
+      # seconds. Catches broken JVM options or missing modules that only show up at run time.
+      - name: Smoke test launcher (unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -e
+          if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get install -y -qq xvfb >/dev/null; export DISPLAY=:99; Xvfb :99 -screen 0 1280x800x24 & sleep 2; fi
+          "${{ matrix.launcher }}" > launcher.log 2>&1 &
+          PID=$!
+          sleep 20
+          if ! kill -0 $PID 2>/dev/null; then echo "launcher exited early"; cat launcher.log; exit 1; fi
+          if grep -qiE "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread" launcher.log; then cat launcher.log; exit 1; fi
+          kill $PID || true
+          echo "launcher alive after 20s"
+
+      - name: Smoke test launcher (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "${{ matrix.launcher }}" -PassThru -RedirectStandardOutput out.log -RedirectStandardError err.log
+          Start-Sleep -Seconds 20
+          if ($p.HasExited) { Write-Host "launcher exited early with $($p.ExitCode)"; Get-Content out.log, err.log; exit 1 }
+          $log = (Get-Content out.log, err.log -ErrorAction SilentlyContinue) -join "`n"
+          if ($log -match "Could not create the Java Virtual Machine|Unrecognized option|Exception in thread") { Write-Host $log; exit 1 }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "launcher alive after 20s"
 
       - uses: actions/upload-artifact@v4
         with:
