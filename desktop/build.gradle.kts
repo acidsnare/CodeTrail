@@ -34,12 +34,14 @@ compose.resources {
 compose.desktop {
     application {
         mainClass = "codetrail.desktop.MainKt"
-        // -Xdock:name fixes the "java" dock tooltip when running from Gradle on macOS
-        jvmArgs("--enable-native-access=ALL-UNNAMED", "-Xdock:name=CodeTrail")
+        jvmArgs("--enable-native-access=ALL-UNNAMED")
+        // -Xdock:name fixes the "java" dock tooltip when running from Gradle. It is a macOS-only
+        // flag: on Windows or Linux an unknown -X option stops the JVM from starting at all.
+        if (org.gradle.internal.os.OperatingSystem.current().isMacOsX) jvmArgs("-Xdock:name=CodeTrail")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CodeTrail"
-            packageVersion = "1.1.0"
+            packageVersion = "1.1.1"
             description = "Program your hero's path"
             vendor = "CodeTrail"
             macOS {
