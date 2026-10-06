@@ -15,14 +15,14 @@ import kotlin.random.Random
  */
 class LevelGenerator {
 
-    fun generate(tier: Int, seed: Long = Random.nextLong()): Level =
-        generate(Difficulty.of(tier), seed)
+    fun generate(tier: Int, seed: Long = Random.nextLong(), obstacles: Boolean = true): Level =
+        generate(Difficulty.of(tier), seed, obstacles)
 
-    fun generate(difficulty: Difficulty, seed: Long): Level {
+    fun generate(difficulty: Difficulty, seed: Long, obstacles: Boolean = true): Level {
         var attempt = 0L
         while (true) {
             val rng = Random(seed + attempt * 7919)
-            val level = tryGenerate(difficulty, seed, rng)
+            val level = tryGenerate(if (obstacles) difficulty else difficulty.copy(obstacles = 0..0), seed, rng)
             if (level != null) return level
             attempt++
             check(attempt < 1000) { "Could not generate a level for tier ${difficulty.tier} with seed $seed" }
@@ -43,6 +43,7 @@ class LevelGenerator {
         placeObstacles(grid, path, rng.nextInt(d.obstacles.first, d.obstacles.last + 1))
 
         val solution = Solver.solve(grid, start, startDir, goal, d.commandSet) ?: return null
+        if (solution.length > d.maxOptimal) return null
 
         return Level(
             grid = grid,

@@ -33,6 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.desktop.AppState
+import codetrail.desktop.GameMode
+import codetrail.desktop.res.mode_forward
+import codetrail.desktop.res.mode_forward_desc
+import codetrail.desktop.res.mode_predict
+import codetrail.desktop.res.mode_predict_desc
+import codetrail.desktop.res.play_mode
 import codetrail.desktop.res.Res
 import codetrail.desktop.res.back
 import codetrail.desktop.res.diff_1
@@ -45,6 +51,7 @@ import codetrail.desktop.res.play_solved
 import codetrail.desktop.res.play_start
 import codetrail.desktop.res.play_title
 import codetrail.desktop.res.play_world
+import codetrail.desktop.res.tier_multiplier
 import codetrail.desktop.theme.WorldTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -56,6 +63,7 @@ fun PlayScreen(app: AppState) {
     val profile = app.current ?: return
     var world by remember { mutableStateOf(WorldTheme.byId(profile.worldId) ?: WorldTheme.Islands) }
     var tier by remember { mutableStateOf(profile.tier) }
+    var mode by remember { mutableStateOf(GameMode.FORWARD) }
 
     Box(Modifier.fillMaxSize().background(MenuBackground)) {
         Column(Modifier.fillMaxSize().padding(40.dp)) {
@@ -68,7 +76,7 @@ fun PlayScreen(app: AppState) {
 
             Text(stringResource(Res.string.play_world), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 for (w in WorldTheme.All) WorldCard(w, selected = world.id == w.id) { world = w }
             }
 
@@ -81,9 +89,17 @@ fun PlayScreen(app: AppState) {
                 }
             }
 
+            Spacer(Modifier.height(28.dp))
+            Text(stringResource(Res.string.play_mode), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD) { mode = GameMode.FORWARD }
+                ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT) { mode = GameMode.PREDICT }
+            }
+
             Spacer(Modifier.weight(1f))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 240.dp) { app.startGame(world, tier) }
+                MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 240.dp) { app.startGame(world, tier, mode) }
             }
         }
     }
@@ -93,7 +109,7 @@ fun PlayScreen(app: AppState) {
 private fun WorldCard(w: WorldTheme, selected: Boolean, onClick: () -> Unit) {
     Column(
         Modifier
-            .width(220.dp)
+            .width(186.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(Panel)
             .border(if (selected) 3.dp else 0.dp, if (selected) Color.White else Color.Transparent, RoundedCornerShape(18.dp))
@@ -101,7 +117,7 @@ private fun WorldCard(w: WorldTheme, selected: Boolean, onClick: () -> Unit) {
             .padding(12.dp),
     ) {
         // Miniature of the world: sea gradient with a few land tiles.
-        Canvas(Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(12.dp))) {
+        Canvas(Modifier.fillMaxWidth().height(96.dp).clip(RoundedCornerShape(12.dp))) {
             drawRect(Brush.verticalGradient(listOf(w.seaTop, w.seaBottom)))
             val cell = size.width / 7
             val land = listOf(1 to 1, 2 to 1, 3 to 1, 3 to 2, 4 to 2, 5 to 2)
@@ -114,7 +130,7 @@ private fun WorldCard(w: WorldTheme, selected: Boolean, onClick: () -> Unit) {
             with(w.art) { drawGoal(Offset(5.5f * cell, 2.5f * cell + 6f), cell) }
         }
         Spacer(Modifier.height(10.dp))
-        Text(stringResource(w.name), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(stringResource(w.name), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
     }
 }
 
@@ -128,9 +144,33 @@ private fun TierCard(tier: Int, name: String, solved: Int, selected: Boolean, on
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {
-        Text("$tier", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = if (selected) Ink else Color.White)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("$tier", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = if (selected) Ink else Color.White)
+            Spacer(Modifier.weight(1f))
+            Text(stringResource(Res.string.tier_multiplier, tier), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Star)
+        }
         Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
         Spacer(Modifier.height(6.dp))
         Text(stringResource(Res.string.play_solved, solved), fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f))
+    }
+}
+
+@Composable
+private fun ModeCard(icon: String, title: String, desc: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .width(380.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (selected) Color.White else Panel)
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(icon, fontSize = 30.sp)
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
+            Text(desc, fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f))
+        }
     }
 }

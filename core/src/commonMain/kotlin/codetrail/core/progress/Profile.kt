@@ -25,6 +25,8 @@ data class SaveSlot(
     val seed: Long,
     val worldId: String,
     val program: Program,
+    /** "forward" (build the program) or "predict" (guess where a given program ends). */
+    val mode: String = "forward",
 )
 
 /** App-wide settings that are not tied to a profile. */

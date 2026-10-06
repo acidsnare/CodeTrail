@@ -7,7 +7,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import codetrail.desktop.res.Res
+import codetrail.desktop.res.cancel
+import codetrail.desktop.res.quit_body
+import codetrail.desktop.res.quit_title
+import codetrail.desktop.res.quit_yes
+import org.jetbrains.compose.resources.stringResource
 import codetrail.desktop.AppState
 import codetrail.desktop.ProvideAppLanguage
 import codetrail.desktop.Screen
@@ -17,6 +24,7 @@ import codetrail.desktop.Screen
 fun Root(app: AppState, onQuit: () -> Unit) {
     ProvideAppLanguage(app.language) {
         MaterialTheme {
+            Box {
             AnimatedContent(
                 targetState = app.screen,
                 transitionSpec = {
@@ -28,11 +36,23 @@ fun Root(app: AppState, onQuit: () -> Unit) {
                     Screen.PROFILES -> ProfilesScreen(app)
                     Screen.PLAY -> PlayScreen(app)
                     Screen.SETTINGS -> SettingsScreen(app)
+                    Screen.STATS -> StatsScreen(app)
                     Screen.GAME -> {
                         val game = app.game
                         if (game == null) MenuScreen(app, onQuit) else GameScreen(app, game)
                     }
                 }
+            }
+            if (app.quitRequested) {
+                ConfirmDialog(
+                    title = stringResource(Res.string.quit_title),
+                    body = stringResource(Res.string.quit_body),
+                    confirmText = stringResource(Res.string.quit_yes),
+                    cancelText = stringResource(Res.string.cancel),
+                    onConfirm = onQuit,
+                    onCancel = { app.cancelQuit() },
+                )
+            }
             }
         }
     }

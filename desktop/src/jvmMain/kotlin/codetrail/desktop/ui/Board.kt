@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.foundation.layout.offset
@@ -60,6 +62,9 @@ fun Board(
     won: Boolean = false,
     stars: Int = 0,
     failure: Failure? = null,
+    guess: Pos? = null,
+    answer: Pos? = null,
+    onCellClick: ((Pos) -> Unit)? = null,
 ) {
     val density = LocalDensity.current
     val sprite = remember(character.id) {
@@ -90,7 +95,15 @@ fun Board(
             .offset { IntOffset(shake.value.toInt(), 0) }
             .aspectRatio(level.grid.width / level.grid.height.toFloat())
             .clip(RoundedCornerShape(18.dp))
-            .onSizeChanged { boardSize = it },
+            .onSizeChanged { boardSize = it }
+            .then(
+                if (onCellClick == null) Modifier else Modifier.pointerInput(level) {
+                    detectTapGestures { tap ->
+                        val c = size.width / level.grid.width.toFloat()
+                        onCellClick(Pos((tap.x / c).toInt(), (tap.y / c).toInt()))
+                    }
+                },
+            ),
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val cell = size.width / level.grid.width
@@ -102,7 +115,9 @@ fun Board(
                 }
                 drawGoal(Offset((level.goal.x + 0.5f) * cell, (level.goal.y + 0.5f) * cell), cell)
             }
-            drawHero(hero, sprite, cell)
+            if (guess != null) drawGuess(guess, cell, isAnswer = false)
+            if (answer != null) drawGuess(answer, cell, isAnswer = true)
+            drawHero(hero, sprite, character, cell)
         }
         if (cellPx > 0f) {
             val goalCenter = Offset((level.goal.x + 0.5f) * cellPx, (level.goal.y + 0.5f) * cellPx)
@@ -157,43 +172,83 @@ private fun DrawScope.drawLand(level: Level, theme: WorldTheme, cell: Float) {
         val tl = Offset(p.x * cell, p.y * cell)
         drawRoundRect(theme.land, tl, Size(cell, cell), radius)
         drawRoundRect(theme.landEdge, tl, Size(cell, cell), radius, style = rim)
+        with(theme.art) { drawTileFace(tl, cell) }
 
         if (p != level.goal && level.grid[p] == Cell.WALKABLE) {
             with(theme.art) { drawLandProps(tl, cell, cellRandom(level, p)) }
         }
+        fun open(q: Pos) = level.grid.cellOrNull(q)?.let { it != Cell.BLOCKED } ?: false
+        with(theme.art) {
+            drawConnections(
+                tl, cell,
+                north = open(Pos(p.x, p.y - 1)), east = open(Pos(p.x + 1, p.y)),
+                south = open(Pos(p.x, p.y + 1)), west = open(Pos(p.x - 1, p.y)),
+            )
+        }
     }
 }
 
-private fun DrawScope.drawHero(hero: HeroVisual, sprite: Painter, cell: Float) {
+/** Predict mode markers: the player's guess as a question-mark ring, the true answer as a green ring. */
+private fun DrawScope.drawGuess(p: Pos, cell: Float, isAnswer: Boolean) {
+    val c = Offset((p.x + 0.5f) * cell, (p.y + 0.5f) * cell)
+    val color = if (isAnswer) Color(0xFF43A047) else Color(0xFFFFD54F)
+    drawRoundRect(color.copy(alpha = 0.25f), Offset(p.x * cell + cell * 0.06f, p.y * cell + cell * 0.06f), Size(cell * 0.88f, cell * 0.88f), CornerRadius(cell * 0.14f))
+    drawRoundRect(color, Offset(p.x * cell + cell * 0.06f, p.y * cell + cell * 0.06f), Size(cell * 0.88f, cell * 0.88f), CornerRadius(cell * 0.14f), style = Stroke(cell * 0.06f))
+    if (!isAnswer) {
+        drawCircle(color, cell * 0.2f, c)
+        drawCircle(Color(0xFF2B1B14), cell * 0.2f, c, style = Stroke(cell * 0.03f))
+        // question mark
+        val q = Path().apply {
+            moveTo(c.x - cell * 0.07f, c.y - cell * 0.05f)
+            quadraticTo(c.x - cell * 0.07f, c.y - cell * 0.14f, c.x, c.y - cell * 0.14f)
+            quadraticTo(c.x + cell * 0.08f, c.y - cell * 0.14f, c.x + cell * 0.08f, c.y - cell * 0.05f)
+            quadraticTo(c.x + cell * 0.08f, c.y + cell * 0.01f, c.x, c.y + cell * 0.03f)
+            lineTo(c.x, c.y + cell * 0.07f)
+        }
+        drawPath(q, Color(0xFF2B1B14), style = Stroke(cell * 0.035f, cap = StrokeCap.Round))
+        drawCircle(Color(0xFF2B1B14), cell * 0.022f, Offset(c.x, c.y + cell * 0.13f))
+    }
+}
+
+/** Portrait sprite with shadow and a chunky heading chevron on its leading edge. */
+private fun DrawScope.drawHero(hero: HeroVisual, sprite: Painter, c: Character, cell: Float) {
     if (hero.alpha <= 0f) return
-    val size = cell * 0.8f * hero.scale
+    val k = hero.scale
+    val a = hero.alpha
+    val size = cell * 0.8f * k
     val cx = (hero.x + 0.5f) * cell
     val groundY = (hero.y + 0.5f) * cell
     val cy = groundY - hero.lift * cell
+
     // shadow stays on the ground and shrinks as the hero lifts or sinks
-    val shadowScale = (1f - hero.lift.coerceIn(0f, 1f) * 0.4f) * hero.scale
+    val shadowScale = (1f - hero.lift.coerceIn(0f, 1f) * 0.4f) * k
     drawOval(
-        Color.Black.copy(alpha = 0.18f * hero.alpha),
+        Color.Black.copy(alpha = 0.18f * a),
         Offset(cx - cell * 0.29f * shadowScale, groundY + cell * 0.22f),
         Size(cell * 0.58f * shadowScale, cell * 0.16f * shadowScale),
     )
+
     rotate(hero.tilt, Offset(cx, cy)) {
         translate(cx - size / 2, cy - size / 2) {
-            with(sprite) { draw(Size(size, size), alpha = hero.alpha) }
+            with(sprite) { draw(Size(size, size), alpha = a) }
         }
     }
-    // heading badge on the sprite edge
-    if (hero.scale > 0.6f) {
+
+    // heading chevron: white with dark outline, sitting on the sprite's edge
+    if (k > 0.6f) {
         rotate(hero.dirDegrees, Offset(cx, cy)) {
-            val tip = Offset(cx, cy - cell * 0.5f * hero.scale)
+            val tip = Offset(cx, cy - cell * 0.56f * k)
+            val w = cell * 0.17f
+            val h = cell * 0.2f
             val path = Path().apply {
                 moveTo(tip.x, tip.y)
-                lineTo(tip.x - cell * 0.12f, tip.y + cell * 0.16f)
-                lineTo(tip.x + cell * 0.12f, tip.y + cell * 0.16f)
+                lineTo(tip.x - w, tip.y + h)
+                lineTo(tip.x, tip.y + h * 0.7f)
+                lineTo(tip.x + w, tip.y + h)
                 close()
             }
-            drawPath(path, Color(0xFF2B1B14).copy(alpha = hero.alpha))
-            drawPath(path, Color.White.copy(alpha = hero.alpha), style = Stroke(cell * 0.025f))
+            drawPath(path, Color.White.copy(alpha = a))
+            drawPath(path, Color(0xFF2B1B14).copy(alpha = a), style = Stroke(cell * 0.035f, join = androidx.compose.ui.graphics.StrokeJoin.Round))
         }
     }
 }

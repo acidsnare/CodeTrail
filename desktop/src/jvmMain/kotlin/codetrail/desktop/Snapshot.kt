@@ -32,8 +32,10 @@ fun main(args: Array<String>) {
     val stars = args.getOrNull(6)?.toIntOrNull() ?: 0
     val screen = args.getOrNull(7) ?: "game"
     val frameMs = args.getOrNull(8)?.toLongOrNull() ?: 16L
+    val heroId = args.getOrNull(9)?.takeIf { it.isNotBlank() } ?: "turtle"
+    val mode = GameMode.of(args.getOrNull(10))
 
-    val demo = Profile("demo", "Mila", 0L, 0L, Progress(totalStars = stars, levelsWon = stars / 2), characterId = "capybara", tier = tier)
+    val demo = Profile("demo", "Mila", 0L, 0L, Progress(totalStars = stars, levelsWon = stars / 2, wonPerTier = mapOf(1 to 7, 2 to 5, 3 to 3, 4 to 1), wonPerWorld = mapOf("islands" to 6, "forest" to 4, "space" to 2, "lava" to 3, "city" to 1)), characterId = heroId, tier = tier)
     val repo = object : ProfileRepository {
         val items = mutableListOf(demo, Profile("p2", "Oskar", 0L, 0L, Progress(totalStars = 31, levelsWon = 14), characterId = "penguin"))
         override fun list() = items.toList()
@@ -51,10 +53,22 @@ fun main(args: Array<String>) {
         "profiles" -> app.goProfiles()
         "play" -> app.goPlay()
         "settings" -> app.goSettings()
+        "stats" -> app.goStats()
+        "quit" -> { app.goMenu(); app.requestQuit() }
         else -> {
-            app.startGame(world, tier)
+            // pass the seed through a save slot so the level is reproducible
+            app.startGame(world, tier, mode, resume = codetrail.core.progress.SaveSlot(tier, seed, world.id, emptyList(), mode.id))
             val state = app.game!!
-            if (solve) {
+            if (mode == GameMode.PREDICT) {
+                // guess the true answer so the win state renders
+                state.selectGuess(state.predict!!.answer)
+                if (solve) runBlocking { state.run() }
+                println("predict program=${state.program.size} answer=${state.predict!!.answer} phase=${state.phase}")
+            } else if (args.getOrNull(3) == "hint") {
+                state.addCommand(Command.TurnRight)
+                state.hint()
+                println("hint=${state.hintCommand} removeLast=${state.hintRemoveLast}")
+            } else if (solve) {
                 val l = state.level
                 Solver.solve(l.grid, l.start, l.startDir, l.goal, l.commandSet)!!.program.forEach(state::addCommand)
                 runBlocking { state.run() }

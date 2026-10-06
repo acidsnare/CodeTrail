@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <!-- flipper -->
-  <g transform="translate(200 200) rotate(-30)">
-    <rect fill="#2F3A4A" x="-18" y="-13" width="70" height="26" rx="13"/>
-    <rect fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" x="-18" y="-13" width="70" height="26" rx="13"/>
+  <!-- two flippers peeking out on both sides, angled down like little arms -->
+  <g transform="translate(34 182) rotate(28)">
+    <rect x="-16" y="-34" width="32" height="68" rx="16" fill="#2F3A4A" stroke="#2B1B14" stroke-width="5"/>
+  </g>
+  <g transform="translate(222 182) rotate(-28)">
+    <rect x="-16" y="-34" width="32" height="68" rx="16" fill="#2F3A4A" stroke="#2B1B14" stroke-width="5"/>
   </g>
   <!-- head -->
   <ellipse fill="#2F3A4A" cx="128" cy="140" rx="100" ry="90"/>
@@ -12,9 +14,12 @@
   <!-- eyes -->
   <circle fill="#2B1B14" cx="96" cy="130" r="9"/><circle fill="#2B1B14" cx="160" cy="130" r="9"/>
   <circle fill="#FFFFFF" cx="99" cy="126" r="3"/><circle fill="#FFFFFF" cx="163" cy="126" r="3"/>
-  <!-- beak -->
-  <path fill="#F4B23E" d="M104 160 L152 160 L128 190 Z"/>
-  <path fill="none" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round" d="M104 160 L152 160 L128 190 Z"/>
-  <path fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round" d="M104 160 L152 160"/>
+  <!-- beak: two-part with a highlight so it reads as a volume -->
+  <path d="M100 158 Q128 150 156 158 L128 192 Z" fill="#F4B23E" stroke="#2B1B14" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M104 162 Q128 170 152 162 L128 190 Z" fill="#E09A2C"/>
+  <path d="M110 160 Q128 154 146 160" fill="none" stroke="#FFE08A" stroke-width="4" stroke-linecap="round"/>
+  <!-- brow tufts, macaroni style -->
+  <path d="M70 112 Q48 96 40 72 M70 112 Q54 104 46 92 M70 112 Q62 100 60 84" fill="none" stroke="#F4B23E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M186 112 Q208 96 216 72 M186 112 Q202 104 210 92 M186 112 Q194 100 196 84" fill="none" stroke="#F4B23E" stroke-width="7" stroke-linecap="round"/>
   <ellipse fill="#F09A7A" opacity=".6" cx="80" cy="172" rx="12" ry="8"/><ellipse fill="#F09A7A" opacity=".6" cx="176" cy="172" rx="12" ry="8"/>
 </svg>

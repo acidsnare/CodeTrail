@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- shell: a dome behind the head that ends above the belly (clipped flat at the lower rim) -->
+  <defs><clipPath id="shellClip"><rect x="0" y="0" width="256" height="196"/></clipPath></defs>
+  <g clip-path="url(#shellClip)">
+    <ellipse cx="128" cy="122" rx="120" ry="106" fill="#7A5230" stroke="#2B1B14" stroke-width="5"/>
+    <ellipse cx="128" cy="122" rx="100" ry="88" fill="#8F6238"/>
+    <path d="M128 16 L128 34 M8 122 L26 122 M230 122 L248 122" stroke="#5D3A1E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M43 47 L56 58 M213 47 L200 58" stroke="#5D3A1E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M60 36 Q128 10 196 36 M28 160 Q24 122 28 84 M228 160 Q232 122 228 84" fill="none" stroke="#5D3A1E" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- lower rim of the shell -->
+  <path d="M22 196 H234" stroke="#2B1B14" stroke-width="5" stroke-linecap="round"/>
+  <!-- flippers -->
+  <g transform="translate(34 206) rotate(30)">
+    <rect x="-15" y="-30" width="30" height="60" rx="15" fill="#6DBE6A" stroke="#2B1B14" stroke-width="5"/>
+  </g>
+  <g transform="translate(222 206) rotate(-30)">
+    <rect x="-15" y="-30" width="30" height="60" rx="15" fill="#6DBE6A" stroke="#2B1B14" stroke-width="5"/>
+  </g>
+  <!-- head -->
+  <ellipse cx="128" cy="134" rx="98" ry="88" fill="#6DBE6A"/>
+  <ellipse cx="128" cy="134" rx="98" ry="88" fill="none" stroke="#2B1B14" stroke-width="5"/>
+  <!-- lighter face -->
+  <path d="M46 150 Q70 118 128 122 Q186 118 210 150 Q196 220 128 222 Q60 220 46 150Z" fill="#C9E8B0"/>
+  <!-- eye patches -->
+  <ellipse cx="92" cy="128" rx="24" ry="20" fill="#FFFFFF"/><ellipse cx="164" cy="128" rx="24" ry="20" fill="#FFFFFF"/>
+  <!-- eyes -->
+  <circle cx="96" cy="130" r="9" fill="#2B1B14"/><circle cx="160" cy="130" r="9" fill="#2B1B14"/>
+  <circle cx="99" cy="126" r="3" fill="#FFFFFF"/><circle cx="163" cy="126" r="3" fill="#FFFFFF"/>
+  <!-- nostrils + smile -->
+  <circle cx="120" cy="164" r="3.5" fill="#2B1B14"/><circle cx="136" cy="164" r="3.5" fill="#2B1B14"/>
+  <path d="M104 182 Q128 200 152 182" fill="none" stroke="#2B1B14" stroke-width="4" stroke-linecap="round"/>
+  <!-- blush -->
+  <ellipse cx="78" cy="172" rx="12" ry="8" fill="#F09A7A" opacity=".6"/><ellipse cx="178" cy="172" rx="12" ry="8" fill="#F09A7A" opacity=".6"/>
+</svg>

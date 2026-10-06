@@ -25,4 +25,23 @@ data class Level(
         require(grid.isWalkable(goal)) { "Goal must be walkable" }
         require(start != goal) { "Start and goal must differ" }
     }
+
+    /**
+     * The unique corridor from start to goal, obstacle cells included.
+     * Valid because the generator never lets path cells touch except along the path.
+     */
+    fun corridor(): List<Pos> {
+        val out = mutableListOf(start)
+        var prev: Pos? = null
+        var cur = start
+        while (cur != goal) {
+            val next = Dir.entries.map { cur + it }
+                .firstOrNull { it != prev && grid.cellOrNull(it)?.let { c -> c != Cell.BLOCKED } == true }
+                ?: break
+            prev = cur
+            cur = next
+            out += cur
+        }
+        return out
+    }
 }

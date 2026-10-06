@@ -3,8 +3,11 @@ package codetrail.desktop.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,10 +40,11 @@ import androidx.compose.ui.unit.sp
 import codetrail.core.command.Command
 import codetrail.core.command.CommandSet
 import codetrail.core.model.Dir
+import codetrail.desktop.GameMode
 import codetrail.desktop.GameState
+import codetrail.desktop.res.predict_check
 import codetrail.desktop.Phase
 import codetrail.desktop.res.Res
-import codetrail.desktop.res.forward_by
 import codetrail.desktop.res.program_title
 import codetrail.desktop.res.run
 import kotlinx.coroutines.launch
@@ -88,26 +92,27 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier) {
                             modifier = Modifier.graphicsLayer { scaleX = pop.value; scaleY = pop.value },
                             size = slotSize,
                             highlighted = state.activeCommand == i && state.phase == Phase.RUNNING,
-                            failed = state.activeCommand == i && state.phase == Phase.FAILED,
-                            onClick = { state.removeCommand(i) },
+                            failed = (state.activeCommand == i && state.phase == Phase.FAILED && state.mode == GameMode.FORWARD) ||
+                                (state.hintRemoveLast && i == state.program.lastIndex),
+                            onClick = if (state.mode == GameMode.FORWARD) ({ state.removeCommand(i) }) else null,
                         )
                     }
                 }
             }
         }
 
-        Spacer(Modifier.weight(1f))
-
-        CommandTray(state, level.commandSet)
+        if (state.mode == GameMode.FORWARD) CommandTray(state, level.commandSet)
 
         Button(
             onClick = { scope.launch { state.run() } },
-            enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty(),
+            enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() &&
+                (state.mode == GameMode.FORWARD || (state.guess != null && state.phase != Phase.WON)),
             colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Accent.copy(alpha = 0.35f)),
             shape = RoundedCornerShape(18.dp),
             modifier = Modifier.fillMaxWidth().height(64.dp),
         ) {
-            Text("▶  " + stringResource(Res.string.run), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+            val label = if (state.mode == GameMode.PREDICT) stringResource(Res.string.predict_check) else stringResource(Res.string.run)
+            Text("▶  $label", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
         }
     }
 }
@@ -128,29 +133,47 @@ private fun CommandTray(state: GameState, set: CommandSet) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (!set.relative) {
                     for (d in listOf(Dir.NORTH, Dir.SOUTH, Dir.WEST, Dir.EAST)) {
-                        CommandCard(Command.Move(d), size = 62, onClick = { add(Command.Move(d)) })
+                        CommandCard(Command.Move(d), size = 62, hinted = state.hintCommand == Command.Move(d), onClick = { add(Command.Move(d)) })
                     }
                 } else {
-                    CommandCard(Command.Forward(state.forwardCount), size = 62, onClick = { add(Command.Forward(state.forwardCount)) })
+                    val maxRun = minOf(maxOf(state.level.grid.width, state.level.grid.height) - 1, set.maxForward)
+                    val hintForward = state.hintCommand as? Command.Forward
+                    if (hintForward != null && state.forwardCount != hintForward.cells) state.forwardCount = hintForward.cells
+                    ForwardPicker(state.forwardCount, maxRun, hinted = hintForward != null, onChange = { state.forwardCount = it }) { add(Command.Forward(state.forwardCount)) }
                     if (set.degreeTurns) {
-                        for (deg in listOf(90, 180, 270)) CommandCard(Command.Turn(deg), size = 62, onClick = { add(Command.Turn(deg)) })
+                        for (deg in listOf(90, 180, 270)) CommandCard(Command.Turn(deg), size = 62, hinted = state.hintCommand == Command.Turn(deg), onClick = { add(Command.Turn(deg)) })
                     } else {
-                        CommandCard(Command.TurnLeft, size = 62, onClick = { add(Command.TurnLeft) })
-                        CommandCard(Command.TurnRight, size = 62, onClick = { add(Command.TurnRight) })
+                        CommandCard(Command.TurnLeft, size = 62, hinted = state.hintCommand == Command.TurnLeft, onClick = { add(Command.TurnLeft) })
+                        CommandCard(Command.TurnRight, size = 62, hinted = state.hintCommand == Command.TurnRight, onClick = { add(Command.TurnRight) })
                     }
-                    if (set.jump) CommandCard(Command.Jump, size = 62, onClick = { add(Command.Jump) })
-                }
-            }
-            if (set.relative) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.forward_by), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Spacer(Modifier.width(8.dp))
-                    val maxRun = maxOf(state.level.grid.width, state.level.grid.height) - 1
-                    for (n in 1..minOf(maxRun, set.maxForward)) {
-                        Chip("$n", selected = state.forwardCount == n) { state.forwardCount = n }
-                    }
+                    if (set.jump) CommandCard(Command.Jump, size = 62, hinted = state.hintCommand == Command.Jump, onClick = { add(Command.Jump) })
                 }
             }
         }
+    }
+}
+
+/** "Forward X" card with a - / + stepper underneath, so the number is set right where the card is. */
+@Composable
+private fun ForwardPicker(count: Int, max: Int, hinted: Boolean = false, onChange: (Int) -> Unit, onAdd: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        CommandCard(Command.Forward(count), size = 62, hinted = hinted, onClick = onAdd)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            StepButton("−", enabled = count > 1) { onChange(count - 1) }
+            StepButton("+", enabled = count < max) { onChange(count + 1) }
+        }
+    }
+}
+
+@Composable
+private fun StepButton(label: String, enabled: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(28.dp)
+            .background(if (enabled) Ink else Ink.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = Tray, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
     }
 }

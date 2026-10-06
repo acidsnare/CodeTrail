@@ -41,6 +41,7 @@ import codetrail.desktop.res.menu_play
 import codetrail.desktop.res.menu_profiles
 import codetrail.desktop.res.menu_quit
 import codetrail.desktop.res.menu_settings
+import codetrail.desktop.res.menu_stats
 import codetrail.desktop.res.menu_subtitle
 import codetrail.desktop.res.hero_change_hint
 import codetrail.desktop.res.stars_total
@@ -76,8 +77,9 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                     MenuButton(stringResource(Res.string.menu_play), color = if (app.canContinue) Color.White else Accent, textColor = if (app.canContinue) Ink else Color.White) { app.goPlay() }
                 }
                 MenuButton(stringResource(Res.string.menu_profiles)) { app.goProfiles() }
+                if (profile != null) MenuButton(stringResource(Res.string.menu_stats)) { app.goStats() }
                 MenuButton(stringResource(Res.string.menu_settings)) { app.goSettings() }
-                MenuButton(stringResource(Res.string.menu_quit), color = Color.White.copy(alpha = 0.15f), textColor = Color.White) { onQuit() }
+                MenuButton(stringResource(Res.string.menu_quit), color = Color.White.copy(alpha = 0.15f), textColor = Color.White) { app.requestQuit() }
             }
 
             Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {

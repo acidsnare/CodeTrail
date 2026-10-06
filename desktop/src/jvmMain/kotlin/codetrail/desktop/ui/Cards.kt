@@ -20,7 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.MoveUp
-import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.UTurnRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,19 +43,21 @@ fun CommandCard(
     size: Int = 56,
     highlighted: Boolean = false,
     failed: Boolean = false,
+    hinted: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     val bg = when {
         failed -> Color(0xFFFFCDD2)
         highlighted -> Color(0xFFFFF59D)
+        hinted -> Color(0xFFC8E6C9)
         else -> Color.White
     }
-    val border = if (highlighted || failed) Ink else Color(0xFFBDBDBD)
+    val border = if (highlighted || failed || hinted) Ink else Color(0xFFBDBDBD)
     Box(
         modifier
             .size(size.dp)
             .background(bg, CardShape)
-            .border(if (highlighted) 3.dp else 2.dp, border, CardShape)
+            .border(if (highlighted || hinted) 3.dp else 2.dp, border, CardShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -93,8 +95,14 @@ private fun CardGlyph(c: Command, size: Int) {
         Command.TurnLeft -> Icon(Icons.AutoMirrored.Filled.RotateLeft, label, Modifier.size(iconSize), tint = Ink)
         Command.TurnRight -> Icon(Icons.AutoMirrored.Filled.RotateRight, label, Modifier.size(iconSize), tint = Ink)
         is Command.Turn -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Replay, label, Modifier.size((size * 0.4f).dp), tint = Ink)
-            Text("${c.degrees}°", color = Ink, fontWeight = FontWeight.Bold, fontSize = (size * 0.26f).sp)
+            // Same arrows as the simple turn cards so the direction is obvious; 180 is a U-turn.
+            val icon = when (c.degrees) {
+                90 -> Icons.AutoMirrored.Filled.RotateRight
+                270 -> Icons.AutoMirrored.Filled.RotateLeft
+                else -> Icons.Default.UTurnRight
+            }
+            Icon(icon, label, Modifier.size((size * 0.42f).dp), tint = Ink)
+            Text("${c.degrees}°", color = Ink, fontWeight = FontWeight.Bold, fontSize = (size * 0.24f).sp)
         }
         Command.Jump -> Icon(Icons.Default.MoveUp, label, Modifier.size(iconSize), tint = Ink)
     }
@@ -109,14 +117,15 @@ private fun dirIcon(d: Dir): ImageVector = when (d) {
 
 @Composable
 fun EmptySlot(index: Int, size: Int = 56) {
+    val tone = LocalContentColor.current
     Box(
         Modifier
             .size(size.dp)
-            .background(Color.White.copy(alpha = 0.6f), CardShape)
-            .border(2.dp, Color(0xFFE0E0E0), CardShape),
+            .background(tone.copy(alpha = 0.06f), CardShape)
+            .border(2.dp, tone.copy(alpha = 0.22f), CardShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text("${index + 1}", color = Color(0xFFBDBDBD), fontSize = (size * 0.4f).sp, fontWeight = FontWeight.Bold)
+        Text("${index + 1}", color = tone.copy(alpha = 0.35f), fontSize = (size * 0.34f).sp, fontWeight = FontWeight.Bold)
     }
 }
 

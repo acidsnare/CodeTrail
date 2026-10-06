@@ -12,7 +12,7 @@ import codetrail.desktop.theme.Character
 import codetrail.desktop.theme.WorldTheme
 import java.util.UUID
 
-enum class Screen { MENU, PROFILES, PLAY, GAME, SETTINGS }
+enum class Screen { MENU, PROFILES, PLAY, GAME, SETTINGS, STATS }
 
 /** Top-level navigation, profiles and settings. Owns at most one running [GameState]. */
 class AppState(
@@ -51,6 +51,21 @@ class AppState(
     fun goProfiles() { screen = Screen.PROFILES }
     fun goPlay() { if (current != null) screen = Screen.PLAY }
     fun goSettings() { screen = Screen.SETTINGS }
+    fun goStats() { if (current != null) screen = Screen.STATS }
+
+    /** Quit confirmation dialog. */
+    var quitRequested by mutableStateOf(false)
+        private set
+
+    fun requestQuit() { quitRequested = true }
+    fun cancelQuit() { quitRequested = false }
+
+    /** Wipes stars and counters of the current profile; name, hero choice and saved level stay. */
+    fun resetProgress() {
+        val p = current ?: return
+        game = null
+        updateProfile(p.copy(progress = codetrail.core.progress.Progress(), characterId = null, autosave = null))
+    }
 
     // ---- profiles ----
 
@@ -102,12 +117,12 @@ class AppState(
         val p = current ?: return
         val slot = p.autosave
         val theme = WorldTheme.byId(slot?.worldId ?: p.worldId) ?: WorldTheme.Islands
-        startGame(theme, slot?.tier ?: p.tier, resume = slot)
+        startGame(theme, slot?.tier ?: p.tier, GameMode.of(slot?.mode), resume = slot)
     }
 
-    fun startGame(theme: WorldTheme, tier: Int, resume: codetrail.core.progress.SaveSlot? = null) {
+    fun startGame(theme: WorldTheme, tier: Int, mode: GameMode = GameMode.FORWARD, resume: codetrail.core.progress.SaveSlot? = null) {
         val p = current ?: return
-        game = GameState(p, theme, tier, resume, onProfileChanged = ::updateProfile)
+        game = GameState(p, theme, tier, resume, mode, onProfileChanged = ::updateProfile)
         paused = false
         screen = Screen.GAME
     }

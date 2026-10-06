@@ -12,7 +12,9 @@ kotlin {
     sourceSets {
         jvmMain {
             // Art lives at the repo root so the future web module can share it.
+            // Only character SVGs and the runtime window icon are bundled; installer icons stay out of the jar.
             resources.srcDir(rootProject.file("assets"))
+            resources.exclude("icon/*.icns", "icon/*.ico", "icon/*.svg", "icon/*_1024.png")
             dependencies {
                 implementation(project(":core"))
                 implementation(compose.desktop.currentOs)
@@ -68,12 +70,14 @@ tasks.register<JavaExec>("snapshot") {
         providers.gradleProperty("out").getOrElse("build/snapshot.png"),
         providers.gradleProperty("tier").getOrElse("3"),
         providers.gradleProperty("seed").getOrElse("7"),
-        if (providers.gradleProperty("solve").isPresent) "solve" else if (providers.gradleProperty("fail").isPresent) "fail" else "edit",
+        if (providers.gradleProperty("solve").isPresent) "solve" else if (providers.gradleProperty("fail").isPresent) "fail" else if (providers.gradleProperty("hint").isPresent) "hint" else "edit",
         providers.gradleProperty("world").getOrElse("islands"),
         providers.gradleProperty("lang").getOrElse("en"),
         providers.gradleProperty("stars").getOrElse("0"),
         providers.gradleProperty("screen").getOrElse("game"),
         providers.gradleProperty("frame").getOrElse("16"),
+        providers.gradleProperty("hero").getOrElse("turtle"),
+        providers.gradleProperty("mode").getOrElse("forward"),
     )
 }
 
@@ -86,8 +90,8 @@ tasks.register<JavaExec>("renderIcon") {
     mainClass.set("codetrail.desktop.IconRenderKt")
     jvmArgs("--enable-native-access=ALL-UNNAMED", "-Djava.awt.headless=true")
     args = listOf(
-        rootProject.file("assets/icon/A_face.svg").path,
-        rootProject.file("assets/icon/codetrail_1024.png").path,
-        "1024",
+        rootProject.file(providers.gradleProperty("svg").getOrElse("assets/icon/A_face.svg")).path,
+        rootProject.file(providers.gradleProperty("png").getOrElse("assets/icon/codetrail_1024.png")).path,
+        providers.gradleProperty("size").getOrElse("1024"),
     )
 }

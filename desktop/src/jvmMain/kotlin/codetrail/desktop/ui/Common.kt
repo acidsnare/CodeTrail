@@ -160,3 +160,35 @@ fun HeroPickerDialog(profile: Profile, onChoose: (Character) -> Unit, onDismiss:
         }
     }
 }
+
+/** Modal yes / no dialog used for quitting and resetting. */
+@Composable
+fun ConfirmDialog(
+    title: String,
+    body: String,
+    confirmText: String,
+    cancelText: String,
+    danger: Boolean = false,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onCancel), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier
+                .width(440.dp)
+                .background(MenuBackground, RoundedCornerShape(24.dp))
+                .clickable(enabled = false) {}
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(title, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+            Spacer(Modifier.height(10.dp))
+            Text(body, fontSize = 16.sp, color = Color.White.copy(alpha = 0.85f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Spacer(Modifier.height(24.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                MenuButton(cancelText, width = 180.dp, onClick = onCancel)
+                MenuButton(confirmText, color = if (danger) Color(0xFFE53935) else Accent, textColor = Color.White, width = 180.dp, onClick = onConfirm)
+            }
+        }
+    }
+}
