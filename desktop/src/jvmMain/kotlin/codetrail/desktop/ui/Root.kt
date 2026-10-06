@@ -25,7 +25,7 @@ import codetrail.desktop.Screen
 fun Root(app: AppState, onQuit: () -> Unit) {
     ProvideAppLanguage(app.language) {
         CompositionLocalProvider(LocalSounds provides app.sounds) {
-        MaterialTheme {
+        MaterialTheme(typography = appTypography()) {
             Box {
             AnimatedContent(
                 targetState = app.screen,

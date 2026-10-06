@@ -126,7 +126,7 @@ class AppState(
 
     fun startGame(theme: WorldTheme, tier: Int, mode: GameMode = GameMode.FORWARD, resume: codetrail.core.progress.SaveSlot? = null) {
         val p = current ?: return
-        game = GameState(p, theme, tier, resume, mode, sounds = sounds, onProfileChanged = ::updateProfile)
+        game = GameState(p, theme, tier, resume, mode, sounds = sounds, speed = { animSpeed.scale }, onProfileChanged = ::updateProfile)
         paused = false
         screen = Screen.GAME
     }
@@ -143,6 +143,10 @@ class AppState(
     // ---- settings ----
 
     fun setLanguage(l: AppLanguage) = saveSettings(settings.copy(language = l.tag))
+
+    val animSpeed: AnimSpeed get() = AnimSpeed.of(settings.speed)
+
+    fun setSpeed(speed: AnimSpeed) = saveSettings(settings.copy(speed = speed.id))
 
     fun setSound(on: Boolean) {
         sounds.enabled = on

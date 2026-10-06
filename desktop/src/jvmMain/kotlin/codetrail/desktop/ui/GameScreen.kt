@@ -10,6 +10,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,6 +52,7 @@ import codetrail.desktop.res.hint
 import codetrail.desktop.res.hint_next
 import codetrail.desktop.res.hint_ready
 import codetrail.desktop.res.hint_remove
+import codetrail.desktop.res.hint_remove_block
 import codetrail.desktop.res.level_done
 import codetrail.desktop.res.predict_correct
 import codetrail.desktop.res.predict_prompt
@@ -90,7 +93,13 @@ fun GameScreen(app: AppState, state: GameState) {
     val theme = state.theme
     val ink = if (theme.dark) Color(0xFFF2F2F2) else Ink
 
-    Box(Modifier.fillMaxSize().background(theme.background)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(theme.background)
+            // a tap on anything that is not a control drops the loop focus
+            .pointerInput(Unit) { detectTapGestures { state.closeLoop() } },
+    ) {
         CompositionLocalProvider(LocalContentColor provides ink) {
             Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 TopBar(app, state)
@@ -110,7 +119,9 @@ fun GameScreen(app: AppState, state: GameState) {
                         SpeechBubble(state)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (state.mode == GameMode.FORWARD) {
-                                SmallAction("💡  " + stringResource(Res.string.hint), enabled = state.canEdit) { state.hint() }
+                                // After a hint the button shows the best rating still possible.
+                                val cap = if (state.hintsUsed > 0) "  ·  ${"★".repeat(state.maxStars)}" else ""
+                                SmallAction("💡  " + stringResource(Res.string.hint) + cap, enabled = state.canEdit) { state.hint() }
                             }
                             Spacer(Modifier.weight(1f))
                             SmallAction("↺  " + stringResource(Res.string.reset), enabled = state.phase != Phase.RUNNING && !state.completed) { state.resetRun() }
@@ -133,21 +144,18 @@ fun GameScreen(app: AppState, state: GameState) {
 @Composable
 private fun TopBar(app: AppState, state: GameState) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(Pill)
-                .clickable(enabled = state.phase != Phase.RUNNING) { app.pause() }
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("☰", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(Res.string.game_menu), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        MenuButton(app, state)
+        val muted = LocalContentColor.current.copy(alpha = 0.6f)
+        // World as the screen title, level and difficulty as a muted subtitle.
+        Column(Modifier.padding(start = 4.dp)) {
+            Text(stringResource(state.theme.name), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+            Text(
+                stringResource(Res.string.game_level, state.tier) + "  ·  " + stringResource(DifficultyNames[state.tier - 1]),
+                fontSize = 13.sp,
+                color = muted,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
-        Crumb(stringResource(state.theme.name))
-        Crumb(stringResource(Res.string.game_level, state.tier))
-        Crumb(stringResource(DifficultyNames[state.tier - 1]))
 
         Spacer(Modifier.weight(1f))
 
@@ -164,13 +172,19 @@ private fun TopBar(app: AppState, state: GameState) {
 }
 
 @Composable
-private fun Crumb(text: String) {
-    Text(
-        text,
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Pill).padding(horizontal = 12.dp, vertical = 8.dp),
-    )
+private fun MenuButton(app: AppState, state: GameState) {
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(Pill)
+            .clickable(enabled = state.phase != Phase.RUNNING) { app.pause() }
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("☰", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(Res.string.game_menu), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
 }
 
 @Composable
@@ -218,6 +232,7 @@ private fun statusText(state: GameState): String {
     if (state.mode == GameMode.PREDICT) return predictText(state)
     state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
     if (state.hintRemoveLast) return stringResource(Res.string.hint_remove)
+    if (state.hintRemoveLastFunction) return stringResource(Res.string.hint_remove_block)
     if (state.hintReady) return stringResource(Res.string.hint_ready)
     return forwardText(state)
 }

@@ -34,6 +34,11 @@ import codetrail.desktop.res.settings_reset_confirm
 import codetrail.desktop.res.settings_data
 import codetrail.desktop.res.settings_language
 import codetrail.desktop.res.settings_sound
+import codetrail.desktop.res.settings_speed
+import codetrail.desktop.res.speed_slow
+import codetrail.desktop.res.speed_normal
+import codetrail.desktop.res.speed_fast
+import codetrail.desktop.AnimSpeed
 import codetrail.desktop.res.on
 import codetrail.desktop.res.off
 import codetrail.desktop.res.settings_title
@@ -65,6 +70,20 @@ fun SettingsScreen(app: AppState) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Chip(stringResource(Res.string.on), selected = app.settings.sound) { app.setSound(true) }
                     Chip(stringResource(Res.string.off), selected = !app.settings.sound) { app.setSound(false) }
+                }
+
+                Spacer(Modifier.height(32.dp))
+                Text(stringResource(Res.string.settings_speed), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    for (sp in AnimSpeed.entries) {
+                        val label = when (sp) {
+                            AnimSpeed.SLOW -> Res.string.speed_slow
+                            AnimSpeed.NORMAL -> Res.string.speed_normal
+                            AnimSpeed.FAST -> Res.string.speed_fast
+                        }
+                        Chip(stringResource(label), selected = app.animSpeed == sp) { app.setSpeed(sp) }
+                    }
                 }
 
                 val profile = app.current

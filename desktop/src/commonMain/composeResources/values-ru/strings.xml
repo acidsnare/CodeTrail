@@ -48,7 +48,7 @@
     <string name="cmd_forward">Вперёд %1$d</string>
     <string name="cmd_turn_left">Поворот налево</string>
     <string name="cmd_turn_right">Поворот направо</string>
-    <string name="cmd_turn_degrees">Поворот на %1$d°</string>
+    <string name="cmd_repeat">Повторить ×%1$d</string>
     <string name="cmd_jump">Прыжок через 1</string>
     <string name="stars_total">%1$d ★</string>
     <string name="unlock_hint">Откроется при %1$d ★</string>
@@ -83,7 +83,7 @@
     <string name="diff_2">Длинные пути</string>
     <string name="diff_3">Повороты</string>
     <string name="diff_4">Прыжки</string>
-    <string name="diff_5">Градусы</string>
+    <string name="diff_5">Циклы</string>
     <string name="game_level">Уровень %1$d</string>
 
     <string name="pause_title">Пауза</string>
@@ -146,4 +146,12 @@
     <string name="on">Вкл</string>
     <string name="off">Выкл</string>
     <string name="level_done">Уровень пройден! Жми «Новый уровень», чтобы продолжить.</string>
+    <string name="settings_speed">Скорость анимации</string>
+    <string name="speed_slow">Медленно</string>
+    <string name="speed_normal">Обычно</string>
+    <string name="speed_fast">Быстро</string>
+    <string name="cmd_call">Блок A</string>
+    <string name="diff_6">Блоки</string>
+    <string name="block_hint">Блок A: нажми сюда, добавь 2-4 карточки, потом вызывай его карточкой A.</string>
+    <string name="hint_remove_block">Последняя карточка в блоке A лишняя. Убери её.</string>
 </resources>

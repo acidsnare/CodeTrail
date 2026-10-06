@@ -31,7 +31,14 @@ class LevelGenerator {
 
     private fun tryGenerate(d: Difficulty, seed: Long, rng: Random): Level? {
         val length = rng.nextInt(d.pathLength.first, d.pathLength.last + 1)
-        val path = PathCarver(d.width, d.height, rng, d.straightBias, jumpSafe = d.commandSet.jump).carve(length) ?: return null
+        val carver = PathCarver(d.width, d.height, rng, d.straightBias, jumpSafe = d.commandSet.jump)
+        // Loop tiers mostly start from a repeated block so a loop is the natural answer.
+        val pattern = if (d.commandSet.loops && rng.nextDouble() < 0.7) {
+            PatternCarver(d.width, d.height, rng, carver, allowObstacles = d.obstacles.last > 0, separated = d.commandSet.functions).carve(length)
+        } else {
+            null
+        }
+        val path = pattern?.path ?: carver.carve(length) ?: return null
 
         val grid = Grid(d.width, d.height, Cell.BLOCKED)
         path.forEach { grid[it] = Cell.WALKABLE }
@@ -40,10 +47,19 @@ class LevelGenerator {
         val goal = path.last()
         val startDir = initialHeading(path, d.commandSet, rng)
 
-        placeObstacles(grid, path, rng.nextInt(d.obstacles.first, d.obstacles.last + 1))
+        var obstacles = rng.nextInt(d.obstacles.first, d.obstacles.last + 1)
+        if (pattern != null) {
+            pattern.obstacles.forEach { grid[it] = Cell.OBSTACLE }
+            obstacles -= pattern.obstacles.size
+        }
+        // Random obstacles stay out of the repeated block, otherwise they would break the pattern.
+        placeObstacles(grid, path, obstacles, rng, exclude = pattern?.protected ?: emptySet())
 
         val solution = Solver.solve(grid, start, startDir, goal, d.commandSet) ?: return null
         if (solution.length > d.maxOptimal) return null
+        if (d.minLoopSavings > 0 && solution.flat.size - solution.length < d.minLoopSavings) return null
+        // A two-card block teaches little: insist on a block worth naming.
+        if (d.requireFunction && solution.function.size < 3) return null
 
         return Level(
             grid = grid,
@@ -73,16 +89,17 @@ class LevelGenerator {
     /**
      * Drops obstacles in the middle of straight runs of at least 3 cells, so the hero can
      * stand before it, jump, and land on the path. Never on start or goal.
+     * Candidates are shuffled so obstacles do not always cluster near the start.
      */
-    private fun placeObstacles(grid: Grid, path: List<Pos>, count: Int) {
-        if (count == 0) return
-        val candidates = (1 until path.size - 1).filter { i ->
+    private fun placeObstacles(grid: Grid, path: List<Pos>, count: Int, rng: Random, exclude: Set<Int> = emptySet()) {
+        if (count <= 0) return
+        val candidates = (1 until path.size - 1).filter { it !in exclude }.filter { i ->
             val a = path[i - 1]
             val b = path[i]
             val c = path[i + 1]
             val straight = (a.x == b.x && b.x == c.x) || (a.y == b.y && b.y == c.y)
             straight
-        }.toMutableList()
+        }.shuffled(rng).toMutableList()
 
         var placed = 0
         while (placed < count && candidates.isNotEmpty()) {

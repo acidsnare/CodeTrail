@@ -19,15 +19,44 @@ sealed interface Command {
 
     data object TurnRight : Command
 
-    /** Rotate clockwise by [degrees], a multiple of 90. */
-    data class Turn(val degrees: Int) : Command {
+    /** Hop over the next cell in the current heading and land two cells ahead. */
+    data object Jump : Command
+
+    /**
+     * Run [body] [times] times in a row. One level of nesting only: the body never holds
+     * another Repeat. Costs 1 slot plus one per body card, which is what makes loops pay off.
+     */
+    data class Repeat(val times: Int, val body: List<Command>) : Command {
         init {
-            require(degrees % 90 == 0 && degrees in 90..270) { "Turn must be 90, 180 or 270" }
+            require(times >= 2) { "Repeat needs at least 2 iterations" }
+            require(body.none { it is Repeat }) { "Repeat cannot be nested" }
         }
     }
 
-    /** Hop over the next cell in the current heading and land two cells ahead. */
-    data object Jump : Command
+    /**
+     * Run the level's one reusable block ("block A"), defined once next to the program.
+     * The block holds plain cards only (no loops, no calls). A call costs 1 slot, the
+     * block's cards cost a slot each, once.
+     */
+    data object Call : Command
 }
 
 typealias Program = List<Command>
+
+/** How many slots a program occupies: a loop costs one slot for itself plus its body. */
+fun Program.slotCount(): Int = sumOf { if (it is Command.Repeat) 1 + it.body.size else 1 }
+
+/** The program with every loop unrolled and every call replaced by the block's cards. */
+fun Program.flatten(function: Program = emptyList()): Program = flatMap { c ->
+    when (c) {
+        is Command.Repeat -> List(c.times) { c.body.flatten(function) }.flatten()
+        Command.Call -> function
+        else -> listOf(c)
+    }
+}
+
+/** A program together with its reusable block. Slots count both, the block once. */
+data class Compiled(val program: Program, val function: Program = emptyList()) {
+    val slots: Int get() = program.slotCount() + function.size
+    fun flatten(): Program = program.flatten(function)
+}

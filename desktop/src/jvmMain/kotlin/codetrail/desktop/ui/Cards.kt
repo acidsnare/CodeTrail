@@ -20,7 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.MoveUp
-import androidx.compose.material.icons.filled.UTurnRight
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,8 +79,9 @@ fun commandLabel(c: Command): String = when (c) {
     is Command.Forward -> stringResource(Res.string.cmd_forward, c.cells)
     Command.TurnLeft -> stringResource(Res.string.cmd_turn_left)
     Command.TurnRight -> stringResource(Res.string.cmd_turn_right)
-    is Command.Turn -> stringResource(Res.string.cmd_turn_degrees, c.degrees)
     Command.Jump -> stringResource(Res.string.cmd_jump)
+    is Command.Repeat -> stringResource(Res.string.cmd_repeat, c.times)
+    Command.Call -> stringResource(Res.string.cmd_call)
 }
 
 @Composable
@@ -95,17 +96,34 @@ private fun CardGlyph(c: Command, size: Int) {
         }
         Command.TurnLeft -> Icon(Icons.AutoMirrored.Filled.RotateLeft, label, Modifier.size(iconSize), tint = Ink)
         Command.TurnRight -> Icon(Icons.AutoMirrored.Filled.RotateRight, label, Modifier.size(iconSize), tint = Ink)
-        is Command.Turn -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // Same arrows as the simple turn cards so the direction is obvious; 180 is a U-turn.
-            val icon = when (c.degrees) {
-                90 -> Icons.AutoMirrored.Filled.RotateRight
-                270 -> Icons.AutoMirrored.Filled.RotateLeft
-                else -> Icons.Default.UTurnRight
-            }
-            Icon(icon, label, Modifier.size((size * 0.42f).dp), tint = Ink)
-            Text("${c.degrees}°", color = Ink, fontWeight = FontWeight.Bold, fontSize = (size * 0.24f).sp)
-        }
         Command.Jump -> Icon(Icons.Default.MoveUp, label, Modifier.size(iconSize), tint = Ink)
+        is Command.Repeat -> RepeatGlyph(c.times, null, size)
+        Command.Call -> CallGlyph(size)
+    }
+}
+
+/** Block A call: a bold letter in a small rounded frame, the same look as the block panel's badge. */
+@Composable
+fun CallGlyph(size: Int, tint: Color = Ink) {
+    Box(
+        Modifier.size((size * 0.56f).dp).border(2.dp, tint, RoundedCornerShape((size * 0.14f).dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text("A", color = tint, fontWeight = FontWeight.Black, fontSize = (size * 0.36f).sp)
+    }
+}
+
+/** Loop badge: a repeat arrow with "×N", or "k/N" while the loop is running. */
+@Composable
+fun RepeatGlyph(times: Int, iteration: Int?, size: Int, tint: Color = Ink) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(Icons.Default.Repeat, null, Modifier.size((size * 0.42f).dp), tint = tint)
+        Text(
+            if (iteration == null) "×$times" else "$iteration/$times",
+            color = tint,
+            fontWeight = FontWeight.Bold,
+            fontSize = (size * 0.26f).sp,
+        )
     }
 }
 

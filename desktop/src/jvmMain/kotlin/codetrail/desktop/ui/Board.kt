@@ -120,8 +120,8 @@ fun Board(
             drawHero(hero, sprite, character, cell)
         }
         if (cellPx > 0f) {
-            val goalCenter = Offset((level.goal.x + 0.5f) * cellPx, (level.goal.y + 0.5f) * cellPx)
-            CelebrationOverlay(trigger = if (won) effectKey else null, center = goalCenter, cell = cellPx, stars = stars)
+            val boardCenter = Offset(boardSize.width / 2f, boardSize.height / 2f)
+            CelebrationOverlay(trigger = if (won) effectKey else null, center = boardCenter, cell = cellPx, stars = stars)
             val fell = failure as? Failure.Fell
             SplashOverlay(
                 trigger = if (fell != null) effectKey else null,

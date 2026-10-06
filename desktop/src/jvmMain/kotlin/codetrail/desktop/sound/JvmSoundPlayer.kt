@@ -1,56 +1,74 @@
 package codetrail.desktop.sound
 
-import java.io.ByteArrayInputStream
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
 
 /**
- * Plays synthesized effects through javax.sound.sampled.
+ * Plays synthesized effects through one always-open output line with a tiny mixer.
  *
- * All clips are synthesized and opened once, on a background thread at startup, and every
- * play() call is handed to a single audio thread, so the UI thread never touches the audio
- * device. Any audio failure (headless CI, no output device) silently disables sound.
+ * Java Sound's Clip.start() carries 100-200 ms of latency on macOS and serialises badly when
+ * effects come fast, so the hero's footsteps lagged behind the animation. Here a daemon thread
+ * keeps a SourceDataLine fed in ~12 ms chunks, summing whatever voices are active. play() only
+ * drops a voice into a list, so the delay between the call and the speaker is about one chunk.
+ * Any audio failure (headless CI, no output device) silently disables sound.
  */
 class JvmSoundPlayer(override var enabled: Boolean = true) : SoundPlayer {
 
     private val format = AudioFormat(Synth.RATE.toFloat(), 16, 1, true, false)
-    private val clips = ConcurrentHashMap<Sfx, Clip>()
+    private val samples = ConcurrentHashMap<Sfx, ShortArray>()
+    private val voices = CopyOnWriteArrayList<Voice>()
     @Volatile private var broken = false
-    private val audio = Executors.newSingleThreadExecutor { r -> Thread(r, "codetrail-audio").apply { isDaemon = true } }
+
+    private class Voice(val pcm: ShortArray) {
+        var pos = 0
+    }
 
     init {
-        audio.execute {
-            try {
-                for (sfx in Sfx.entries) clips[sfx] = load(sfx)
-            } catch (e: Exception) {
-                broken = true
-            }
-        }
+        Thread({ pump() }, "codetrail-audio").apply { isDaemon = true; priority = Thread.MAX_PRIORITY }.start()
     }
 
     override fun play(sfx: Sfx) {
         if (!enabled || broken) return
-        audio.execute {
-            try {
-                val clip = clips[sfx] ?: load(sfx).also { clips[sfx] = it }
-                if (clip.isRunning) clip.stop()
-                clip.framePosition = 0
-                clip.start()
-            } catch (e: Exception) {
-                broken = true
+        val pcm = samples[sfx] ?: return // still synthesizing at startup: skip rather than stall
+        voices += Voice(pcm)
+    }
+
+    /** Audio thread: synthesize all effects, then mix forever. */
+    private fun pump() {
+        try {
+            for (sfx in Sfx.entries) samples[sfx] = toShorts(Synth.toPcm16(Synth.build(sfx)))
+            val line = AudioSystem.getSourceDataLine(format)
+            line.open(format, CHUNK * 2 * 4) // four chunks of headroom in the device buffer
+            line.start()
+            val mix = IntArray(CHUNK)
+            val out = ByteArray(CHUNK * 2)
+            while (true) {
+                mix.fill(0)
+                for (v in voices) {
+                    val n = minOf(CHUNK, v.pcm.size - v.pos)
+                    for (i in 0 until n) mix[i] += v.pcm[v.pos + i].toInt()
+                    v.pos += n
+                    if (v.pos >= v.pcm.size) voices.remove(v)
+                }
+                for (i in 0 until CHUNK) {
+                    val s = mix[i].coerceIn(-32768, 32767)
+                    out[2 * i] = (s and 0xFF).toByte()
+                    out[2 * i + 1] = (s shr 8).toByte()
+                }
+                line.write(out, 0, out.size) // blocks until there is room: this paces the loop
             }
+        } catch (e: Exception) {
+            broken = true
         }
     }
 
-    private fun load(sfx: Sfx): Clip {
-        val pcm = Synth.toPcm16(Synth.build(sfx))
-        val stream = AudioInputStream(ByteArrayInputStream(pcm), format, (pcm.size / 2).toLong())
-        val clip = AudioSystem.getClip()
-        clip.open(stream)
-        return clip
+    private fun toShorts(bytes: ByteArray): ShortArray =
+        ShortArray(bytes.size / 2) { i -> ((bytes[2 * i].toInt() and 0xFF) or (bytes[2 * i + 1].toInt() shl 8)).toShort() }
+
+    companion object {
+        /** Frames per mix chunk: 256 frames at 22050 Hz is about 12 ms of latency. */
+        private const val CHUNK = 256
     }
 }

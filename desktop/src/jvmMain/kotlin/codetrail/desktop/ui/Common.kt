@@ -87,8 +87,9 @@ fun Avatar(
         Modifier
             .size(size)
             .clip(CircleShape)
-            .background(if (selected) Color.White else Color.White.copy(alpha = if (unlocked) 0.4f else 0.25f))
-            .border(if (selected) 3.dp else 1.dp, if (selected) Ink else Color(0x552B1B14), CircleShape)
+            // Translucent disc only: the hero art has a transparent background and should show the chrome behind it.
+            .background(Color.White.copy(alpha = if (!unlocked) 0.25f else if (selected) 0.45f else 0.35f))
+            .border(if (selected) 3.dp else 1.dp, if (selected) Color.White else Color(0x55FFFFFF), CircleShape)
             .then(if (onClick != null && unlocked) Modifier.clickable { sounds.play(Sfx.CLICK); onClick() } else Modifier)
             .padding(size * 0.08f),
         contentAlignment = Alignment.Center,

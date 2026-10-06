@@ -21,6 +21,16 @@ internal class PathCarver(
     private val jumpSafe: Boolean,
 ) {
 
+    /** Grows an existing thin [prefix] to [targetLength] cells, or null when it cannot. */
+    fun extendPath(prefix: List<Pos>, targetLength: Int, heading: Dir?): List<Pos>? {
+        val path = ArrayList(prefix)
+        val used = HashSet(prefix)
+        return if (extend(path, used, targetLength, heading, depth = 0)) path else null
+    }
+
+    /** Whether [next] may be appended to [path] keeping it thin (and jump safe). */
+    fun canAppend(path: List<Pos>, next: Pos): Boolean = isFree(next, path.last(), path, path.toHashSet())
+
     fun carve(targetLength: Int, maxAttempts: Int = 200): List<Pos>? {
         repeat(maxAttempts) {
             val start = Pos(rng.nextInt(width), rng.nextInt(height))

@@ -46,7 +46,7 @@
     <string name="cmd_forward">Frem %1$d felter</string>
     <string name="cmd_turn_left">Roter mod venstre</string>
     <string name="cmd_turn_right">Roter mod højre</string>
-    <string name="cmd_turn_degrees">Roter %1$d°</string>
+    <string name="cmd_repeat">Gentag ×%1$d</string>
     <string name="cmd_jump">Hop over 1 felt</string>
     <string name="stars_total">%1$d ★</string>
     <string name="unlock_hint">Låses op ved %1$d ★</string>
@@ -81,7 +81,7 @@
     <string name="diff_2">Længere veje</string>
     <string name="diff_3">Drej og gå</string>
     <string name="diff_4">Hop over</string>
-    <string name="diff_5">Grader</string>
+    <string name="diff_5">Løkker</string>
     <string name="game_level">Niveau %1$d</string>
 
     <string name="pause_title">Pause</string>
@@ -144,4 +144,12 @@
     <string name="on">Til</string>
     <string name="off">Fra</string>
     <string name="level_done">Banen er klaret! Tryk Ny bane for den næste.</string>
+    <string name="settings_speed">Animationshastighed</string>
+    <string name="speed_slow">Langsom</string>
+    <string name="speed_normal">Normal</string>
+    <string name="speed_fast">Hurtig</string>
+    <string name="cmd_call">Blok A</string>
+    <string name="diff_6">Blokke</string>
+    <string name="block_hint">Blok A: tryk her, tilføj 2-4 kort, og kald den så med A-kortet.</string>
+    <string name="hint_remove_block">Det sidste kort i blok A er forkert. Fjern det.</string>
 </resources>

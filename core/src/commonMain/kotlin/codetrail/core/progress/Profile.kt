@@ -27,6 +27,8 @@ data class SaveSlot(
     val program: Program,
     /** "forward" (build the program) or "predict" (guess where a given program ends). */
     val mode: String = "forward",
+    /** Block A on the block tier. */
+    val function: Program = emptyList(),
 )
 
 /** App-wide settings that are not tied to a profile. */
@@ -34,6 +36,8 @@ data class Settings(
     val language: String? = null,
     val lastProfileId: String? = null,
     val sound: Boolean = true,
+    /** Animation speed: "slow", "normal" or "fast". */
+    val speed: String = "normal",
 )
 
 interface ProfileRepository {

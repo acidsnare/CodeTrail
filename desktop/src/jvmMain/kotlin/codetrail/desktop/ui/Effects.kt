@@ -55,7 +55,7 @@ private val confettiColors = listOf(
     Color(0xFFFFD54F), Color(0xFFEF5350), Color(0xFF42A5F5), Color(0xFF66BB6A), Color(0xFFAB47BC), Color(0xFFFF7043), Color(0xFFFFFFFF),
 )
 
-/** Confetti burst from [center] plus three stars popping up above it. */
+/** Confetti burst from [center] (the board middle) plus three stars popping up around it. */
 @Composable
 fun CelebrationOverlay(trigger: Any?, center: Offset?, cell: Float, stars: Int, modifier: Modifier = Modifier) {
     val durationMs = 2600
@@ -95,19 +95,16 @@ fun CelebrationOverlay(trigger: Any?, center: Offset?, cell: Float, stars: Int, 
                 }
             }
         }
-        // stars pop in one after another above the goal
+        // stars pop in one after another in a row at the centre, the middle one raised
         for (i in 0 until 3) {
             val appear = 0.15f + i * 0.12f
             val local = ((progress - appear) / 0.12f).coerceIn(0f, 1f)
             if (local <= 0f) continue
             val pop = overshoot(local)
             val lit = i < stars
-            // Keep the trio inside the board: below the goal when it sits in the top row.
-            val above = center.y > cell * 1.6f
-            val baseX = center.x.coerceIn(cell * 1.0f, size.width - cell * 1.0f)
-            val x = baseX + (i - 1) * cell * 0.75f
-            val y = if (above) center.y - cell * 1.1f - (i % 2) * cell * 0.15f else center.y + cell * 1.1f + (i % 2) * cell * 0.15f
-            drawStar(Offset(x, y), cell * 0.36f * pop, if (lit) Color(0xFFFFD54F) else Color(0x66FFFFFF), fade)
+            val x = center.x + (i - 1) * cell * 1.1f
+            val y = center.y - (if (i == 1) cell * 0.25f else 0f)
+            drawStar(Offset(x, y), cell * 0.5f * pop, if (lit) Color(0xFFFFD54F) else Color(0x66FFFFFF), fade)
         }
     }
 }
