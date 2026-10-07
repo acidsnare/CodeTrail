@@ -5,6 +5,8 @@ import codetrail.core.progress.Profile
 import codetrail.core.progress.Progress
 import codetrail.core.progress.SaveSlot
 import codetrail.core.progress.Settings
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Profiles and settings as flat key -> value maps. Every platform stores these maps its own
@@ -95,4 +97,31 @@ object ProfileCodec {
         .filter { it.isNotBlank() && !it.startsWith("#") }
         .mapNotNull { line -> line.indexOf('=').takeIf { it > 0 }?.let { line.substring(0, it).trim() to line.substring(it + 1).replace("\\n", "\n") } }
         .toMap()
+
+    // ---- transfer between devices ----
+
+    /**
+     * One-line code a player can copy from one device and paste on another: the profile text
+     * in Base64 behind a short prefix, so it survives chats and clipboards unharmed.
+     */
+    @OptIn(ExperimentalEncodingApi::class)
+    fun toTransferCode(profile: Profile): String = TRANSFER_PREFIX + Base64.UrlSafe.encode(toText(encode(profile)).encodeToByteArray())
+
+    /**
+     * Accepts a transfer code or the plain key=value text of a save file. Returns null when the
+     * input is neither, or does not describe a profile.
+     */
+    @OptIn(ExperimentalEncodingApi::class)
+    fun fromTransfer(input: String): Map<String, String>? {
+        val trimmed = input.trim()
+        if (trimmed.isEmpty()) return null
+        val text = if (trimmed.startsWith(TRANSFER_PREFIX)) {
+            val payload = trimmed.removePrefix(TRANSFER_PREFIX).filterNot { it.isWhitespace() }
+            runCatching { Base64.UrlSafe.decode(payload).decodeToString() }.getOrNull() ?: return null
+        } else trimmed
+        val map = fromText(text)
+        return map.takeIf { "name" in it }
+    }
+
+    private const val TRANSFER_PREFIX = "CT1."
 }

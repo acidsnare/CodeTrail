@@ -29,7 +29,8 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Five heroes** unlocked with stars: turtle, penguin, fox, bear and the red panda.
   Harder tiers pay more stars (rating x tier).
 - **Profiles** are save slots: progress, hero choice and the level in progress are stored per
-  profile and the game resumes exactly where it was left.
+  profile and the game resumes exactly where it was left. A profile moves between devices as a
+  copy-paste code (`CT1.` + Base64 of its save file) or, on desktop and web, as a file.
 - **Editing that works on a tablet and with a mouse**: tap a tray card to add it after the
   selected one, tap a program card to select it (delete badge, -/+ for numbers), drag cards from
   the tray or within the program to place them exactly, Undo for every change.
@@ -162,7 +163,9 @@ Packages are unsigned: macOS Gatekeeper and Windows SmartScreen will warn on fir
 ```
 
 Plain text; delete a file to remove a profile. The browser build keeps the same key=value
-text in `localStorage` under `codetrail.settings` and `codetrail.profile.<id>`.
+text in `localStorage` under `codetrail.settings` and `codetrail.profile.<id>`. The Profiles
+screen exports a profile as a `CT1.` code (Base64 of that text) or a `.properties` file and
+imports either; importing a name that already exists asks whether to replace it or add a copy.
 
 ## Adding content
 

@@ -77,8 +77,7 @@ class AppState(
     fun createProfile(name: String) {
         val trimmed = name.trim().ifEmpty { return }
         val now = Platform.currentTimeMillis()
-        @OptIn(ExperimentalUuidApi::class)
-        val p = Profile(id = Uuid.random().toString().take(8), name = trimmed, createdAt = now, lastPlayedAt = now)
+        val p = Profile(id = newProfileId(), name = trimmed, createdAt = now, lastPlayedAt = now)
         profiles.save(p)
         allProfiles.add(0, p)
         selectProfile(p)
@@ -100,6 +99,51 @@ class AppState(
             saveSettings(settings.copy(lastProfileId = current?.id))
         }
     }
+
+    // ---- transfer ----
+
+    /** Outcome of decoding a pasted profile code. */
+    sealed interface Import {
+        object Invalid : Import
+        /** A profile with the same name is already here; the user picks replace or copy. */
+        data class Conflict(val existing: Profile, val incoming: Profile) : Import
+        data class Done(val profile: Profile) : Import
+    }
+
+    fun exportProfile(p: Profile): String = ProfileCodec.toTransferCode(p)
+
+    /** Save-file text for the desktop file dialog; the same format the app writes on its own. */
+    fun exportProfileText(p: Profile): String = ProfileCodec.toText(ProfileCodec.encode(p))
+
+    fun importProfile(input: String): Import {
+        val map = ProfileCodec.fromTransfer(input) ?: return Import.Invalid
+        val decoded = ProfileCodec.decodeProfile(newProfileId(), map)
+        val name = decoded.name.trim().take(16)
+        if (name.isEmpty()) return Import.Invalid
+        val incoming = decoded.copy(name = name)
+        val existing = allProfiles.firstOrNull { it.name.equals(incoming.name, ignoreCase = true) }
+        if (existing != null) return Import.Conflict(existing, incoming)
+        return Import.Done(adopt(incoming))
+    }
+
+    /** Resolves [Import.Conflict]: overwrite the existing profile, keeping its id so settings still point at it. */
+    fun importReplace(c: Import.Conflict): Profile = adopt(c.incoming.copy(id = c.existing.id))
+
+    /** Resolves [Import.Conflict]: keep both, the newcomer gets a numbered name. */
+    fun importAsCopy(c: Import.Conflict): Profile {
+        val taken = allProfiles.map { it.name.lowercase() }.toSet()
+        val name = (2..99).asSequence().map { "${c.incoming.name.take(13)} $it" }.first { it.lowercase() !in taken }
+        return adopt(c.incoming.copy(name = name))
+    }
+
+    private fun adopt(p: Profile): Profile {
+        updateProfile(p)
+        selectProfile(p)
+        return p
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    private fun newProfileId(): String = Uuid.random().toString().take(8)
 
     fun chooseCharacter(c: Character) {
         val p = current ?: return

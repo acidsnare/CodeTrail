@@ -70,6 +70,21 @@
     <string name="profiles_current">Spiller</string>
     <string name="profiles_stats">%1$d ★  ·  %2$s</string>
     <string name="profiles_empty">Ingen profiler endnu. Opret en for at begynde.</string>
+    <string name="profiles_export">Eksportér</string>
+    <string name="profiles_import">Importér</string>
+    <string name="export_title">Profilkode</string>
+    <string name="export_body">Kopiér koden og indsæt den i CodeTrail på en anden enhed, eller gem den som en fil.</string>
+    <string name="copy">Kopiér</string>
+    <string name="copied">Kopieret!</string>
+    <string name="save_file">Gem fil</string>
+    <string name="open_file">Åbn fil</string>
+    <string name="import_title">Importér profil</string>
+    <string name="import_hint">Indsæt profilkoden her</string>
+    <string name="import_invalid">Det ligner ikke en profilkode.</string>
+    <string name="import_exists">Der findes allerede en profil med navnet %1$s. Erstat den eller tilføj en kopi?</string>
+    <string name="import_replace">Erstat</string>
+    <string name="import_copy">Tilføj kopi</string>
+    <string name="close">Luk</string>
     <string name="hero_title">Din helt</string>
 
     <string name="play_title">Vælg dit eventyr</string>

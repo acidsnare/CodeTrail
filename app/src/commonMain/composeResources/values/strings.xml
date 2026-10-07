@@ -70,6 +70,21 @@
     <string name="profiles_current">Playing</string>
     <string name="profiles_stats">%1$d ★  ·  %2$s</string>
     <string name="profiles_empty">No profiles yet. Create one to start playing.</string>
+    <string name="profiles_export">Export</string>
+    <string name="profiles_import">Import</string>
+    <string name="export_title">Profile code</string>
+    <string name="export_body">Copy the code and paste it into CodeTrail on another device, or save it as a file.</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied!</string>
+    <string name="save_file">Save file</string>
+    <string name="open_file">Open file</string>
+    <string name="import_title">Import profile</string>
+    <string name="import_hint">Paste the profile code here</string>
+    <string name="import_invalid">This does not look like a profile code.</string>
+    <string name="import_exists">A profile named %1$s already exists. Replace it or add a copy?</string>
+    <string name="import_replace">Replace</string>
+    <string name="import_copy">Add copy</string>
+    <string name="close">Close</string>
     <string name="hero_title">Your hero</string>
 
     <string name="play_title">Choose your adventure</string>

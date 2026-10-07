@@ -72,6 +72,21 @@
     <string name="profiles_current">Играет</string>
     <string name="profiles_stats">%1$d ★  ·  %2$s</string>
     <string name="profiles_empty">Профилей пока нет. Создай первый, чтобы начать.</string>
+    <string name="profiles_export">Экспорт</string>
+    <string name="profiles_import">Импорт</string>
+    <string name="export_title">Код профиля</string>
+    <string name="export_body">Скопируй код и вставь его в CodeTrail на другом устройстве или сохрани в файл.</string>
+    <string name="copy">Копировать</string>
+    <string name="copied">Скопировано!</string>
+    <string name="save_file">В файл</string>
+    <string name="open_file">Из файла</string>
+    <string name="import_title">Импорт профиля</string>
+    <string name="import_hint">Вставь сюда код профиля</string>
+    <string name="import_invalid">Это не похоже на код профиля.</string>
+    <string name="import_exists">Профиль с именем %1$s уже есть. Заменить его или добавить копию?</string>
+    <string name="import_replace">Заменить</string>
+    <string name="import_copy">Добавить копию</string>
+    <string name="close">Закрыть</string>
     <string name="hero_title">Твой герой</string>
 
     <string name="play_title">Выбери приключение</string>
