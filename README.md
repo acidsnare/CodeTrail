@@ -33,8 +33,9 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
 - **English, Russian, Ukrainian and Danish** UI.
-- **Runs on the desktop and in the browser** from the same code: native installers for
-  macOS, Windows and Linux, and a Kotlin/Wasm build served from GitHub Pages.
+- **Runs on the desktop, in the browser and on Android** from the same code: native
+  installers for macOS, Windows and Linux, a Kotlin/Wasm build served from GitHub Pages, and
+  an APK for tablets.
 
 ## Project layout
 
@@ -47,7 +48,10 @@ app/       Compose Multiplatform app.
            jvmMain: desktop window, file storage, audio output, installer configuration,
            snapshot and render tools.
            wasmJsMain: browser entry point, localStorage saves, Web Audio, index.html.
-assets/    App icon sources (SVG, PNG, .icns, .ico).
+           androidMain: file storage, AudioTrack output, locale.
+android/   Thin Android application module: activity, manifest, launcher icons, APK packaging.
+assets/    App icon sources and the hero SVG masters (converted to XML vectors by tools/svg2vd.py).
+tools/     Build-time helpers.
 ```
 
 The core never touches strings, colours or files. The app's `commonMain` has no platform
@@ -100,6 +104,26 @@ The release workflow publishes this build to GitHub Pages on every `v*` tag (one
 repository Settings -> Pages -> Source: GitHub Actions) and attaches it to the release as
 `codetrail-web.zip`.
 
+## Android
+
+```bash
+./gradlew :android:assembleDebug      # android/build/outputs/apk/debug/android-debug.apk
+```
+
+Needs the Android SDK (`local.properties` with `sdk.dir=...`, or `ANDROID_HOME`). Min SDK 26,
+landscape only for now: the 1280x800 scene is scaled to the screen, so it is comfortable on
+tablets and small on phones. A portrait layout for phones is the next step.
+
+Hero art: Compose resources cannot render SVG on Android, so the shipped drawables are XML
+vectors generated from the SVG masters:
+
+```bash
+tools/svg2vd.py assets/characters/*.svg -o app/src/commonMain/composeResources/drawable
+```
+
+The release workflow attaches `codetrail-android.apk` (debug-signed, for sideloading) to
+each release.
+
 ## Installers
 
 Native packages are built with `jpackage`; the JVM is bundled so players do not need Java.
@@ -130,7 +154,8 @@ text in `localStorage` under `codetrail.settings` and `codetrail.profile.<id>`.
 - **A world**: add a `WorldTheme` (palette) and a `WorldArt` object (goal, obstacle, props)
   in `app/src/commonMain/kotlin/codetrail/app/theme/`, plus name / goal / fall-message strings in the four
   `strings.xml` files.
-- **A hero**: drop an SVG into `app/src/commonMain/composeResources/drawable/`, add a `Character` entry with its unlock
+- **A hero**: draw an SVG in `assets/characters/`, run `tools/svg2vd.py` to produce the XML
+  drawable, add a `Character` entry with its unlock
   threshold and body colours, and a name string.
 - **A language**: add `values-xx/strings.xml` and an entry in `AppLanguage`.
 

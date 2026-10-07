@@ -5,10 +5,18 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
+    id("com.android.kotlin.multiplatform.library")
 }
 
 kotlin {
     jvm()
+
+    // Android: this module is a library; the :android module wraps it into the APK.
+    androidLibrary {
+        namespace = "codetrail.app"
+        compileSdk = 37
+        minSdk = 26
+    }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {

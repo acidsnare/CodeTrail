@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark chrome colour behind the Compose content, no action bar, edge to edge. -->
+    <style name="Theme.CodeTrail" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#163B4B</item>
+        <item name="android:statusBarColor">#163B4B</item>
+        <item name="android:navigationBarColor">#163B4B</item>
+    </style>
+</resources>
