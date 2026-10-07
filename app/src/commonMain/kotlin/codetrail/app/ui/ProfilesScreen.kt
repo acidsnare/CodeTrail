@@ -246,33 +246,35 @@ private fun DialogFrame(title: String, onClose: () -> Unit, content: @Composable
 @Composable
 private fun NewProfileRow(app: AppState) {
     var name by remember { mutableStateOf("") }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedTextField(
-            value = name,
-            onValueChange = { if (it.length <= 16) name = it },
-            singleLine = true,
-            placeholder = { Text(stringResource(Res.string.profiles_name_hint)) },
-            label = { Text(stringResource(Res.string.profiles_new)) },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White.copy(alpha = 0.8f),
-                focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-                unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-                cursorColor = Color.White,
-            ),
-            modifier = Modifier.weight(1f),
-        )
-        Button(
-            onClick = { app.createProfile(name); name = "" },
-            enabled = name.isNotBlank(),
-            colors = ButtonDefaults.buttonColors(containerColor = Accent),
-            shape = RoundedCornerShape(14.dp),
-        ) { Text(stringResource(Res.string.profiles_create), fontSize = 18.sp, fontWeight = FontWeight.Bold) }
-    }
+    // The Create button lives inside the field so the outline spans the same width as the cards below.
+    OutlinedTextField(
+        value = name,
+        onValueChange = { if (it.length <= 16) name = it },
+        singleLine = true,
+        placeholder = { Text(stringResource(Res.string.profiles_name_hint)) },
+        label = { Text(stringResource(Res.string.profiles_new)) },
+        trailingIcon = {
+            Button(
+                onClick = { app.createProfile(name); name = "" },
+                enabled = name.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Color.White.copy(alpha = 0.15f), disabledContentColor = Color.White.copy(alpha = 0.4f)),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.padding(end = 8.dp),
+            ) { Text(stringResource(Res.string.profiles_create), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedBorderColor = Color.White,
+            unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
+            focusedLabelColor = Color.White,
+            unfocusedLabelColor = Color.White.copy(alpha = 0.8f),
+            focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+            unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+            cursorColor = Color.White,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
