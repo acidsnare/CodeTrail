@@ -52,18 +52,39 @@ render(1024, 500, to: "feature_1024x500.png") { _ in
     background(1024, 500, cell: 62.5)
     text("CodeTrail", size: 104, weight: "ExtraBold", color: .white, at: NSPoint(x: 64, y: 250))
     text("Program your hero's path", size: 34, weight: "SemiBold", color: NSColor(white: 1, alpha: 0.85), at: NSPoint(x: 68, y: 200))
-    // command cards as a hint of the gameplay
-    let cards = ["→ 2", "↻", "→ 1", "×3"]
+    // command cards as a hint of the gameplay: forward 2, turn right, forward 1, repeat x3
+    let ink = NSColor(red: 0x2B/255.0, green: 0x1B/255.0, blue: 0x14/255.0, alpha: 1)
+    let cards = ["→ 2", "", "→ 1", "×3"]
     var cx: CGFloat = 68
     for c in cards {
         let r = NSRect(x: cx, y: 96, width: 78, height: 78)
         NSColor.white.setFill(); NSBezierPath(roundedRect: r, xRadius: 16, yRadius: 16).fill()
         NSColor(red: 0xBD/255.0, green: 0xBD/255.0, blue: 0xBD/255.0, alpha: 1).setStroke()
         let b = NSBezierPath(roundedRect: r.insetBy(dx: 1, dy: 1), xRadius: 15, yRadius: 15); b.lineWidth = 2; b.stroke()
-        let font = NSFont(name: "Nunito-Bold", size: 30)!
-        let s = NSAttributedString(string: c, attributes: [.font: font, .foregroundColor: NSColor(red: 0x2B/255.0, green: 0x1B/255.0, blue: 0x14/255.0, alpha: 1)])
-        let sz = s.size()
-        s.draw(at: NSPoint(x: r.midX - sz.width / 2, y: r.midY - sz.height / 2))
+        if c.isEmpty {
+            // clockwise arc with an arrowhead, like the game's turn-right card
+            let center = NSPoint(x: r.midX, y: r.midY), radius: CGFloat = 17
+            let arc = NSBezierPath()
+            arc.appendArc(withCenter: center, radius: radius, startAngle: 200, endAngle: -40, clockwise: true)
+            arc.lineWidth = 5; arc.lineCapStyle = .round
+            ink.setStroke(); arc.stroke()
+            // arrowhead at the arc end (angle -40 deg), pointing along the clockwise tangent
+            let end = CGFloat(-40 * Double.pi / 180)
+            let tip = NSPoint(x: center.x + radius * cos(end), y: center.y + radius * sin(end))
+            let tangent = CGFloat(end - .pi / 2) // clockwise direction of travel
+            let head = NSBezierPath()
+            let len: CGFloat = 13
+            head.move(to: NSPoint(x: tip.x + len * cos(tangent), y: tip.y + len * sin(tangent)))
+            head.line(to: NSPoint(x: tip.x + len * 0.75 * cos(tangent + 2.2), y: tip.y + len * 0.75 * sin(tangent + 2.2)))
+            head.line(to: NSPoint(x: tip.x + len * 0.75 * cos(tangent - 2.2), y: tip.y + len * 0.75 * sin(tangent - 2.2)))
+            head.close()
+            ink.setFill(); head.fill()
+        } else {
+            let font = NSFont(name: "Nunito-Bold", size: 30)!
+            let s = NSAttributedString(string: c, attributes: [.font: font, .foregroundColor: ink])
+            let sz = s.size()
+            s.draw(at: NSPoint(x: r.midX - sz.width / 2, y: r.midY - sz.height / 2))
+        }
         cx += 92
     }
     image("fox").draw(in: NSRect(x: 560, y: 60, width: 230, height: 230), from: .zero, operation: .sourceOver, fraction: 1)
