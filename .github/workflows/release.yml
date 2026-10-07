@@ -115,8 +115,9 @@ jobs:
         with:
           path: app/build/dist/wasmJs/productionExecutable
 
-  # Android APK. Signed with the debug key: fine for sideloading and GitHub Releases,
-  # a Play Store upload would need a release keystore instead.
+  # Android: APK for sideloading plus an App Bundle for Google Play.
+  # With the ANDROID_KEYSTORE_* secrets set both are signed with the release key; without them
+  # the debug key is used, which is fine for GitHub Releases but not for Play.
   android:
     runs-on: ubuntu-latest
     steps:
@@ -127,14 +128,27 @@ jobs:
           java-version: 21
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build APK
-        run: ./gradlew :android:assembleRelease --no-daemon --console=plain
+      - name: Decode release keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+      - name: Build APK and App Bundle
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :android:assembleRelease :android:bundleRelease --no-daemon --console=plain
       - name: Rename
-        run: cp android/build/outputs/apk/release/android-release.apk codetrail-android.apk
+        run: |
+          cp android/build/outputs/apk/release/android-release.apk codetrail-android.apk
+          cp android/build/outputs/bundle/release/android-release.aab codetrail-android.aab
       - uses: actions/upload-artifact@v4
         with:
           name: codetrail-android
-          path: codetrail-android.apk
+          path: |
+            codetrail-android.apk
+            codetrail-android.aab
 
   # Publishes the web build to https://<owner>.github.io/<repo>/ on every tag.
   # One-time setup: Settings -> Pages -> Source: "GitHub Actions".

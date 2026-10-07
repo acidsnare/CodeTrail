@@ -121,8 +121,20 @@ vectors generated from the SVG masters:
 tools/svg2vd.py assets/characters/*.svg -o app/src/commonMain/composeResources/drawable
 ```
 
-The release workflow attaches `codetrail-android.apk` (debug-signed, for sideloading) to
-each release.
+The release workflow attaches `codetrail-android.apk` to each release and also builds the
+App Bundle (`codetrail-android.aab`) for Google Play. Both are signed with the release key when
+the repository has these secrets, and with the debug key otherwise:
+
+```
+ANDROID_KEYSTORE_BASE64    the .jks file, base64-encoded
+ANDROID_KEYSTORE_PASSWORD
+ANDROID_KEY_ALIAS
+ANDROID_KEY_PASSWORD
+```
+
+Locally, export the same values plus `ANDROID_KEYSTORE_FILE=/path/to/release.jks` before running
+`:android:bundleRelease`. The privacy policy required by Play is served with the web build at
+`/privacy.html`.
 
 ## Installers
 

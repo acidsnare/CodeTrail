@@ -15,11 +15,25 @@ android {
         versionCode = 120
         versionName = "1.2.0"
     }
+    // Release signing comes from the environment (CI secrets or a local shell). Without it the
+    // release build falls back to the debug key, which is fine for sideloading but not for Play.
+    val keystorePath = System.getenv("ANDROID_KEYSTORE_FILE")
+    val hasReleaseKey = !keystorePath.isNullOrBlank() && file(keystorePath).exists()
+    signingConfigs {
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = file(keystorePath!!)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             // No shrinking: the app is small and Compose resources are looked up by name.
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
         }
     }
 }
