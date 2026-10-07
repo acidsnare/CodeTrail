@@ -4,7 +4,8 @@ Generated, do not edit by hand:
 
 - `icon_512.png` - app icon, 512x512, opaque (Play applies its own mask).
 - `feature_1024x500.png` - feature graphic.
-- `screenshots/*.png` - 1280x800 captures from `:app:snapshot`, usable for phone, 7" and 10" tablets.
+- `screenshots/*.png` - 1280x800 captures from `:app:snapshot`, usable for phone, 7" and 10" tablets (English).
+- `screenshots-ru/`, `screenshots-uk/`, `screenshots-da/` - the same eight frames in the other store languages.
 
 Regenerate:
 
