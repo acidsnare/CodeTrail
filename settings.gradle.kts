@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "codetrail"
 
-include(":core", ":desktop")
+include(":core", ":app")
