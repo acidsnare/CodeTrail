@@ -34,6 +34,8 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Editing that works on a tablet and with a mouse**: tap a tray card to add it after the
   selected one, tap a program card to select it (delete badge, -/+ for numbers), drag cards from
   the tray or within the program to place them exactly, Undo for every change.
+- **Card legend**: a "?" button in the game header lists the cards of the current tier with one
+  line each on what they do.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
 - **English, Russian, Ukrainian and Danish** UI.

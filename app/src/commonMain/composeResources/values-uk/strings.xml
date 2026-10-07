@@ -170,4 +170,14 @@
     <string name="block_hint">Блок A: натисни сюди, додай 2-4 картки, потім викликай його карткою A.</string>
     <string name="hint_remove_block">Остання картка в блоці A зайва. Прибери її.</string>
     <string name="undo">Скасувати</string>
+    <string name="legend">Картки</string>
+    <string name="legend_title">Що роблять картки</string>
+    <string name="legend_move">Герой іде на одну клітинку в цей бік.</string>
+    <string name="legend_forward">Герой іде на стільки клітинок уперед, куди дивиться. Натисни на число, щоб змінити.</string>
+    <string name="legend_turn_left">Герой повертається ліворуч на місці. Він не рухається.</string>
+    <string name="legend_turn_right">Герой повертається праворуч на місці. Він не рухається.</string>
+    <string name="legend_jump">Герой перестрибує наступну клітинку, навіть воду чи камінь, і приземляється за нею.</string>
+    <string name="legend_repeat">Картки всередині виконуються стільки разів. Натисни на рамку, потім додавай картки всередину.</string>
+    <string name="legend_call">Виконує блок A. Збери блок один раз унизу, а потім викликай скільки хочеш.</string>
+    <string name="legend_goal">Герой має зупинитися точно на цілі. Що менше карток, то більше зірок.</string>
 </resources>

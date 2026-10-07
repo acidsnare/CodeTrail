@@ -168,4 +168,14 @@
     <string name="block_hint">Block A: tap here, add 2-4 cards, then call it with the A card.</string>
     <string name="hint_remove_block">The last card in block A is wrong. Remove it.</string>
     <string name="undo">Undo</string>
+    <string name="legend">Cards</string>
+    <string name="legend_title">What the cards do</string>
+    <string name="legend_move">Moves the hero one cell in that direction.</string>
+    <string name="legend_forward">Walks that many cells the way the hero is facing. Tap the number to change it.</string>
+    <string name="legend_turn_left">Turns the hero to its left on the spot. It does not move.</string>
+    <string name="legend_turn_right">Turns the hero to its right on the spot. It does not move.</string>
+    <string name="legend_jump">Hops over the next cell, water or rock included, and lands behind it.</string>
+    <string name="legend_repeat">Runs the cards inside it that many times. Tap the frame, then add cards into it.</string>
+    <string name="legend_call">Runs block A. Build the block once at the bottom, then call it as often as you like.</string>
+    <string name="legend_goal">The hero must stop exactly on the goal. Fewer cards means more stars.</string>
 </resources>

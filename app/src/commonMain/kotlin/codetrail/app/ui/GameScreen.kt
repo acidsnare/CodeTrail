@@ -47,6 +47,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +81,24 @@ import codetrail.app.res.fail_not_at_goal
 import codetrail.app.res.fail_too_many
 import codetrail.app.res.game_level
 import codetrail.app.res.game_menu
+import codetrail.app.res.legend
+import codetrail.app.res.legend_title
+import codetrail.app.res.legend_move
+import codetrail.app.res.legend_forward
+import codetrail.app.res.legend_turn_left
+import codetrail.app.res.legend_turn_right
+import codetrail.app.res.legend_jump
+import codetrail.app.res.legend_repeat
+import codetrail.app.res.legend_call
+import codetrail.app.res.legend_goal
+import codetrail.app.res.close
+import codetrail.core.command.Command
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material3.Icon
+import codetrail.core.model.Dir
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import codetrail.app.res.new_level
 import codetrail.app.res.pause_exit
 import codetrail.app.res.pause_new_level
@@ -125,9 +145,10 @@ fun GameScreen(app: AppState, state: GameState) {
                 }
             },
     ) {
+        var legend by remember { mutableStateOf(false) }
         CompositionLocalProvider(LocalContentColor provides ink) {
             Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                TopBar(app, state)
+                TopBar(app, state, onLegend = { legend = true })
 
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     Column(Modifier.weight(1.45f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -167,15 +188,17 @@ fun GameScreen(app: AppState, state: GameState) {
             }
         }
         if (app.paused) PauseOverlay(app, state)
+        if (legend) LegendOverlay(state) { legend = false }
         val unlocked = state.justUnlocked
         if (state.unlockSplash && unlocked != null) UnlockOverlay(unlocked) { state.dismissUnlock() }
     }
 }
 
 @Composable
-private fun TopBar(app: AppState, state: GameState) {
+private fun TopBar(app: AppState, state: GameState, onLegend: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         MenuButton(app, state)
+        PillButton("?", stringResource(Res.string.legend), onClick = onLegend)
         val muted = LocalContentColor.current.copy(alpha = 0.6f)
         // World as the screen title, level and difficulty as a muted subtitle.
         Column(Modifier.padding(start = 4.dp)) {
@@ -203,18 +226,73 @@ private fun TopBar(app: AppState, state: GameState) {
 }
 
 @Composable
-private fun MenuButton(app: AppState, state: GameState) {
+private fun MenuButton(app: AppState, state: GameState) =
+    PillButton("☰", stringResource(Res.string.game_menu), enabled = state.phase != Phase.RUNNING) { app.pause() }
+
+@Composable
+private fun PillButton(glyph: String, text: String, enabled: Boolean = true, onClick: () -> Unit) {
     Row(
         Modifier
             .clip(RoundedCornerShape(14.dp))
             .background(Pill)
-            .clickable(enabled = state.phase != Phase.RUNNING) { app.pause() }
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("☰", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(glyph, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(8.dp))
-        Text(stringResource(Res.string.game_menu), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+/** Reference sheet: every card of the level's command set with one line on what it does. */
+@Composable
+private fun LegendOverlay(state: GameState, onDismiss: () -> Unit) {
+    val set = state.level.commandSet
+    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier
+                .width(620.dp)
+                .background(MenuBackground, RoundedCornerShape(24.dp))
+                .clickable(enabled = false) {}
+                .padding(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(stringResource(Res.string.legend_title), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+            Spacer(Modifier.height(16.dp))
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (!set.relative) {
+                    LegendRow(stringResource(Res.string.legend_move)) {
+                        for (d in listOf(Dir.NORTH, Dir.SOUTH, Dir.WEST, Dir.EAST)) CommandCard(Command.Move(d), size = 48)
+                    }
+                } else {
+                    LegendRow(stringResource(Res.string.legend_forward)) { CommandCard(Command.Forward(3), size = 48) }
+                    LegendRow(stringResource(Res.string.legend_turn_left)) { CommandCard(Command.TurnLeft, size = 48) }
+                    LegendRow(stringResource(Res.string.legend_turn_right)) { CommandCard(Command.TurnRight, size = 48) }
+                }
+                if (set.jump) LegendRow(stringResource(Res.string.legend_jump)) { CommandCard(Command.Jump, size = 48) }
+                if (set.loops) LegendRow(stringResource(Res.string.legend_repeat)) { CommandCard(Command.Repeat(3, emptyList()), size = 48) }
+                if (set.functions) LegendRow(stringResource(Res.string.legend_call)) { CommandCard(Command.Call, size = 48) }
+                LegendRow(stringResource(Res.string.legend_goal)) {
+                    Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) { Icon(Icons.Default.Flag, null, Modifier.size(30.dp), tint = Star) }
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+            MenuButton(stringResource(Res.string.close), width = 200.dp, onClick = onDismiss)
+        }
+    }
+}
+
+@Composable
+private fun LegendRow(text: String, cards: @Composable () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp)).padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        cards()
+        Spacer(Modifier.width(6.dp))
+        Text(text, color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f))
     }
 }
 

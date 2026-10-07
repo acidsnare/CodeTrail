@@ -168,4 +168,14 @@
     <string name="block_hint">Blok A: tryk her, tilføj 2-4 kort, og kald den så med A-kortet.</string>
     <string name="hint_remove_block">Det sidste kort i blok A er forkert. Fjern det.</string>
     <string name="undo">Fortryd</string>
+    <string name="legend">Kort</string>
+    <string name="legend_title">Hvad kortene gør</string>
+    <string name="legend_move">Helten går ét felt i den retning.</string>
+    <string name="legend_forward">Helten går så mange felter frem i den retning, den kigger. Tryk på tallet for at ændre det.</string>
+    <string name="legend_turn_left">Helten drejer til venstre på stedet. Den flytter sig ikke.</string>
+    <string name="legend_turn_right">Helten drejer til højre på stedet. Den flytter sig ikke.</string>
+    <string name="legend_jump">Helten hopper over det næste felt, også vand eller sten, og lander bag det.</string>
+    <string name="legend_repeat">Kortene indeni køres så mange gange. Tryk på rammen, og læg derefter kort ind i den.</string>
+    <string name="legend_call">Kører blok A. Byg blokken én gang nederst, og kald den så lige så tit du vil.</string>
+    <string name="legend_goal">Helten skal stoppe præcis på målet. Færre kort giver flere stjerner.</string>
 </resources>

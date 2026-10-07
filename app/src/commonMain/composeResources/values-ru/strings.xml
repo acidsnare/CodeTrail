@@ -170,4 +170,14 @@
     <string name="block_hint">Блок A: нажми сюда, добавь 2-4 карточки, потом вызывай его карточкой A.</string>
     <string name="hint_remove_block">Последняя карточка в блоке A лишняя. Убери её.</string>
     <string name="undo">Отменить</string>
+    <string name="legend">Карточки</string>
+    <string name="legend_title">Что делают карточки</string>
+    <string name="legend_move">Герой идёт на одну клетку в эту сторону.</string>
+    <string name="legend_forward">Герой идёт на столько клеток вперёд, куда смотрит. Нажми на число, чтобы изменить.</string>
+    <string name="legend_turn_left">Герой поворачивается налево на месте. Он не двигается.</string>
+    <string name="legend_turn_right">Герой поворачивается направо на месте. Он не двигается.</string>
+    <string name="legend_jump">Герой перепрыгивает следующую клетку, даже воду или камень, и приземляется за ней.</string>
+    <string name="legend_repeat">Карточки внутри выполняются столько раз. Нажми на рамку, потом добавляй карточки внутрь.</string>
+    <string name="legend_call">Выполняет блок A. Собери блок один раз внизу, а потом вызывай сколько хочешь.</string>
+    <string name="legend_goal">Герой должен остановиться точно на цели. Чем меньше карточек, тем больше звёзд.</string>
 </resources>
