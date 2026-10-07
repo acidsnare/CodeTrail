@@ -111,8 +111,8 @@ repository Settings -> Pages -> Source: GitHub Actions) and attaches it to the r
 ```
 
 Needs the Android SDK (`local.properties` with `sdk.dir=...`, or `ANDROID_HOME`). Min SDK 26,
-landscape only for now: the 1280x800 scene is scaled to the screen, so it is comfortable on
-tablets and small on phones. A portrait layout for phones is the next step.
+landscape only: the 1280x800 scene is scaled to fill the screen, so the game is comfortable on
+tablets and works, if small, on phones.
 
 Hero art: Compose resources cannot render SVG on Android, so the shipped drawables are XML
 vectors generated from the SVG masters:
