@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -15,21 +14,24 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
-/** The layout is designed for this logical size. */
+/** The layout is designed for at least this logical size. */
 val SceneWidth = 1280.dp
 val SceneHeight = 800.dp
 
 /**
- * Letterboxes the fixed 1280x800 scene into whatever size the host gives us by scaling the
- * density, so the desktop layout works unchanged in a browser window or on a tablet.
+ * Scales density so the host's viewport is at least 1280x800 logical pixels, then lets the
+ * scene fill the whole viewport. A wider screen gets a wider scene (panels spread out), a
+ * taller one a taller scene; nothing is letterboxed and nothing falls off the edge.
  */
 @Composable
 fun FitScene(content: @Composable () -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxSize().background(Color(0xFF163B4B)), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(Color(0xFF163B4B))) {
         val base = LocalDensity.current
         val scale = min(maxWidth / SceneWidth, maxHeight / SceneHeight)
+        val sceneWidth = maxWidth / scale
+        val sceneHeight = maxHeight / scale
         CompositionLocalProvider(LocalDensity provides Density(base.density * scale, base.fontScale)) {
-            Box(Modifier.size(SceneWidth, SceneHeight)) { content() }
+            Box(Modifier.size(sceneWidth, sceneHeight)) { content() }
         }
     }
 }
