@@ -33,6 +33,8 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
 - **English, Russian, Ukrainian and Danish** UI.
+- **Runs on the desktop and in the browser** from the same code: native installers for
+  macOS, Windows and Linux, and a Kotlin/Wasm build served from GitHub Pages.
 
 ## Project layout
 
@@ -44,12 +46,13 @@ app/       Compose Multiplatform app.
            synthesis, strings, font and hero SVGs (Compose Resources).
            jvmMain: desktop window, file storage, audio output, installer configuration,
            snapshot and render tools.
+           wasmJsMain: browser entry point, localStorage saves, Web Audio, index.html.
 assets/    App icon sources (SVG, PNG, .icns, .ico).
 ```
 
-The core never touches strings, colours or files. The app's `commonMain` has no JVM code
-either: a web or Android target only needs the handful of platform pieces in `jvmMain`
-(storage, audio device, locale, entry point) reimplemented.
+The core never touches strings, colours or files. The app's `commonMain` has no platform
+code either: each target reimplements only storage, the audio device, locale handling and
+the entry point (about 200 lines for the browser).
 
 ## Running
 
@@ -76,6 +79,27 @@ Options: `screen` (menu, profiles, play, settings, stats, quit, pause, game), `t
 `world`, `hero`, `mode` (forward, predict), `lang`, `stars`, `frame` (animation time in ms),
 `solve` / `fail` / `hint`.
 
+## Web build
+
+```bash
+./gradlew :app:wasmJsBrowserDistribution
+```
+
+Produces a static site in `app/build/dist/wasmJs/productionExecutable/` (about 14 MB:
+Skia and the app as Wasm, plus resources). Serve it from any static host; locally for example
+
+```bash
+python3 -m http.server 8765 --directory app/build/dist/wasmJs/productionExecutable
+```
+
+It needs a browser with WasmGC: Chrome / Edge 119+, Firefox 120+, Safari 18+. Saves live in
+the browser's `localStorage`. The fixed 1280x800 layout is scaled to fit the window. Switching
+the UI language reloads the page, because Compose resources read the browser language once.
+
+The release workflow publishes this build to GitHub Pages on every `v*` tag (one-time setup:
+repository Settings -> Pages -> Source: GitHub Actions) and attaches it to the release as
+`codetrail-web.zip`.
+
 ## Installers
 
 Native packages are built with `jpackage`; the JVM is bundled so players do not need Java.
@@ -87,18 +111,19 @@ Native packages are built with `jpackage`; the JVM is bundled so players do not 
 ```
 
 `jpackage` cannot cross-compile. The GitHub Actions workflow in `.github/workflows/release.yml`
-builds all three on a tag `v*` and attaches them to a release.
+builds all three on a tag `v*`, plus the web build, and attaches them to a release.
 
 Packages are unsigned: macOS Gatekeeper and Windows SmartScreen will warn on first launch.
 
 ## Save files
 
 ```
-~/.codetrail/settings.properties          language, last profile
+~/.codetrail/settings.properties          language, sound, speed, last profile
 ~/.codetrail/profiles/<id>.properties     one file per profile
 ```
 
-Plain text; delete a file to remove a profile.
+Plain text; delete a file to remove a profile. The browser build keeps the same key=value
+text in `localStorage` under `codetrail.settings` and `codetrail.profile.<id>`.
 
 ## Adding content
 

@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     kotlin("multiplatform")
@@ -8,6 +9,16 @@ plugins {
 
 kotlin {
     jvm()
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "codetrail.js"
+            }
+        }
+        binaries.executable()
+    }
 
     sourceSets {
         // Everything a player sees lives here: screens, board art, game and app state, sound synthesis.

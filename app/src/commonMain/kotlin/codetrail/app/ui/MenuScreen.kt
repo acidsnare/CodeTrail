@@ -79,7 +79,9 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                 MenuButton(stringResource(Res.string.menu_profiles)) { app.goProfiles() }
                 if (profile != null) MenuButton(stringResource(Res.string.menu_stats)) { app.goStats() }
                 MenuButton(stringResource(Res.string.menu_settings)) { app.goSettings() }
-                MenuButton(stringResource(Res.string.menu_quit), color = Color.White.copy(alpha = 0.15f), textColor = Color.White) { app.requestQuit() }
+                if (codetrail.app.Platform.canQuit) {
+                    MenuButton(stringResource(Res.string.menu_quit), color = Color.White.copy(alpha = 0.15f), textColor = Color.White) { app.requestQuit() }
+                }
             }
 
             Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
