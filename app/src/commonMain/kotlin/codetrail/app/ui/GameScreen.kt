@@ -81,7 +81,6 @@ import codetrail.app.res.fail_not_at_goal
 import codetrail.app.res.fail_too_many
 import codetrail.app.res.game_level
 import codetrail.app.res.game_menu
-import codetrail.app.res.legend
 import codetrail.app.res.legend_title
 import codetrail.app.res.legend_move
 import codetrail.app.res.legend_forward
@@ -148,7 +147,7 @@ fun GameScreen(app: AppState, state: GameState) {
         var legend by remember { mutableStateOf(false) }
         CompositionLocalProvider(LocalContentColor provides ink) {
             Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                TopBar(app, state, onLegend = { legend = true })
+                TopBar(app, state)
 
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     Column(Modifier.weight(1.45f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -183,7 +182,7 @@ fun GameScreen(app: AppState, state: GameState) {
                             SmallAction("✦  " + stringResource(Res.string.new_level), enabled = state.phase != Phase.RUNNING, filled = true) { state.newLevel() }
                         }
                     }
-                    ProgramPanel(state, Modifier.weight(1f))
+                    ProgramPanel(state, Modifier.weight(1f), onLegend = { legend = true })
                 }
             }
         }
@@ -195,10 +194,9 @@ fun GameScreen(app: AppState, state: GameState) {
 }
 
 @Composable
-private fun TopBar(app: AppState, state: GameState, onLegend: () -> Unit) {
+private fun TopBar(app: AppState, state: GameState) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         MenuButton(app, state)
-        PillButton("?", stringResource(Res.string.legend), onClick = onLegend)
         val muted = LocalContentColor.current.copy(alpha = 0.6f)
         // World as the screen title, level and difficulty as a muted subtitle.
         Column(Modifier.padding(start = 4.dp)) {

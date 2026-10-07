@@ -168,7 +168,6 @@
     <string name="block_hint">Blok A: tryk her, tilføj 2-4 kort, og kald den så med A-kortet.</string>
     <string name="hint_remove_block">Det sidste kort i blok A er forkert. Fjern det.</string>
     <string name="undo">Fortryd</string>
-    <string name="legend">Kort</string>
     <string name="legend_title">Hvad kortene gør</string>
     <string name="legend_move">Helten går ét felt i den retning.</string>
     <string name="legend_forward">Helten går så mange felter frem i den retning, den kigger. Tryk på tallet for at ændre det.</string>

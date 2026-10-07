@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import codetrail.app.sound.Sfx
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +86,7 @@ private val Danger = Color(0xFFE53935)
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ProgramPanel(state: GameState, modifier: Modifier = Modifier) {
+fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -> Unit = {}) {
     val level = state.level
     val scope = rememberCoroutineScope()
     val slotSize = 58
@@ -165,7 +166,7 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier) {
                 FunctionPanel(state, dnd, slotSize, editable)
             }
 
-            if (editable && !state.completed) CommandTray(state, dnd, level.commandSet)
+            if (editable && !state.completed) CommandTray(state, dnd, level.commandSet, onLegend)
 
             Button(
                 onClick = { scope.launch { state.run() } },
@@ -442,10 +443,11 @@ private fun FunctionPanel(state: GameState, dnd: DragController, size: Int, edit
 
 /** Yellow tray with the available command cards. Tap adds, drag places. */
 @Composable
-private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet) {
+private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet, onLegend: () -> Unit) {
     val add: (Command) -> Unit = { state.addCommand(it) }
     val canAdd = { state.canEdit && state.slotsUsed < state.level.maxSlots }
     CompositionLocalProvider(LocalContentColor provides Ink) {
+      Box {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -486,6 +488,21 @@ private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet) 
                 }
             }
         }
+        // "What do these cards do?" sits on the tray's corner, right next to the cards it explains.
+        val sounds = LocalSounds.current
+        Box(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 12.dp, y = (-12).dp)
+                .size(34.dp)
+                .background(Ink, CircleShape)
+                .border(2.dp, Tray, CircleShape)
+                .clickable { sounds.play(Sfx.CLICK); onLegend() },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("?", color = Tray, fontSize = 19.sp, fontWeight = FontWeight.Black)
+        }
+      }
     }
 }
 

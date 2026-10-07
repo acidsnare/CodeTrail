@@ -168,7 +168,6 @@
     <string name="block_hint">Block A: tap here, add 2-4 cards, then call it with the A card.</string>
     <string name="hint_remove_block">The last card in block A is wrong. Remove it.</string>
     <string name="undo">Undo</string>
-    <string name="legend">Cards</string>
     <string name="legend_title">What the cards do</string>
     <string name="legend_move">Moves the hero one cell in that direction.</string>
     <string name="legend_forward">Walks that many cells the way the hero is facing. Tap the number to change it.</string>

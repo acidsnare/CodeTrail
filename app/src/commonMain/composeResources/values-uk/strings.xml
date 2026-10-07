@@ -170,7 +170,6 @@
     <string name="block_hint">Блок A: натисни сюди, додай 2-4 картки, потім викликай його карткою A.</string>
     <string name="hint_remove_block">Остання картка в блоці A зайва. Прибери її.</string>
     <string name="undo">Скасувати</string>
-    <string name="legend">Картки</string>
     <string name="legend_title">Що роблять картки</string>
     <string name="legend_move">Герой іде на одну клітинку в цей бік.</string>
     <string name="legend_forward">Герой іде на стільки клітинок уперед, куди дивиться. Натисни на число, щоб змінити.</string>
