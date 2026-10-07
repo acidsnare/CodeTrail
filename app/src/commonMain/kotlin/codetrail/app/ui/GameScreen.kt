@@ -15,6 +15,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -106,8 +107,13 @@ fun GameScreen(app: AppState, state: GameState) {
 
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     Column(Modifier.weight(1.45f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // The board takes what is left above the bubble and buttons, never more:
+                        // on a wide screen it is height-bound, on a narrow one width-bound.
+                        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                            val ratio = boardAspect(state.level)
+                            val width = minOf(maxWidth, maxHeight * ratio)
                         Board(
-                            state.level, state.hero, theme, state.character, Modifier.fillMaxWidth(),
+                            state.level, state.hero, theme, state.character, Modifier.width(width),
                             effectKey = state.runId.takeIf { it > 0 },
                             won = state.phase == Phase.WON,
                             stars = state.stars,
@@ -116,6 +122,7 @@ fun GameScreen(app: AppState, state: GameState) {
                             answer = if (state.mode == GameMode.PREDICT && state.phase == Phase.WON) state.predict?.answer else null,
                             onCellClick = if (state.mode == GameMode.PREDICT) ({ state.selectGuess(it) }) else null,
                         )
+                        }
                         SpeechBubble(state)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (state.mode == GameMode.FORWARD) {

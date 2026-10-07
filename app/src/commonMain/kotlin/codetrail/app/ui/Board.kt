@@ -146,6 +146,9 @@ fun Board(
 /** Water band around the grid, in cells. */
 private const val BoardMargin = 0.5f
 
+/** Width / height of the board for [level], margin included, so screens can size it to fit. */
+fun boardAspect(level: Level): Float = (level.grid.width + BoardMargin * 2) / (level.grid.height + BoardMargin * 2)
+
 /** Stable per-cell randomness so decorations do not flicker between frames. */
 private fun cellRandom(level: Level, p: Pos) = Random(level.seed xor (p.x * 73856093L) xor (p.y * 19349663L))
 
