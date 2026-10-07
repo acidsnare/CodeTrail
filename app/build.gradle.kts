@@ -65,7 +65,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CodeTrail"
-            packageVersion = "1.3.0"
+            packageVersion = "1.4.0"
             description = "Program your hero's path"
             vendor = "CodeTrail"
             macOS {
