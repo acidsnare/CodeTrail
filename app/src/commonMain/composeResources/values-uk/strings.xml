@@ -154,4 +154,5 @@
     <string name="diff_6">Блоки</string>
     <string name="block_hint">Блок A: натисни сюди, додай 2-4 картки, потім викликай його карткою A.</string>
     <string name="hint_remove_block">Остання картка в блоці A зайва. Прибери її.</string>
+    <string name="undo">Скасувати</string>
 </resources>

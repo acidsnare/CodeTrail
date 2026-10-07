@@ -152,4 +152,5 @@
     <string name="diff_6">Blokke</string>
     <string name="block_hint">Blok A: tryk her, tilføj 2-4 kort, og kald den så med A-kortet.</string>
     <string name="hint_remove_block">Det sidste kort i blok A er forkert. Fjern det.</string>
+    <string name="undo">Fortryd</string>
 </resources>

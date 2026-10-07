@@ -30,6 +30,9 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
   Harder tiers pay more stars (rating x tier).
 - **Profiles** are save slots: progress, hero choice and the level in progress are stored per
   profile and the game resumes exactly where it was left.
+- **Editing that works on a tablet and with a mouse**: tap a tray card to add it after the
+  selected one, tap a program card to select it (delete badge, -/+ for numbers), drag cards from
+  the tray or within the program to place them exactly, Undo for every change.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
 - **English, Russian, Ukrainian and Danish** UI.

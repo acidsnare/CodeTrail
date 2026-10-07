@@ -64,6 +64,25 @@ fun main(args: Array<String>) {
                 state.selectGuess(state.predict!!.answer)
                 if (solve) runBlocking { state.run() }
                 println("predict program=${state.program.size} answer=${state.predict!!.answer} phase=${state.phase}")
+            } else if (args.getOrNull(3) == "dnd") {
+                // Exercise the editing model: selection-based insert, drops into a loop and into block A, moves, undo.
+                fun show(label: String) = println("$label: ${codetrail.core.engine.Ascii.program(state.program)}   A=[${codetrail.core.engine.Ascii.program(state.function)}]  sel=${state.selection}")
+                state.addCommand(Command.Repeat(3, emptyList())); show("add loop")
+                state.addCommand(Command.Forward(2)); show("tap F2 -> into selected loop")
+                state.addCommand(Command.TurnRight); show("tap R -> after selected card")
+                println("insert L at InLoop(0,0): " + state.insertCommand(Command.TurnLeft, codetrail.app.Slot.InLoop(0, 0))); show("")
+                println("insert J at Top(0): " + state.insertCommand(Command.Jump, codetrail.app.Slot.Top(0))); show("")
+                println("move InLoop(1,2) -> Top(0): " + state.moveCommand(codetrail.app.Slot.InLoop(1, 2), codetrail.app.Slot.Top(0))); show("")
+                println("move loop Top(2) -> Top(0): " + state.moveCommand(codetrail.app.Slot.Top(2), codetrail.app.Slot.Top(0))); show("")
+                println("move loop into itself: " + state.moveCommand(codetrail.app.Slot.Top(0), codetrail.app.Slot.InLoop(0, 0))); show("")
+                if (state.level.commandSet.functions) {
+                    println("insert F1 into function: " + state.insertCommand(Command.Forward(1), codetrail.app.Slot.InFunction(0))); show("")
+                    println("insert Call into function (must fail): " + state.insertCommand(Command.Call, codetrail.app.Slot.InFunction(0)))
+                    println("move Top(1) -> InFunction(1): " + state.moveCommand(codetrail.app.Slot.Top(1), codetrail.app.Slot.InFunction(1))); show("")
+                }
+                state.select(codetrail.app.Selection.Card(codetrail.app.Slot.Top(1))); state.adjustSelected(+1); show("adjust selected +1")
+                state.undo(); show("undo")
+                state.undo(); show("undo")
             } else if (args.getOrNull(3) == "hint") {
                 state.addCommand(Command.TurnRight)
                 state.hint()

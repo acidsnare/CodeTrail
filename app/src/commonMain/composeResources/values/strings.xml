@@ -152,4 +152,5 @@
     <string name="diff_6">Blocks</string>
     <string name="block_hint">Block A: tap here, add 2-4 cards, then call it with the A card.</string>
     <string name="hint_remove_block">The last card in block A is wrong. Remove it.</string>
+    <string name="undo">Undo</string>
 </resources>

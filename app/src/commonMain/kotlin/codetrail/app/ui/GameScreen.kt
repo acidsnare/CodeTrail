@@ -10,6 +10,16 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.clickable
@@ -93,13 +103,27 @@ private val Pill = Color(0x26FFFFFF)
 fun GameScreen(app: AppState, state: GameState) {
     val theme = state.theme
     val ink = if (theme.dark) Color(0xFFF2F2F2) else Ink
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
 
     Box(
         Modifier
             .fillMaxSize()
             .background(theme.background)
             // a tap on anything that is not a control drops the loop focus
-            .pointerInput(Unit) { detectTapGestures { state.closeLoop() } },
+            .pointerInput(Unit) { detectTapGestures { state.clearSelection() } }
+            // Desktop keys: Delete removes the selected card, Ctrl/Cmd+Z undoes.
+            .focusRequester(focus)
+            .focusable()
+            .onPreviewKeyEvent { e ->
+                if (e.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                when {
+                    e.key == Key.Delete || e.key == Key.Backspace -> { state.removeSelected(); true }
+                    e.key == Key.Z && (e.isCtrlPressed || e.isMetaPressed) -> { state.undo(); true }
+                    e.key == Key.Escape -> { state.clearSelection(); true }
+                    else -> false
+                }
+            },
     ) {
         CompositionLocalProvider(LocalContentColor provides ink) {
             Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {

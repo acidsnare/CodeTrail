@@ -101,7 +101,7 @@ tasks.register<JavaExec>("snapshot") {
         providers.gradleProperty("out").getOrElse("build/snapshot.png"),
         providers.gradleProperty("tier").getOrElse("3"),
         providers.gradleProperty("seed").getOrElse("7"),
-        if (providers.gradleProperty("solve").isPresent) "solve" else if (providers.gradleProperty("fail").isPresent) "fail" else if (providers.gradleProperty("hint").isPresent) "hint" else "edit",
+        if (providers.gradleProperty("solve").isPresent) "solve" else if (providers.gradleProperty("fail").isPresent) "fail" else if (providers.gradleProperty("hint").isPresent) "hint" else if (providers.gradleProperty("dnd").isPresent) "dnd" else "edit",
         providers.gradleProperty("world").getOrElse("islands"),
         providers.gradleProperty("lang").getOrElse("en"),
         providers.gradleProperty("stars").getOrElse("0"),

@@ -45,20 +45,26 @@ fun CommandCard(
     highlighted: Boolean = false,
     failed: Boolean = false,
     hinted: Boolean = false,
+    selected: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     val bg = when {
         failed -> Color(0xFFFFCDD2)
         highlighted -> Color(0xFFFFF59D)
         hinted -> Color(0xFFC8E6C9)
+        selected -> Color(0xFFEDE7F6)
         else -> Color.White
     }
-    val border = if (highlighted || failed || hinted) Ink else Color(0xFFBDBDBD)
+    val border = when {
+        highlighted || failed || hinted -> Ink
+        selected -> Accent2
+        else -> Color(0xFFBDBDBD)
+    }
     Box(
         modifier
             .size(size.dp)
             .background(bg, CardShape)
-            .border(if (highlighted || hinted) 3.dp else 2.dp, border, CardShape)
+            .border(if (highlighted || hinted || selected) 3.dp else 2.dp, border, CardShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
