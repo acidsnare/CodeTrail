@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CodeTrail</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #163B4B; overflow: hidden; }
+    #root { width: 100vw; height: 100vh; }
+    #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+               color: #fff; font: 600 20px/1.4 system-ui, sans-serif; }
+    canvas { outline: none; }
+  </style>
+  <script>
+    // Compose resources pick the UI language from navigator.language and offer no way to change it
+    // at runtime, so the choice made in Settings is stored and applied here, before Compose starts.
+    (function () {
+      var lang = null;
+      try { lang = localStorage.getItem('codetrail.lang'); } catch (e) {}
+      if (lang) {
+        Object.defineProperty(navigator, 'language', { get: function () { return lang; } });
+        Object.defineProperty(navigator, 'languages', { get: function () { return [lang]; } });
+      }
+    })();
+
+    // Tiny Web Audio helper used by WebSoundPlayer: clips are uploaded once, then started on demand.
+    window.codetrailAudio = (function () {
+      var ctx = null, buffers = {};
+      function context() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+      }
+      return {
+        load: function (id, samples, rate) {
+          var c = context();
+          var b = c.createBuffer(1, samples.length, rate);
+          b.copyToChannel(samples, 0);
+          buffers[id] = b;
+        },
+        play: function (id) {
+          var b = buffers[id]; if (!b) return;
+          var c = context();
+          var src = c.createBufferSource();
+          src.buffer = b; src.connect(c.destination); src.start();
+        }
+      };
+    })();
+  </script>
+</head>
+<body>
+  <div id="loading">Loading CodeTrail…</div>
+  <div id="root"></div>
+  <script>
+    // Hide the loading text once the canvas is in place.
+    new MutationObserver(function () {
+      if (document.querySelector('#root canvas')) { var l = document.getElementById('loading'); if (l) l.remove(); }
+    }).observe(document.getElementById('root'), { childList: true, subtree: true });
+  </script>
+  <script type="application/javascript" src="codetrail.js"></script>
+</body>
+</html>

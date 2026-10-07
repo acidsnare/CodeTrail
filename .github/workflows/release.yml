@@ -1,4 +1,4 @@
-name: Release installers
+name: Release
 
 on:
   push:
@@ -93,8 +93,46 @@ jobs:
           name: codetrail-${{ runner.os }}
           path: ${{ matrix.artifact }}
 
+  # Browser build: Kotlin/Wasm + Compose, a folder of static files served from GitHub Pages.
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build web distribution
+        run: ./gradlew :app:wasmJsBrowserDistribution --no-daemon --console=plain
+      - name: Zip for the release
+        run: cd app/build/dist/wasmJs/productionExecutable && zip -qr ../../../../../codetrail-web.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codetrail-web
+          path: codetrail-web.zip
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/build/dist/wasmJs/productionExecutable
+
+  # Publishes the web build to https://<owner>.github.io/<repo>/ on every tag.
+  # One-time setup: Settings -> Pages -> Source: "GitHub Actions".
+  pages:
+    needs: web
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
   release:
-    needs: package
+    needs: [package, web]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
@@ -104,6 +142,7 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+          pattern: codetrail-*
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
