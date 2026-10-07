@@ -41,6 +41,7 @@ import codetrail.core.model.Pos
 import codetrail.app.HeroVisual
 import codetrail.app.theme.Character
 import codetrail.app.theme.WorldTheme
+import kotlin.math.floor
 import kotlin.random.Random
 
 /**
@@ -65,7 +66,11 @@ fun Board(
 ) {
     val sprite = characterPainter(character)
     var boardSize by remember { mutableStateOf(IntSize.Zero) }
-    val cellPx = if (boardSize.width == 0) 0f else boardSize.width / level.grid.width.toFloat()
+    // Half a cell of water around the grid so tiles never touch the rounded frame.
+    val cols = level.grid.width + BoardMargin * 2
+    val rows = level.grid.height + BoardMargin * 2
+    val cellPx = if (boardSize.width == 0) 0f else boardSize.width / cols
+    val marginPx = cellPx * BoardMargin
 
     // Bump into an obstacle: short horizontal shake.
     val shake = remember { Animatable(0f) }
@@ -87,31 +92,37 @@ fun Board(
     Box(
         modifier
             .offset { IntOffset(shake.value.toInt(), 0) }
-            .aspectRatio(level.grid.width / level.grid.height.toFloat())
+            .aspectRatio(cols / rows)
             .clip(RoundedCornerShape(18.dp))
             .onSizeChanged { boardSize = it }
             .then(
                 if (onCellClick == null) Modifier else Modifier.pointerInput(level) {
                     detectTapGestures { tap ->
-                        val c = size.width / level.grid.width.toFloat()
-                        onCellClick(Pos((tap.x / c).toInt(), (tap.y / c).toInt()))
+                        val c = size.width / cols
+                        val x = floor((tap.x - c * BoardMargin) / c).toInt()
+                        val y = floor((tap.y - c * BoardMargin) / c).toInt()
+                        if (level.grid.contains(Pos(x, y))) onCellClick(Pos(x, y))
                     }
                 },
             ),
     ) {
         Canvas(Modifier.fillMaxSize()) {
-            val cell = size.width / level.grid.width
-            drawSea(level, theme, cell)
-            drawLand(level, theme, cell)
-            with(theme.art) {
-                for (p in level.grid.positions()) {
-                    if (level.grid[p] == Cell.OBSTACLE) drawObstacle(Offset(p.x * cell, p.y * cell), cell)
+            val cell = size.width / cols
+            val margin = cell * BoardMargin
+            drawRect(Brush.verticalGradient(listOf(theme.seaTop, theme.seaBottom)), Offset.Zero, size)
+            translate(margin, margin) {
+                drawSea(level, theme, cell, margin)
+                drawLand(level, theme, cell)
+                with(theme.art) {
+                    for (p in level.grid.positions()) {
+                        if (level.grid[p] == Cell.OBSTACLE) drawObstacle(Offset(p.x * cell, p.y * cell), cell)
+                    }
+                    drawGoal(Offset((level.goal.x + 0.5f) * cell, (level.goal.y + 0.5f) * cell), cell)
                 }
-                drawGoal(Offset((level.goal.x + 0.5f) * cell, (level.goal.y + 0.5f) * cell), cell)
+                if (guess != null) drawGuess(guess, cell, isAnswer = false)
+                if (answer != null) drawGuess(answer, cell, isAnswer = true)
+                drawHero(hero, sprite, character, cell)
             }
-            if (guess != null) drawGuess(guess, cell, isAnswer = false)
-            if (answer != null) drawGuess(answer, cell, isAnswer = true)
-            drawHero(hero, sprite, character, cell)
         }
         if (cellPx > 0f) {
             val boardCenter = Offset(boardSize.width / 2f, boardSize.height / 2f)
@@ -121,8 +132,8 @@ fun Board(
                 trigger = if (fell != null) effectKey else null,
                 center = fell?.let {
                     Offset(
-                        ((it.at.x + 0.5f) * cellPx).coerceIn(cellPx * 0.1f, boardSize.width - cellPx * 0.1f),
-                        ((it.at.y + 0.5f) * cellPx).coerceIn(cellPx * 0.1f, boardSize.height - cellPx * 0.1f),
+                        (marginPx + (it.at.x + 0.5f) * cellPx).coerceIn(cellPx * 0.1f, boardSize.width - cellPx * 0.1f),
+                        (marginPx + (it.at.y + 0.5f) * cellPx).coerceIn(cellPx * 0.1f, boardSize.height - cellPx * 0.1f),
                     )
                 },
                 cell = cellPx,
@@ -132,14 +143,19 @@ fun Board(
     }
 }
 
+/** Water band around the grid, in cells. */
+private const val BoardMargin = 0.5f
+
 /** Stable per-cell randomness so decorations do not flicker between frames. */
 private fun cellRandom(level: Level, p: Pos) = Random(level.seed xor (p.x * 73856093L) xor (p.y * 19349663L))
 
-private fun DrawScope.drawSea(level: Level, theme: WorldTheme, cell: Float) {
-    drawRect(Brush.verticalGradient(listOf(theme.seaTop, theme.seaBottom)), Offset.Zero, size)
+/** Grid lines and sea decorations. Called inside the margin translation; lines run out into the margin. */
+private fun DrawScope.drawSea(level: Level, theme: WorldTheme, cell: Float, margin: Float) {
     val w = cell * 0.022f
-    for (i in 1 until level.grid.width) drawLine(theme.gridLine, Offset(i * cell, 0f), Offset(i * cell, size.height), w)
-    for (j in 1 until level.grid.height) drawLine(theme.gridLine, Offset(0f, j * cell), Offset(size.width, j * cell), w)
+    val right = size.width - margin
+    val bottom = size.height - margin
+    for (i in 0..level.grid.width) drawLine(theme.gridLine, Offset(i * cell, -margin), Offset(i * cell, bottom), w)
+    for (j in 0..level.grid.height) drawLine(theme.gridLine, Offset(-margin, j * cell), Offset(right, j * cell), w)
     with(theme.art) {
         for (p in level.grid.positions()) {
             if (level.grid[p] == Cell.BLOCKED) drawSeaProps(Offset(p.x * cell, p.y * cell), cell, cellRandom(level, p))
