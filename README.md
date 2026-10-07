@@ -140,7 +140,7 @@ ANDROID_KEY_PASSWORD
 
 Locally, export the same values plus `ANDROID_KEYSTORE_FILE=/path/to/release.jks` before running
 `:android:bundleRelease`. The privacy policy required by Play is served with the web build at
-`/privacy.html`.
+`/privacy.html`. A one-page guide for teachers (Danish) is served at `/skole.html`.
 
 ## Installers
 
