@@ -70,7 +70,7 @@ compose.desktop {
             vendor = "CodeTrail"
             macOS {
                 iconFile.set(rootProject.file("assets/icon/codetrail.icns"))
-                bundleID = "dev.codetrail.app"
+                bundleID = "dk.codetrail.app"
                 dockName = "CodeTrail"
             }
             windows {

@@ -9,7 +9,7 @@ android {
     namespace = "codetrail.android"
     compileSdk = 37
     defaultConfig {
-        applicationId = "dev.codetrail.app"
+        applicationId = "dk.codetrail.app"
         minSdk = 26
         targetSdk = 37
         versionCode = 120
