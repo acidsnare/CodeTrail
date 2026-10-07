@@ -13,16 +13,16 @@ jobs:
         include:
           - os: macos-latest
             task: packageDmg
-            artifact: desktop/build/compose/binaries/main/dmg/*.dmg
-            launcher: desktop/build/compose/binaries/main/app/CodeTrail.app/Contents/MacOS/CodeTrail
+            artifact: app/build/compose/binaries/main/dmg/*.dmg
+            launcher: app/build/compose/binaries/main/app/CodeTrail.app/Contents/MacOS/CodeTrail
           - os: windows-latest
             task: packageMsi
-            artifact: desktop/build/compose/binaries/main/msi/*.msi
-            launcher: desktop/build/compose/binaries/main/app/CodeTrail/CodeTrail.exe
+            artifact: app/build/compose/binaries/main/msi/*.msi
+            launcher: app/build/compose/binaries/main/app/CodeTrail/CodeTrail.exe
           - os: ubuntu-latest
             task: packageDeb
-            artifact: desktop/build/compose/binaries/main/deb/*.deb
-            launcher: desktop/build/compose/binaries/main/app/CodeTrail/bin/CodeTrail
+            artifact: app/build/compose/binaries/main/deb/*.deb
+            launcher: app/build/compose/binaries/main/app/CodeTrail/bin/CodeTrail
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
         shell: pwsh
 
       - name: Build installer
-        run: ./gradlew :desktop:createDistributable :desktop:${{ matrix.task }} --no-daemon --console=plain
+        run: ./gradlew :app:createDistributable :app:${{ matrix.task }} --no-daemon --console=plain
 
       # Smoke test: the packaged launcher must start its bundled JVM and stay alive for a few
       # seconds. Catches broken JVM options or missing modules that only show up at run time.
@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          APP=desktop/build/compose/binaries/main/app
+          APP=app/build/compose/binaries/main/app
           echo "--- app image"; find "$APP" -maxdepth 3 | head -40
           if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq xvfb >/dev/null
@@ -74,7 +74,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $app = "desktop/build/compose/binaries/main/app"
+          $app = "app/build/compose/binaries/main/app"
           Write-Host "--- app image"; Get-ChildItem -Recurse -Depth 2 $app | Select-Object -First 40 | ForEach-Object { $_.FullName }
           $exe = Get-ChildItem -Recurse -Filter CodeTrail.exe $app | Select-Object -First 1
           if (-not $exe) { Write-Host "launcher not found"; exit 1 }

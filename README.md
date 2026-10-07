@@ -39,19 +39,24 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 ```
 core/      Kotlin Multiplatform, no UI: grid model, commands, interpreter, solver,
            level generator, predict puzzles, progress model.
-desktop/   Compose Multiplatform desktop app: screens, board rendering, world art,
-           file storage, installer configuration.
-assets/    Hero SVGs and the app icon. Shared by the desktop build and a future web port.
+app/       Compose Multiplatform app.
+           commonMain: screens, board rendering, world art, game and app state, sound
+           synthesis, strings, font and hero SVGs (Compose Resources).
+           jvmMain: desktop window, file storage, audio output, installer configuration,
+           snapshot and render tools.
+assets/    App icon sources (SVG, PNG, .icns, .ico).
 ```
 
-The core never touches strings, colours or files, so a web front end can reuse it unchanged.
+The core never touches strings, colours or files. The app's `commonMain` has no JVM code
+either: a web or Android target only needs the handful of platform pieces in `jvmMain`
+(storage, audio device, locale, entry point) reimplemented.
 
 ## Running
 
 Requires a JDK 21+.
 
 ```bash
-./gradlew :desktop:run
+./gradlew :app:run
 ```
 
 Print sample levels for every tier and stress-test the generator:
@@ -63,8 +68,8 @@ Print sample levels for every tier and stress-test the generator:
 Render any screen to a PNG without opening a window (handy for checking layout):
 
 ```bash
-./gradlew :desktop:snapshot -Pscreen=play -Pstars=30 -Plang=ru -Pout=build/play.png
-./gradlew :desktop:snapshot -Ptier=4 -Pseed=7 -Pworld=lava -Phero=fox -Psolve -Pframe=700 -Pout=build/win.png
+./gradlew :app:snapshot -Pscreen=play -Pstars=30 -Plang=ru -Pout=build/play.png
+./gradlew :app:snapshot -Ptier=4 -Pseed=7 -Pworld=lava -Phero=fox -Psolve -Pframe=700 -Pout=build/win.png
 ```
 
 Options: `screen` (menu, profiles, play, settings, stats, quit, pause, game), `tier`, `seed`,
@@ -76,9 +81,9 @@ Options: `screen` (menu, profiles, play, settings, stats, quit, pause, game), `t
 Native packages are built with `jpackage`; the JVM is bundled so players do not need Java.
 
 ```bash
-./gradlew :desktop:packageDmg   # macOS, run on macOS
-./gradlew :desktop:packageMsi   # Windows, run on Windows with WiX 3.x installed
-./gradlew :desktop:packageDeb   # Linux
+./gradlew :app:packageDmg   # macOS, run on macOS
+./gradlew :app:packageMsi   # Windows, run on Windows with WiX 3.x installed
+./gradlew :app:packageDeb   # Linux
 ```
 
 `jpackage` cannot cross-compile. The GitHub Actions workflow in `.github/workflows/release.yml`
@@ -98,9 +103,9 @@ Plain text; delete a file to remove a profile.
 ## Adding content
 
 - **A world**: add a `WorldTheme` (palette) and a `WorldArt` object (goal, obstacle, props)
-  in `desktop/.../theme/`, plus name / goal / fall-message strings in the four
+  in `app/src/commonMain/kotlin/codetrail/app/theme/`, plus name / goal / fall-message strings in the four
   `strings.xml` files.
-- **A hero**: drop an SVG into `assets/characters/`, add a `Character` entry with its unlock
+- **A hero**: drop an SVG into `app/src/commonMain/composeResources/drawable/`, add a `Character` entry with its unlock
   threshold and body colours, and a name string.
 - **A language**: add `values-xx/strings.xml` and an entry in `AppLanguage`.
 
@@ -110,5 +115,5 @@ Code and art in this repository are original work. Hero illustrations and world 
 hand-drawn SVG / Canvas, no third-party asset packs are used.
 
 The UI font is [Nunito](https://github.com/googlefonts/nunito), bundled under the SIL Open Font
-License (see `desktop/src/commonMain/composeResources/font/OFL-Nunito.txt`). Bundling it keeps
+License (see `app/src/commonMain/composeResources/font/OFL-Nunito.txt`). Bundling it keeps
 text metrics identical on macOS, Windows and Linux.
