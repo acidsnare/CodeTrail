@@ -74,7 +74,7 @@ fun PlayScreen(app: AppState) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ScreenTitle(stringResource(Res.string.play_title))
                 Spacer(Modifier.weight(1f))
-                MenuButton(stringResource(Res.string.back), width = 160.dp) { app.goMenu() }
+                MenuButton(stringResource(Res.string.back), width = 200.dp) { app.goMenu() }
             }
             Spacer(Modifier.height(20.dp))
 
@@ -100,7 +100,7 @@ fun PlayScreen(app: AppState) {
                 ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD) { mode = GameMode.FORWARD }
                 ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT) { mode = GameMode.PREDICT }
                 Spacer(Modifier.weight(1f))
-                MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 240.dp) { app.startGame(world, tier, mode) }
+                MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 200.dp) { app.startGame(world, tier, mode) }
             }
             Spacer(Modifier.weight(1f))
         }
