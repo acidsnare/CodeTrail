@@ -28,7 +28,7 @@ Lavet til børn og til de voksne, der spiller med:
 • Flere profiler på én enhed, fremskridt gemmes automatisk
 • Hints, der peger på det næste kort, når en bane driller
 • Bløde lyde og animationer, kan slås fra i Indstillinger
-• Dansk, engelsk, russisk og ukrainsk
+• Dansk, engelsk, rumænsk, russisk og ukrainsk
 
 Inspireret af "Programmering"-arbejdsarkene fra den danske indskoling. Lavet til tablets i landskabsformat; virker også på telefoner.
 

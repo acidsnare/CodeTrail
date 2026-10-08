@@ -28,7 +28,7 @@ Made for children and for the grown-ups who play along:
 • Several profiles on one device, progress is saved automatically
 • Hints that point at the next card when a level gets tricky
 • Gentle sounds and animations, switchable in Settings
-• English, Russian, Ukrainian and Danish
+• English, Danish, Romanian, Russian and Ukrainian
 
 Inspired by the "Programmering" worksheets used in Danish primary schools. Designed for tablets in landscape; also runs on phones.
 
