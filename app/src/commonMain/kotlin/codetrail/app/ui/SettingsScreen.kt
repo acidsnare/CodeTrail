@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -60,8 +62,8 @@ fun SettingsScreen(app: AppState) {
                 Spacer(Modifier.height(28.dp))
 
                 // Two panels side by side: the game settings and the data section, so the right half is not empty.
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                    Column(Modifier.weight(1f).background(Panel, RoundedCornerShape(20.dp)).padding(24.dp)) {
+                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Column(Modifier.weight(1f).fillMaxHeight().background(Panel, RoundedCornerShape(20.dp)).padding(24.dp)) {
                         Text(stringResource(Res.string.settings_language), fontSize = 22.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(10.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -91,7 +93,7 @@ fun SettingsScreen(app: AppState) {
                         }
                     }
 
-                    Column(Modifier.weight(1f).background(Panel, RoundedCornerShape(20.dp)).padding(24.dp)) {
+                    Column(Modifier.weight(1f).fillMaxHeight().background(Panel, RoundedCornerShape(20.dp)).padding(24.dp)) {
                         val profile = app.current
                         if (profile != null) {
                             Text(stringResource(Res.string.settings_reset), fontSize = 22.sp, fontWeight = FontWeight.Bold)
