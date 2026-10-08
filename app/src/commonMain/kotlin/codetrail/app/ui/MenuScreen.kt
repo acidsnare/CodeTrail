@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -56,8 +57,14 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
 
     Box(Modifier.fillMaxSize().background(MenuBackground)) {
         // Six buttons (Continue + Quit) plus the title must fit a 720-high scene on phones.
-        Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.Center) {
+        // Buttons and hero are centred together as one group, with a fixed gap, so wide screens
+        // do not open a hole between them.
+        Row(
+            Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
                 Text(stringResource(Res.string.app_name), fontSize = 56.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                 Text(stringResource(Res.string.menu_subtitle), fontSize = 22.sp, color = Color.White.copy(alpha = 0.8f))
                 Spacer(Modifier.height(28.dp))
@@ -85,7 +92,8 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                 }
             }
 
-            Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+            Spacer(Modifier.width(140.dp))
+            Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                 // Idle "breathing": slow scale and a gentle sway so the portrait feels alive.
                 val idle = rememberInfiniteTransition()
                 val breath by idle.animateFloat(1f, 1.035f, infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse))
