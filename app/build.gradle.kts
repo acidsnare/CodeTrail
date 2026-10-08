@@ -65,7 +65,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CodeTrail"
-            packageVersion = "1.5.3"
+            packageVersion = providers.gradleProperty("codetrail.version").get()
             description = "Program your hero's path"
             vendor = "CodeTrail"
             macOS {
@@ -94,7 +94,7 @@ compose.desktop {
 // fetches fresh code.
 tasks.named<ProcessResources>("wasmJsProcessResources") {
     // Local copy: the action must not capture the build script (configuration cache).
-    val tokens = mapOf("version" to "1.5.3")
+    val tokens = mapOf("version" to providers.gradleProperty("codetrail.version").get())
     filesMatching("index.html") { filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to tokens) }
 }
 

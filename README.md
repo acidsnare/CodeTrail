@@ -155,6 +155,10 @@ Native packages are built with `jpackage`; the JVM is bundled so players do not 
 `jpackage` cannot cross-compile. The GitHub Actions workflow in `.github/workflows/release.yml`
 builds all three on a tag `v*`, plus the web build, and attaches them to a release.
 
+Releasing: bump `codetrail.version` in `gradle.properties` (desktop package version, Android
+`versionName`/`versionCode` and the web cache-busting query all derive from it), commit, then
+tag `vX.Y.Z` and push the tag.
+
 Packages are unsigned: macOS Gatekeeper and Windows SmartScreen will warn on first launch.
 
 ## Save files

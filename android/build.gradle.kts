@@ -13,8 +13,10 @@ android {
         applicationId = "dk.codetrail.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 153
-        versionName = "1.5.3"
+        val version = providers.gradleProperty("codetrail.version").get()
+        versionName = version
+        // 1.5.3 -> 153; room for ten patch and ten minor releases per step.
+        versionCode = version.split('.').map { it.toInt() }.let { (major, minor, patch) -> major * 100 + minor * 10 + patch }
     }
     // Release signing comes from the environment (CI secrets or a local shell). Without it the
     // release build falls back to the debug key, which is fine for sideloading but not for Play.
