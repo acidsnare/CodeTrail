@@ -30,6 +30,6 @@ Făcut pentru copii și pentru adulții care joacă alături de ei:
 • Sunete și animații blânde, se pot opri din Setări
 • Română, engleză, daneză, rusă și ucraineană
 
-Inspirat de fișele „Programmering” folosite în școlile primare daneze. Gândit pentru tablete în modul peisaj; merge și pe telefoane.
+Gândit pentru tablete în modul peisaj; merge și pe telefoane.
 
 CodeTrail este open source: github.com/acidsnare/CodeTrail

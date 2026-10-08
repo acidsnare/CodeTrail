@@ -30,6 +30,6 @@ Made for children and for the grown-ups who play along:
 • Gentle sounds and animations, switchable in Settings
 • English, Danish, Romanian, Russian and Ukrainian
 
-Inspired by the "Programmering" worksheets used in Danish primary schools. Designed for tablets in landscape; also runs on phones.
+Designed for tablets in landscape; also runs on phones.
 
 CodeTrail is open source: github.com/acidsnare/CodeTrail

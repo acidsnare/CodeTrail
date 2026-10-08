@@ -30,6 +30,6 @@ Lavet til børn og til de voksne, der spiller med:
 • Bløde lyde og animationer, kan slås fra i Indstillinger
 • Dansk, engelsk, rumænsk, russisk og ukrainsk
 
-Inspireret af "Programmering"-arbejdsarkene fra den danske indskoling. Lavet til tablets i landskabsformat; virker også på telefoner.
+Lavet til tablets i landskabsformat; virker også på telefoner.
 
 CodeTrail er open source: github.com/acidsnare/CodeTrail
