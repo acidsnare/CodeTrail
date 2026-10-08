@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -96,7 +98,8 @@ fun PlayScreen(app: AppState) {
             Spacer(Modifier.height(20.dp))
             Text(stringResource(Res.string.play_mode), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            // Intrinsic height so both mode cards are as tall as the one whose description wraps.
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD) { mode = GameMode.FORWARD }
                 ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT) { mode = GameMode.PREDICT }
                 Spacer(Modifier.weight(1f))
@@ -162,6 +165,7 @@ private fun ModeCard(icon: String, title: String, desc: String, selected: Boolea
     Row(
         Modifier
             .width(380.dp)
+            .fillMaxHeight()
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) Color.White else Panel)
             .clickable(onClick = onClick)

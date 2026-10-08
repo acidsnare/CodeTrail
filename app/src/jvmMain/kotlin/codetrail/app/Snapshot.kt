@@ -95,8 +95,9 @@ fun main(args: Array<String>) {
                 // replay the same level: must not pay again
                 runBlocking { state.run() }
                 println("replay: payout=${state.payout} profileStars=${state.profile.progress.totalStars}")
-                // a solved level is locked: restart hands out a fresh level, solve that one too
-                state.restartLevel()
+                // a solved level is locked: a fresh level follows, solve that one too. Seeded so store
+                // screenshots come out identical in every language.
+                state.newLevel(seed = seed + 1)
                 val n = state.level
                 Solver.solve(n.grid, n.start, n.startDir, n.goal, n.commandSet)!!.let { state.program.addAll(it.program); state.function.addAll(it.function) }
                 runBlocking { state.run() }
