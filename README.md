@@ -38,7 +38,7 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
   line each on what they do.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
-- **English, Russian, Ukrainian and Danish** UI.
+- **English, Danish, Romanian, Russian and Ukrainian** UI.
 - **Runs on the desktop, in the browser and on Android** from the same code: native
   installers for macOS, Windows and Linux, a Kotlin/Wasm build served from GitHub Pages, and
   an APK for tablets.
@@ -140,7 +140,7 @@ ANDROID_KEY_PASSWORD
 
 Locally, export the same values plus `ANDROID_KEYSTORE_FILE=/path/to/release.jks` before running
 `:android:bundleRelease`. The privacy policy required by Play is served with the web build at
-`/privacy.html`. A one-page guide for teachers (Danish) is served at `/skole.html`.
+`/privacy.html`. A one-page guide for teachers is served at `/school.html` (English), `/skole.html` (Danish) and `/school-<lang>.html` for ro, ru, uk; all are rendered from `tools/school_pages.py`.
 
 ## Installers
 

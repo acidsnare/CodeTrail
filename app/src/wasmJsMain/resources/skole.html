@@ -5,28 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CodeTrail i klassen</title>
   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="alternate" hreflang="en" href="https://codetrail.dk/school.html">
+  <link rel="alternate" hreflang="da" href="https://codetrail.dk/skole.html">
+  <link rel="alternate" hreflang="ro" href="https://codetrail.dk/school-ro.html">
+  <link rel="alternate" hreflang="ru" href="https://codetrail.dk/school-ru.html">
+  <link rel="alternate" hreflang="uk" href="https://codetrail.dk/school-uk.html">
   <style>
     body { margin: 0; background: #163B4B; color: #F2F2F2; font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
-    main { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
     h1 { font-size: 32px; margin: 0 0 8px; }
     h2 { font-size: 20px; margin: 32px 0 8px; }
     .lead { font-size: 19px; opacity: .9; margin-bottom: 28px; }
     a { color: #FFD54F; }
+    .langs { font-size: 14px; opacity: .8; margin-bottom: 24px; }
+    .langs a, .langs span { margin-right: 12px; }
+    .langs span { font-weight: 700; }
     .cta { display: inline-block; background: #43A047; color: #fff; text-decoration: none; font-weight: 700; padding: 12px 24px; border-radius: 14px; margin: 8px 0 24px; }
     table { border-collapse: collapse; width: 100%; }
     td, th { text-align: left; padding: 6px 10px 6px 0; vertical-align: top; }
     th { opacity: .7; font-weight: 600; white-space: nowrap; }
-    ul { padding-left: 22px; }
+    ul, ol { padding-left: 22px; }
     li { margin: 4px 0; }
     .box { background: rgba(255,255,255,.08); border-radius: 16px; padding: 16px 20px; margin: 16px 0; }
-    @media print { body { background: #fff; color: #111; } a { color: #0a5; } .box { background: #f2f2f2; } }
+    @media print { body { background: #fff; color: #111; } a { color: #0a5; } .box { background: #f2f2f2; } .langs { display: none; } }
   </style>
 </head>
 <body>
 <main>
+  <nav class="langs"><a href="school.html">English</a> <span>Dansk</span> <a href="school-ro.html">Română</a> <a href="school-ru.html">Русский</a> <a href="school-uk.html">Українська</a></nav>
   <h1>CodeTrail i klassen</h1>
-  <p class="lead">Et gratis spil, hvor eleverne programmerer en lille helt frem til målet med kort.
-  Ingen login, ingen installation, ingen indsamling af data. Sproget følger enheden og kan sættes til dansk under <em>Indstillinger</em>.</p>
+  <p class="lead">Et gratis spil, hvor eleverne programmerer en lille helt frem til målet med kort. Ingen login, ingen installation, ingen indsamling af data. Sproget følger enheden og kan sættes til dansk under <em>Indstillinger</em>.</p>
 
   <a class="cta" href="https://codetrail.dk/">Åbn spillet: codetrail.dk</a>
 
@@ -56,8 +64,7 @@
     <tr><th>5 Løkker</th><td>"Gentag ×N" med kort indeni. Større baner.</td></tr>
     <tr><th>6 Blokke</th><td>Byg "blok A" én gang og kald den flere gange.</td></tr>
   </table>
-  <p>To spilformer: <strong>Byg vejen</strong> (eleven skriver programmet) og <strong>Gæt målet</strong>
-  (eleven læser et færdigt program og peger på, hvor helten ender). Den sidste træner læsning af kode.</p>
+  <p>To spilformer: <strong>Byg vejen</strong> (eleven skriver programmet) og <strong>Gæt målet</strong> (eleven læser et færdigt program og peger på, hvor helten ender). Den sidste træner læsning af kode.</p>
 
   <h2>Sådan kører du en lektion</h2>
   <div class="box">
@@ -75,12 +82,11 @@
     <li>Fremskridt gemmes i browseren på den enkelte enhed. Deler eleverne enheder, kan en profil eksporteres som en kode under <em>Profiler</em> og hentes ind igen et andet sted.</li>
     <li>Ingen konti, ingen e-mail, intet sendes fra enheden. Læs mere: <a href="privacy.html">privatlivspolitik</a>.</li>
     <li>Findes også som app til Windows, macOS, Linux og Android: <a href="https://github.com/acidsnare/CodeTrail/releases">github.com/acidsnare/CodeTrail/releases</a>.</li>
-    <li>Sprog skiftes under <em>Indstillinger</em>: dansk, engelsk, ukrainsk, russisk.</li>
+    <li>Sprog skiftes under <em>Indstillinger</em>: dansk, engelsk, rumænsk, russisk, ukrainsk.</li>
   </ul>
 
   <h2>Kontakt</h2>
-  <p>Spillet er lavet af en forælder på skolen. Spørgsmål, ønsker og fejl: skriv gerne, eller opret en sag på
-  <a href="https://github.com/acidsnare/CodeTrail/issues">GitHub</a>.</p>
+  <p>Spillet er lavet af en forælder i fritiden. Spørgsmål, ønsker og fejl: skriv gerne, eller opret en sag på <a href="https://github.com/acidsnare/CodeTrail/issues">GitHub</a>.</p>
 </main>
 </body>
 </html>

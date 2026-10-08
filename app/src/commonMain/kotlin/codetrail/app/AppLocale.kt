@@ -8,14 +8,16 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 /** Languages the UI ships with. SYSTEM follows the OS locale, falling back to English. */
 enum class AppLanguage(val tag: String?, val label: String) {
+    // Auto first, then alphabetical by label: this is the order of the chips in Settings.
     SYSTEM(null, "Auto"),
+    DA("da", "DA"),
     EN("en", "EN"),
+    RO("ro", "RO"),
     RU("ru", "RU"),
-    UA("uk", "UA"),
-    DA("da", "DA");
+    UA("uk", "UA");
 
     companion object {
-        val Supported = setOf("en", "ru", "uk", "da")
+        val Supported = entries.mapNotNull { it.tag }.toSet()
     }
 }
 
