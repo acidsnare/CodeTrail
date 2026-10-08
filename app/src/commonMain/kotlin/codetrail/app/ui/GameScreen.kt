@@ -104,7 +104,6 @@ import codetrail.app.res.pause_new_level
 import codetrail.app.res.pause_restart
 import codetrail.app.res.pause_resume
 import codetrail.app.res.pause_title
-import codetrail.app.res.reset
 import codetrail.app.res.stars_total
 import codetrail.app.res.status_goal
 import codetrail.app.res.status_running
@@ -175,7 +174,6 @@ fun GameScreen(app: AppState, state: GameState) {
                                 SmallAction("💡  " + stringResource(Res.string.hint) + cap, enabled = state.canEdit) { state.hint() }
                             }
                             Spacer(Modifier.weight(1f))
-                            SmallAction("↺  " + stringResource(Res.string.reset), enabled = state.phase != Phase.RUNNING && !state.completed) { state.resetRun() }
                             if (state.mode == GameMode.FORWARD) {
                                 SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty()) { state.clearProgram() }
                             }
