@@ -55,11 +55,12 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
     var pickHero by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize().background(MenuBackground)) {
-        Row(Modifier.fillMaxSize().padding(48.dp), verticalAlignment = Alignment.CenterVertically) {
+        // Six buttons (Continue + Quit) plus the title must fit a 720-high scene on phones.
+        Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-                Text(stringResource(Res.string.app_name), fontSize = 64.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                Text(stringResource(Res.string.app_name), fontSize = 56.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                 Text(stringResource(Res.string.menu_subtitle), fontSize = 22.sp, color = Color.White.copy(alpha = 0.8f))
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(28.dp))
 
                 if (profile != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -69,7 +70,7 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                             Text(stringResource(Res.string.stars_total, profile.progress.totalStars), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Star)
                         }
                     }
-                    Spacer(Modifier.height(28.dp))
+                    Spacer(Modifier.height(20.dp))
                 }
 
                 if (profile != null) {
