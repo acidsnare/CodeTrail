@@ -89,6 +89,15 @@ compose.desktop {
     }
 }
 
+// Browsers cache codetrail.js by name (GitHub Pages sends max-age=600, Safari keeps it longer), so
+// index.html asks for it with the package version as a query string and a new release always
+// fetches fresh code.
+tasks.named<ProcessResources>("wasmJsProcessResources") {
+    // Local copy: the action must not capture the build script (configuration cache).
+    val tokens = mapOf("version" to "1.5.3")
+    filesMatching("index.html") { filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to tokens) }
+}
+
 tasks.register<JavaExec>("snapshot") {
     group = "verification"
     description = "Render the app to a PNG without a window: -Pout=file.png -Ptier=3 -Pseed=7"
