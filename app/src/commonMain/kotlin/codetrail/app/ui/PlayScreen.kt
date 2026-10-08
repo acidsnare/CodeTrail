@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.app.AppState
@@ -68,13 +69,14 @@ fun PlayScreen(app: AppState) {
     var mode by remember { mutableStateOf(GameMode.FORWARD) }
 
     Box(Modifier.fillMaxSize().background(MenuBackground)) {
-        Column(Modifier.fillMaxSize().padding(40.dp)) {
+        // Sized to fit a 720-high scene (phones in landscape): tight section gaps and Start on the mode row.
+        Column(Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 32.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ScreenTitle(stringResource(Res.string.play_title))
                 Spacer(Modifier.weight(1f))
                 MenuButton(stringResource(Res.string.back), width = 160.dp) { app.goMenu() }
             }
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
 
             Text(stringResource(Res.string.play_world), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
@@ -82,7 +84,7 @@ fun PlayScreen(app: AppState) {
                 for (w in WorldTheme.All) WorldCard(w, selected = world.id == w.id) { world = w }
             }
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
             Text(stringResource(Res.string.play_difficulty), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -91,18 +93,16 @@ fun PlayScreen(app: AppState) {
                 }
             }
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
             Text(stringResource(Res.string.play_mode), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD) { mode = GameMode.FORWARD }
                 ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT) { mode = GameMode.PREDICT }
-            }
-
-            Spacer(Modifier.weight(1f))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Spacer(Modifier.weight(1f))
                 MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 240.dp) { app.startGame(world, tier, mode) }
             }
+            Spacer(Modifier.weight(1f))
         }
     }
 }
@@ -172,7 +172,7 @@ private fun ModeCard(icon: String, title: String, desc: String, selected: Boolea
         Spacer(Modifier.width(12.dp))
         Column {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
-            Text(desc, fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f))
+            Text(desc, fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f), maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
 }
