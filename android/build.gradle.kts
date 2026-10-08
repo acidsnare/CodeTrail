@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "codetrail.android"
     compileSdk = 37
+    compileSdkMinor = 1
     defaultConfig {
         applicationId = "dk.codetrail.app"
         minSdk = 26

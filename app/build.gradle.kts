@@ -14,7 +14,7 @@ kotlin {
     // Android: this module is a library; the :android module wraps it into the APK.
     androidLibrary {
         namespace = "codetrail.app"
-        compileSdk = 37
+        compileSdk { version = release(37) { minorApiLevel = 1 } }
         minSdk = 26
     }
 
