@@ -31,5 +31,3 @@ Făcut pentru copii și pentru adulții care joacă alături de ei:
 • Română, engleză, daneză, rusă și ucraineană
 
 Gândit pentru tablete în modul peisaj; merge și pe telefoane.
-
-CodeTrail este open source: github.com/acidsnare/CodeTrail

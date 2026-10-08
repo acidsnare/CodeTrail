@@ -31,5 +31,3 @@ Lavet til børn og til de voksne, der spiller med:
 • Dansk, engelsk, rumænsk, russisk og ukrainsk
 
 Lavet til tablets i landskabsformat; virker også på telefoner.
-
-CodeTrail er open source: github.com/acidsnare/CodeTrail
