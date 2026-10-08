@@ -100,7 +100,6 @@
 
     <string name="pause_title">Pause</string>
     <string name="pause_resume">Fortsæt</string>
-    <string name="pause_restart">Start banen forfra</string>
     <string name="pause_new_level">Ny bane</string>
     <string name="pause_exit">Gem og afslut</string>
 

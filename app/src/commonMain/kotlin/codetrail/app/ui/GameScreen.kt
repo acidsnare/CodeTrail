@@ -101,7 +101,6 @@ import androidx.compose.foundation.verticalScroll
 import codetrail.app.res.new_level
 import codetrail.app.res.pause_exit
 import codetrail.app.res.pause_new_level
-import codetrail.app.res.pause_restart
 import codetrail.app.res.pause_resume
 import codetrail.app.res.pause_title
 import codetrail.app.res.stars_total
@@ -388,7 +387,6 @@ private fun PauseOverlay(app: AppState, state: GameState) {
             Text(stringResource(Res.string.pause_title), fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             Spacer(Modifier.height(12.dp))
             MenuButton(stringResource(Res.string.pause_resume), color = Accent, textColor = Color.White) { app.resume() }
-            MenuButton(stringResource(Res.string.pause_restart)) { state.restartLevel(); app.resume() }
             MenuButton(stringResource(Res.string.pause_new_level)) { state.newLevel(); app.resume() }
             MenuButton(stringResource(Res.string.pause_exit), color = Color.White.copy(alpha = 0.15f), textColor = Color.White) { app.exitToMenu() }
         }

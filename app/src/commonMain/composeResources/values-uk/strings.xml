@@ -102,7 +102,6 @@
 
     <string name="pause_title">Пауза</string>
     <string name="pause_resume">Продовжити</string>
-    <string name="pause_restart">Почати рівень заново</string>
     <string name="pause_new_level">Новий рівень</string>
     <string name="pause_exit">Зберегти й вийти</string>
 

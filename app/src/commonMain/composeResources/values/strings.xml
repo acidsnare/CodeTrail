@@ -100,7 +100,6 @@
 
     <string name="pause_title">Paused</string>
     <string name="pause_resume">Resume</string>
-    <string name="pause_restart">Restart level</string>
     <string name="pause_new_level">New level</string>
     <string name="pause_exit">Save and exit</string>
 

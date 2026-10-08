@@ -101,7 +101,6 @@
 
     <string name="pause_title">Pauză</string>
     <string name="pause_resume">Continuă</string>
-    <string name="pause_restart">Reia nivelul</string>
     <string name="pause_new_level">Nivel nou</string>
     <string name="pause_exit">Salvează și ieși</string>
 
