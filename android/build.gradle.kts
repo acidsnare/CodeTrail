@@ -12,8 +12,8 @@ android {
         applicationId = "dk.codetrail.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 150
-        versionName = "1.5.0"
+        versionCode = 151
+        versionName = "1.5.1"
     }
     // Release signing comes from the environment (CI secrets or a local shell). Without it the
     // release build falls back to the debug key, which is fine for sideloading but not for Play.
