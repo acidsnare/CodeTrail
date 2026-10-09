@@ -298,20 +298,17 @@ private fun androidx.compose.foundation.layout.BoxScope.SelectionControls(cmd: C
         contentAlignment = Alignment.Center,
     ) { Text("✕", color = Color.White, fontWeight = FontWeight.Bold, fontSize = (badge.value * 0.55f).sp) }
     if (cmd is Command.Forward || cmd is Command.Repeat) {
-        Row(
-            Modifier.align(Alignment.BottomCenter).offset(y = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            MiniStep("−") { onAdjust(-1) }
-            MiniStep("+") { onAdjust(+1) }
-        }
+        // In the bottom corners, outside the card like the delete badge, so the number stays readable.
+        val step = (22 * TouchBoost * TouchBoost).dp
+        MiniStep("−", Modifier.align(Alignment.BottomStart).offset(x = -step / 3, y = step / 3)) { onAdjust(-1) }
+        MiniStep("+", Modifier.align(Alignment.BottomEnd).offset(x = step / 3, y = step / 3)) { onAdjust(+1) }
     }
 }
 
 @Composable
-private fun MiniStep(label: String, onClick: () -> Unit) {
+private fun MiniStep(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        Modifier.size((22 * TouchBoost * TouchBoost).dp).shadow(3.dp, CircleShape).background(Ink, CircleShape).clickable(onClick = onClick),
+        modifier.size((22 * TouchBoost * TouchBoost).dp).shadow(3.dp, CircleShape).background(Ink, CircleShape).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Text(label, color = Tray, fontWeight = FontWeight.ExtraBold, fontSize = (15 * TouchBoost).sp) }
 }
