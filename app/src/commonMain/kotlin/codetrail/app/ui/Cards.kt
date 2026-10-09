@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -166,10 +167,13 @@ fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
             .background(if (selected) Color.White else Color.Transparent, RoundedCornerShape(8.dp))
             .border(2.dp, if (selected) Color.White else content.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
             .clickable { sounds.play(Sfx.CLICK); onClick() }
+            // Under a finger the chip grows in both directions and its label with it, so it stays a pill, not a column.
             .heightIn(min = TapTarget - 4.dp)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .widthIn(min = (TapTarget - 4.dp) * 1.4f)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, color = if (selected) Ink else content, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+        val style = MaterialTheme.typography.labelLarge
+        Text(text, color = if (selected) Ink else content, fontWeight = FontWeight.Bold, style = if (codetrail.app.Platform.touch) style.copy(fontSize = style.fontSize * 1.3f) else style)
     }
 }
