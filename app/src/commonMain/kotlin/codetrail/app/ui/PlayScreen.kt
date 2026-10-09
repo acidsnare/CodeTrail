@@ -2,6 +2,8 @@ package codetrail.app.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +74,8 @@ fun PlayScreen(app: AppState) {
 
     Box(Modifier.fillMaxSize().background(MenuBackground)) {
         // Sized to fit a 720-high scene (phones in landscape): tight section gaps and Start on the mode row.
-        Column(Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 32.dp)) {
+        // Scrolls when a large system font pushes the rows past the scene height.
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 40.dp, vertical = 32.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ScreenTitle(stringResource(Res.string.play_title))
                 Spacer(Modifier.weight(1f))
@@ -105,7 +108,6 @@ fun PlayScreen(app: AppState) {
                 Spacer(Modifier.weight(1f))
                 MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 200.dp) { app.startGame(world, tier, mode) }
             }
-            Spacer(Modifier.weight(1f))
         }
     }
 }

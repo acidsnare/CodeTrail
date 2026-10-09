@@ -38,7 +38,9 @@ fun FitScene(content: @Composable () -> Unit) {
         // Phones shrink the scene to ~0.57, which turns 13sp captions into 7 real sp. Text gets a
         // fifth back on touch screens; layouts are checked to absorb it.
         val fontBoost = if (codetrail.app.Platform.touch && scale < 1f) 1.2f else 1f
-        CompositionLocalProvider(LocalDensity provides Density(base.density * scale, base.fontScale * fontBoost), LocalSceneScale provides scale) {
+        // The scene is laid out for a fixed font size; a large system font setting is honoured only a little.
+        val fontScale = min(base.fontScale, 1.15f) * fontBoost
+        CompositionLocalProvider(LocalDensity provides Density(base.density * scale, fontScale), LocalSceneScale provides scale) {
             Box(Modifier.size(sceneWidth, sceneHeight)) { content() }
         }
     }
