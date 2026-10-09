@@ -199,7 +199,7 @@ private fun TopBar(app: AppState, state: GameState) {
             Text(stringResource(state.theme.name), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
             Text(
                 stringResource(Res.string.game_level, state.tier) + "  ·  " + stringResource(DifficultyNames[state.tier - 1]),
-                fontSize = 13.sp,
+                fontSize = 14.sp,
                 color = muted,
                 fontWeight = FontWeight.SemiBold,
             )

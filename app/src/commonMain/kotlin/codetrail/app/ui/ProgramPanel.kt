@@ -435,7 +435,7 @@ private fun FunctionPanel(state: GameState, dnd: DragController, size: Int, edit
             if (!selected) {
                 Box(Modifier.height(inner.dp), contentAlignment = Alignment.CenterStart) {
                     // Two lines in every language so the panel keeps one height whether the hint wraps or not.
-                    Text(stringResource(Res.string.block_hint), color = Ink.copy(alpha = 0.6f), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, minLines = 2, maxLines = 2, modifier = Modifier.padding(horizontal = 6.dp))
+                    Text(stringResource(Res.string.block_hint), color = Ink.copy(alpha = 0.6f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, minLines = 2, maxLines = 2, modifier = Modifier.padding(horizontal = 6.dp))
                 }
             }
         }

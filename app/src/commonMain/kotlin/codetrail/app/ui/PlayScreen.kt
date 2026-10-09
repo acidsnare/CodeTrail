@@ -156,7 +156,7 @@ private fun TierCard(tier: Int, name: String, solved: Int, selected: Boolean, on
         }
         Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
         Spacer(Modifier.height(6.dp))
-        Text(stringResource(Res.string.play_solved, solved), fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f))
+        Text(stringResource(Res.string.play_solved, solved), fontSize = 14.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f))
     }
 }
 
@@ -176,7 +176,7 @@ private fun ModeCard(icon: String, title: String, desc: String, selected: Boolea
         Spacer(Modifier.width(12.dp))
         Column {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
-            Text(desc, fontSize = 13.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(desc, fontSize = 14.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f), maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
 }
