@@ -349,14 +349,13 @@ private fun LoopCard(
             Modifier
                 .height(size.dp)
                 .graphicsLayer { alpha = if (dragging) 0.3f else 1f }
-                .clip(shape)
                 .background(frame, shape)
                 .border(if (selected || running || dropHere) 3.dp else 2.dp, if (failedWhole) Ink else Accent2, shape)
                 .then(if (editable) Modifier.clickable { state.select(Selection.Loop(index)) } else Modifier)
                 .onGloballyPositioned { c -> dnd.toRoot(c)?.let { dnd.containers[Container.Loop(index)] = it; dnd.cards[Slot.Top(index)] = it } }
-                .padding(horizontal = 5.dp),
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Box(
                 Modifier
@@ -406,18 +405,18 @@ private fun FunctionPanel(state: GameState, dnd: DragController, size: Int, edit
         selected || dropHere -> BlockOpenFill
         else -> BlockFill
     }
-    val inner = size - 10
+    // Cards keep nearly their full size and get room around them for the selection badges.
+    val inner = size - 6
     FlowRow(
         Modifier
             .fillMaxWidth()
-            .clip(shape)
             .background(fill, shape)
             .border(if (selected || running || dropHere) 3.dp else 2.dp, BlockColor, shape)
             .then(if (editable) Modifier.clickable { state.select(Selection.Function) } else Modifier)
             .onGloballyPositioned { c -> dnd.toRoot(c)?.let { dnd.containers[Container.Function] = it } }
-            .padding(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(
             Modifier.size(inner.dp).background(if (selected) BlockColor else Color.Transparent, RoundedCornerShape(10.dp)),
