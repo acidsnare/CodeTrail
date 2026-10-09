@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.app.theme.Character
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.foundation.layout.heightIn
 import codetrail.app.sound.Sfx
 import codetrail.app.sound.SoundPlayer
 import androidx.compose.foundation.layout.Arrangement
@@ -63,8 +65,18 @@ val Accent = Color(0xFF43A047)
 val Accent2 = Color(0xFF6A4DBA)
 val Star = Color(0xFFFFD54F)
 
-/** Minimum height of small secondary controls: 48dp under a finger, Material's 40dp under a mouse. */
-val TapTarget: Dp get() = if (codetrail.app.Platform.touch) 48.dp else 40.dp
+val Pill = Color(0x26FFFFFF)
+
+/** How much FitScene shrank the scene: 1 on a 1280x800 desktop window, ~0.57 on a phone. */
+val LocalSceneScale = compositionLocalOf { 1f }
+
+/**
+ * Minimum height of tappable controls. Under a finger this is 44 physical dp, converted back
+ * into scene units (the scene is scaled down on phones, so 48 scene dp would be only ~27 real
+ * dp); under a mouse Material's 40dp is enough.
+ */
+val TapTarget: Dp
+    @Composable get() = if (codetrail.app.Platform.touch) maxOf(48.dp, 44.dp / LocalSceneScale.current) else 40.dp
 
 @Composable
 fun characterPainter(c: Character): Painter = painterResource(c.art)
@@ -120,7 +132,7 @@ fun MenuButton(text: String, color: Color = Color.White, textColor: Color = Ink,
         interactionSource = interaction,
         colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = textColor, disabledContainerColor = color.copy(alpha = 0.3f)),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.width(width).padding(vertical = 2.dp).graphicsLayer { scaleX = scale; scaleY = scale },
+        modifier = Modifier.width(width).heightIn(min = TapTarget).padding(vertical = 2.dp).graphicsLayer { scaleX = scale; scaleY = scale },
     ) {
         Text(text, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
     }

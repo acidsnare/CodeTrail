@@ -35,7 +35,7 @@ fun FitScene(content: @Composable () -> Unit) {
         val scale = min(maxWidth / SceneWidth, maxHeight / SceneHeight)
         val sceneWidth = minOf(maxWidth / scale, SceneMaxWidth)
         val sceneHeight = maxHeight / scale
-        CompositionLocalProvider(LocalDensity provides Density(base.density * scale, base.fontScale)) {
+        CompositionLocalProvider(LocalDensity provides Density(base.density * scale, base.fontScale), LocalSceneScale provides scale) {
             Box(Modifier.size(sceneWidth, sceneHeight)) { content() }
         }
     }

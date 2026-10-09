@@ -114,7 +114,6 @@ import codetrail.app.res.won_payout
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-private val Pill = Color(0x26FFFFFF)
 
 @Composable
 fun GameScreen(app: AppState, state: GameState) {

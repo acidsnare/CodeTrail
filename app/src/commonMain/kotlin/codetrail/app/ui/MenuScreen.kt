@@ -2,6 +2,8 @@ package codetrail.app.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,17 +72,6 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                 Spacer(Modifier.height(28.dp))
 
                 if (profile != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Avatar(hero, 64.dp, selected = true) { pickHero = true }
-                        Column(Modifier.padding(start = 14.dp)) {
-                            Text(profile.name, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text(stringResource(Res.string.stars_total, profile.progress.totalStars), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Star)
-                        }
-                    }
-                    Spacer(Modifier.height(20.dp))
-                }
-
-                if (profile != null) {
                     if (app.canContinue) MenuButton(stringResource(Res.string.menu_continue), color = Accent, textColor = Color.White) { app.continueGame() }
                     MenuButton(stringResource(Res.string.menu_play), color = if (app.canContinue) Color.White else Accent, textColor = if (app.canContinue) Ink else Color.White) { app.goPlay() }
                 }
@@ -110,6 +101,25 @@ fun MenuScreen(app: AppState, onQuit: () -> Unit) {
                         Text(stringResource(Res.string.hero_change_hint), color = Color.White.copy(alpha = 0.6f), fontSize = 15.sp)
                     }
                 }
+            }
+        }
+        // Player pill in the top-right corner, the same chrome as the game header: keeps the
+        // player's identity apart from the action buttons. Tap to change the hero.
+        if (profile != null) {
+            Row(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(24.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Pill)
+                    .clickable { pickHero = true }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(Res.string.stars_total, profile.progress.totalStars), color = Star, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                Avatar(hero, 44.dp, selected = true)
+                Text(profile.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
         if (pickHero && profile != null) {
