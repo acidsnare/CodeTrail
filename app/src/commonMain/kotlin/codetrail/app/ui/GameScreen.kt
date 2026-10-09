@@ -167,7 +167,7 @@ fun GameScreen(app: AppState, state: GameState) {
                             onCellClick = if (state.mode == GameMode.PREDICT) ({ state.selectGuess(it) }) else null,
                         )
                         }
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (!state.completed) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (state.mode == GameMode.FORWARD) {
                                 // After a hint the button shows the best rating still possible.
                                 val cap = if (state.hintsUsed > 0) "  ·  ${"★".repeat(state.maxStars)}" else ""
@@ -336,10 +336,13 @@ private fun SpeechBubble(state: GameState) {
 private fun statusText(state: GameState): String {
     if (state.completed && state.phase != Phase.WON) return stringResource(Res.string.level_done)
     if (state.mode == GameMode.PREDICT) return predictText(state)
-    state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
-    if (state.hintRemoveLast) return stringResource(Res.string.hint_remove)
-    if (state.hintRemoveLastFunction) return stringResource(Res.string.hint_remove_block)
-    if (state.hintReady) return stringResource(Res.string.hint_ready)
+    if (state.phase == Phase.EDITING) {
+        // Hints only make sense while editing; after a run the outcome speaks.
+        state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
+        if (state.hintRemoveLast) return stringResource(Res.string.hint_remove)
+        if (state.hintRemoveLastFunction) return stringResource(Res.string.hint_remove_block)
+        if (state.hintReady) return stringResource(Res.string.hint_ready)
+    }
     return forwardText(state)
 }
 
