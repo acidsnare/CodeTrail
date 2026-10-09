@@ -63,6 +63,9 @@ val Accent = Color(0xFF43A047)
 val Accent2 = Color(0xFF6A4DBA)
 val Star = Color(0xFFFFD54F)
 
+/** Minimum height of small secondary controls: 48dp under a finger, Material's 40dp under a mouse. */
+val TapTarget: Dp get() = if (codetrail.app.Platform.touch) 48.dp else 40.dp
+
 @Composable
 fun characterPainter(c: Character): Painter = painterResource(c.art)
 

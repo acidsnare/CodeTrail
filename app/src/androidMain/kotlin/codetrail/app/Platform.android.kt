@@ -7,6 +7,8 @@ actual object Platform {
 
     actual val canQuit: Boolean = true
 
+    actual val touch: Boolean = true
+
     // Profiles travel by copy / paste code on phones; no file pickers wired up here.
     actual val ownsClipboard: Boolean = false
 

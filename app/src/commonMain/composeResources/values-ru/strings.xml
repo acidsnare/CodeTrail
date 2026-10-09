@@ -62,8 +62,8 @@
     <string name="back">Назад</string>
 
     <string name="profiles_title">Кто играет?</string>
-    <string name="profiles_new">Новый профиль</string>
-    <string name="profiles_name_hint">Имя</string>
+    <string name="profiles_new">Имя игрока</string>
+    <string name="profiles_name_hint">Как тебя зовут?</string>
     <string name="profiles_create">Создать</string>
     <string name="profiles_delete">Удалить</string>
     <string name="profiles_confirm_delete">Точно удалить?</string>

@@ -7,6 +7,8 @@ actual object Platform {
 
     actual val canQuit: Boolean = false
 
+    actual val touch: Boolean = Browser.hasTouch()
+
     actual val ownsClipboard: Boolean = true
 
     actual fun copyToClipboard(text: String) = Browser.copy(text)

@@ -9,6 +9,7 @@ internal object Browser {
     fun reload() = jsReload()
     fun language(): String = jsLanguage()
     fun now(): Long = jsNow().toLong()
+    fun hasTouch(): Boolean = jsHasTouch()
     fun copy(text: String) = jsCopy(text)
     fun download(name: String, text: String) = jsDownload(name, text)
     fun pickTextFile(onLoaded: (String) -> Unit) = jsPickTextFile(onLoaded)
@@ -22,6 +23,7 @@ private fun lsKey(i: Int): String? = js("localStorage.key(i)")
 private fun jsReload(): Unit = js("location.reload()")
 private fun jsLanguage(): String = js("(navigator.language || 'en')")
 private fun jsNow(): Double = js("Date.now()")
+private fun jsHasTouch(): Boolean = js("(navigator.maxTouchPoints || 0) > 0")
 private fun jsCopy(text: String): Unit = js("""{
     const fallback = () => {
         const ta = document.createElement('textarea');

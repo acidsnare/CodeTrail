@@ -97,14 +97,20 @@ fun ProfilesScreen(app: AppState) {
             }
             Spacer(Modifier.height(24.dp))
 
+            if (app.allProfiles.isEmpty()) {
+                // First launch: one big form in the middle instead of a thin row at the top of an empty screen.
+                Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Text(stringResource(Res.string.profiles_empty), color = Color.White.copy(alpha = 0.85f), fontSize = 20.sp, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(24.dp))
+                    NewProfileRow(app, Modifier.width(560.dp), big = true)
+                    Spacer(Modifier.weight(0.6f))
+                }
+            } else
             Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 // Left: profile list + create
                 Column(Modifier.weight(1.1f)) {
                     NewProfileRow(app)
                     Spacer(Modifier.height(16.dp))
-                    if (app.allProfiles.isEmpty()) {
-                        Text(stringResource(Res.string.profiles_empty), color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp)
-                    }
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(app.allProfiles, key = { it.id }) { p -> ProfileCard(app, p, onExport = { exporting = p }) }
                     }
@@ -200,8 +206,8 @@ private fun ImportDialog(app: AppState, onClose: () -> Unit) {
                     unfocusedTextColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
-                    focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+                    focusedPlaceholderColor = Color.White.copy(alpha = 0.35f),
+                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.35f),
                     cursorColor = Color.White,
                     errorTextColor = Color.White,
                     errorCursorColor = Color.White,
@@ -244,14 +250,16 @@ private fun DialogFrame(title: String, onClose: () -> Unit, content: @Composable
 }
 
 @Composable
-private fun NewProfileRow(app: AppState) {
+private fun NewProfileRow(app: AppState, modifier: Modifier = Modifier.fillMaxWidth(), big: Boolean = false) {
     var name by remember { mutableStateOf("") }
+    val textSize = if (big) 24.sp else 18.sp
     // The Create button lives inside the field so the outline spans the same width as the cards below.
     OutlinedTextField(
         value = name,
         onValueChange = { if (it.length <= 16) name = it },
         singleLine = true,
-        placeholder = { Text(stringResource(Res.string.profiles_name_hint)) },
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = textSize, fontWeight = FontWeight.SemiBold),
+        placeholder = { Text(stringResource(Res.string.profiles_name_hint), fontSize = textSize) },
         label = { Text(stringResource(Res.string.profiles_new)) },
         trailingIcon = {
             Button(
@@ -259,8 +267,8 @@ private fun NewProfileRow(app: AppState) {
                 enabled = name.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Color.White.copy(alpha = 0.15f), disabledContentColor = Color.White.copy(alpha = 0.4f)),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.padding(end = 8.dp),
-            ) { Text(stringResource(Res.string.profiles_create), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                modifier = Modifier.padding(end = 8.dp).heightIn(min = if (big) 52.dp else TapTarget),
+            ) { Text(stringResource(Res.string.profiles_create), fontSize = if (big) 20.sp else 16.sp, fontWeight = FontWeight.Bold) }
         },
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = Color.White,
@@ -269,11 +277,11 @@ private fun NewProfileRow(app: AppState) {
             unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
             focusedLabelColor = Color.White,
             unfocusedLabelColor = Color.White.copy(alpha = 0.8f),
-            focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-            unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+            focusedPlaceholderColor = Color.White.copy(alpha = 0.35f),
+            unfocusedPlaceholderColor = Color.White.copy(alpha = 0.35f),
             cursorColor = Color.White,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
     )
 }
 
@@ -309,20 +317,20 @@ private fun ProfileCard(app: AppState, p: Profile, onExport: () -> Unit) {
                 modifier = Modifier.padding(end = 8.dp),
             ) { Text(stringResource(Res.string.menu_play) + "  ▶", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
         } else {
-            OutlinedButton(onClick = { app.selectProfile(p) }, modifier = Modifier.padding(end = 8.dp)) {
+            OutlinedButton(onClick = { app.selectProfile(p) }, modifier = Modifier.padding(end = 8.dp).heightIn(min = TapTarget)) {
                 Text(stringResource(Res.string.profiles_select), color = Color.White)
             }
         }
         // Icon only: a fourth text button pushed the stats line onto two rows in Russian.
-        OutlinedButton(onClick = onExport, contentPadding = PaddingValues(0.dp), modifier = Modifier.padding(end = 8.dp).size(44.dp)) {
+        OutlinedButton(onClick = onExport, contentPadding = PaddingValues(0.dp), modifier = Modifier.padding(end = 8.dp).size(TapTarget + 4.dp)) {
             Icon(Icons.Default.Share, stringResource(Res.string.profiles_export), Modifier.size(20.dp), tint = Color.White.copy(alpha = 0.8f))
         }
         if (confirmDelete) {
-            Button(onClick = { app.deleteProfile(p) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))) {
+            Button(onClick = { app.deleteProfile(p) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)), modifier = Modifier.heightIn(min = TapTarget)) {
                 Text(stringResource(Res.string.profiles_confirm_delete))
             }
         } else {
-            OutlinedButton(onClick = { confirmDelete = true }) { Text(stringResource(Res.string.profiles_delete), color = Color.White.copy(alpha = 0.8f)) }
+            OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.heightIn(min = TapTarget)) { Text(stringResource(Res.string.profiles_delete), color = Color.White.copy(alpha = 0.8f)) }
         }
         Spacer(Modifier.width(4.dp))
     }

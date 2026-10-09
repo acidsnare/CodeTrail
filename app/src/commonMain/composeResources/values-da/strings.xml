@@ -60,8 +60,8 @@
     <string name="back">Tilbage</string>
 
     <string name="profiles_title">Hvem spiller?</string>
-    <string name="profiles_new">Ny profil</string>
-    <string name="profiles_name_hint">Navn</string>
+    <string name="profiles_new">Spillerens navn</string>
+    <string name="profiles_name_hint">Hvad hedder du?</string>
     <string name="profiles_create">Opret</string>
     <string name="profiles_delete">Slet</string>
     <string name="profiles_confirm_delete">Slet helt sikkert?</string>

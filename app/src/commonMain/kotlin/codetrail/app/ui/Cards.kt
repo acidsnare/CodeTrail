@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -165,7 +166,9 @@ fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
             .background(if (selected) Color.White else Color.Transparent, RoundedCornerShape(8.dp))
             .border(2.dp, if (selected) Color.White else content.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
             .clickable { sounds.play(Sfx.CLICK); onClick() }
+            .heightIn(min = TapTarget - 4.dp)
             .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(text, color = if (selected) Ink else content, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
     }

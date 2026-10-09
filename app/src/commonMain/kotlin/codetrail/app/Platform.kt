@@ -10,6 +10,9 @@ expect object Platform {
     /** Desktop apps have a Quit button; a browser tab does not. */
     val canQuit: Boolean
 
+    /** Fingers, not a mouse: small controls grow to a comfortable tap size. */
+    val touch: Boolean
+
     /** Whether [saveTextFile] and [openTextFile] do anything here. Phones only use the copy / paste code. */
     val canUseFiles: Boolean
 

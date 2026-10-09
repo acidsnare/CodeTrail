@@ -61,8 +61,8 @@
     <string name="back">Înapoi</string>
 
     <string name="profiles_title">Cine joacă?</string>
-    <string name="profiles_new">Profil nou</string>
-    <string name="profiles_name_hint">Nume</string>
+    <string name="profiles_new">Numele jucătorului</string>
+    <string name="profiles_name_hint">Cum te cheamă?</string>
     <string name="profiles_create">Creează</string>
     <string name="profiles_delete">Șterge</string>
     <string name="profiles_confirm_delete">Sigur ștergi?</string>

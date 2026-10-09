@@ -11,6 +11,8 @@ actual object Platform {
 
     actual val canQuit: Boolean = true
 
+    actual val touch: Boolean = false
+
     actual val ownsClipboard: Boolean = false
 
     actual fun copyToClipboard(text: String) = Unit

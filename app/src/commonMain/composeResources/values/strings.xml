@@ -60,8 +60,8 @@
     <string name="back">Back</string>
 
     <string name="profiles_title">Who is playing?</string>
-    <string name="profiles_new">New profile</string>
-    <string name="profiles_name_hint">Name</string>
+    <string name="profiles_new">Player name</string>
+    <string name="profiles_name_hint">What's your name?</string>
     <string name="profiles_create">Create</string>
     <string name="profiles_delete">Delete</string>
     <string name="profiles_confirm_delete">Really delete?</string>
