@@ -233,7 +233,7 @@ private fun ImportDialog(app: AppState, onClose: () -> Unit) {
 
 @Composable
 private fun DialogFrame(title: String, onClose: () -> Unit, content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Scrim).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
         Column(
             Modifier
                 .width(640.dp)

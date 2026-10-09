@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -150,6 +151,8 @@ fun GameScreen(app: AppState, state: GameState) {
                     Column(Modifier.weight(1.45f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         // The board takes what is left above the bubble and buttons, never more:
                         // on a wide screen it is height-bound, on a narrow one width-bound.
+                        // The goal comes first: the bubble sits above the board so the task is read before the cards.
+                        SpeechBubble(state)
                         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                             val ratio = boardAspect(state.level)
                             val width = minOf(maxWidth, maxHeight * ratio)
@@ -164,7 +167,6 @@ fun GameScreen(app: AppState, state: GameState) {
                             onCellClick = if (state.mode == GameMode.PREDICT) ({ state.selectGuess(it) }) else null,
                         )
                         }
-                        SpeechBubble(state)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (state.mode == GameMode.FORWARD) {
                                 // After a hint the button shows the best rating still possible.
@@ -243,7 +245,7 @@ private fun PillButton(glyph: String, text: String, enabled: Boolean = true, onC
 @Composable
 private fun LegendOverlay(state: GameState, onDismiss: () -> Unit) {
     val set = state.level.commandSet
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Scrim).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
         Column(
             Modifier
                 .width(620.dp)
@@ -295,6 +297,7 @@ private fun SmallAction(text: String, enabled: Boolean, filled: Boolean = false,
     Button(
         onClick = onClick,
         enabled = enabled,
+        modifier = Modifier.heightIn(min = TapTarget),
         shape = RoundedCornerShape(12.dp),
         colors = if (filled) {
             ButtonDefaults.buttonColors(containerColor = Accent2, disabledContainerColor = Accent2.copy(alpha = 0.5f), disabledContentColor = Color.White.copy(alpha = 0.7f))
@@ -377,7 +380,7 @@ private fun forwardText(state: GameState): String = when (state.phase) {
 
 @Composable
 private fun PauseOverlay(app: AppState, state: GameState) {
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(enabled = false) {}, contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Scrim).clickable(enabled = false) {}, contentAlignment = Alignment.Center) {
         Column(
             Modifier.background(MenuBackground, RoundedCornerShape(24.dp)).padding(36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -78,6 +78,13 @@ val LocalSceneScale = compositionLocalOf { 1f }
 val TapTarget: Dp
     @Composable get() = if (codetrail.app.Platform.touch) maxOf(48.dp, 44.dp / LocalSceneScale.current) else 40.dp
 
+/** Cards and slots grow by this on touch screens so a finger lands on them; 1 under a mouse. */
+val TouchBoost: Float
+    @Composable get() = if (codetrail.app.Platform.touch && LocalSceneScale.current < 1f) 1.2f else 1f
+
+/** Dim behind modal overlays: strong enough that the dialog does not blend into the screen below. */
+val Scrim = Color.Black.copy(alpha = 0.7f)
+
 @Composable
 fun characterPainter(c: Character): Painter = painterResource(c.art)
 
@@ -165,7 +172,7 @@ fun HeroPicker(profile: Profile, size: Dp = 84.dp, onChoose: (Character) -> Unit
 /** Modal hero picker over any screen. Click outside or pick a hero to close. */
 @Composable
 fun HeroPickerDialog(profile: Profile, onChoose: (Character) -> Unit, onDismiss: () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Scrim).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
         Column(
             Modifier
                 .background(MenuBackground, RoundedCornerShape(24.dp))
@@ -191,7 +198,7 @@ fun ConfirmDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).clickable(onClick = onCancel), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Scrim).clickable(onClick = onCancel), contentAlignment = Alignment.Center) {
         Column(
             Modifier
                 .width(440.dp)

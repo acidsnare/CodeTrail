@@ -55,6 +55,7 @@ import codetrail.app.Selection
 import codetrail.app.Slot
 import codetrail.app.res.Res
 import codetrail.app.res.block_hint
+import codetrail.app.res.new_level
 import codetrail.app.res.predict_check
 import codetrail.app.res.program_title
 import codetrail.app.res.run
@@ -89,7 +90,7 @@ private val Danger = Color(0xFFE53935)
 fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -> Unit = {}) {
     val level = state.level
     val scope = rememberCoroutineScope()
-    val slotSize = 58
+    val slotSize = (58 * TouchBoost).toInt()
     val editable = state.mode == GameMode.FORWARD
     val dnd = remember(state) { DragController(state, scope) }
     // The controller keeps bounds of cards that are gone after an edit; refresh from scratch each time.
@@ -168,9 +169,18 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
 
             if (editable && !state.completed) CommandTray(state, dnd, level.commandSet, onLegend)
 
-            Button(
+            if (state.completed) {
+                // The level is done: the big green button becomes "New level" so the next step is obvious.
+                Button(
+                    onClick = { state.newLevel() },
+                    enabled = state.phase != Phase.RUNNING,
+                    colors = ButtonDefaults.buttonColors(containerColor = Accent2),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth().height(64.dp),
+                ) { Text("✦  " + stringResource(Res.string.new_level), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+            } else Button(
                 onClick = { scope.launch { state.run() } },
-                enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() && !state.completed &&
+                enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() &&
                     (editable || state.guess != null),
                 colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Accent.copy(alpha = 0.35f)),
                 shape = RoundedCornerShape(18.dp),
@@ -275,16 +285,18 @@ private fun ProgramCard(
 /** Delete badge in the top-right corner and, for numbered cards, -/+ at the bottom corners. */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.SelectionControls(cmd: Command, size: Int, onDelete: () -> Unit, onAdjust: (Int) -> Unit) {
+    // Big enough to hit with a finger: a third of the card, at least 28dp.
+    val badge = maxOf(28.dp, (size * 0.42f * TouchBoost).dp)
     Box(
         Modifier
             .align(Alignment.TopEnd)
-            .offset(x = 8.dp, y = (-8).dp)
-            .size(24.dp)
+            .offset(x = badge / 3, y = -badge / 3)
+            .size(badge)
             .shadow(3.dp, CircleShape)
             .background(Danger, CircleShape)
             .clickable(onClick = onDelete),
         contentAlignment = Alignment.Center,
-    ) { Text("✕", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+    ) { Text("✕", color = Color.White, fontWeight = FontWeight.Bold, fontSize = (badge.value * 0.55f).sp) }
     if (cmd is Command.Forward || cmd is Command.Repeat) {
         Row(
             Modifier.align(Alignment.BottomCenter).offset(y = 10.dp),
@@ -299,9 +311,9 @@ private fun androidx.compose.foundation.layout.BoxScope.SelectionControls(cmd: C
 @Composable
 private fun MiniStep(label: String, onClick: () -> Unit) {
     Box(
-        Modifier.size(22.dp).shadow(3.dp, CircleShape).background(Ink, CircleShape).clickable(onClick = onClick),
+        Modifier.size((22 * TouchBoost * TouchBoost).dp).shadow(3.dp, CircleShape).background(Ink, CircleShape).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
-    ) { Text(label, color = Tray, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
+    ) { Text(label, color = Tray, fontWeight = FontWeight.ExtraBold, fontSize = (15 * TouchBoost).sp) }
 }
 
 /**
@@ -460,7 +472,7 @@ private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet, 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 @Composable
                 fun tray(c: Command, hinted: Boolean = state.hintCommand == c) {
-                    CommandCard(c, size = 62, hinted = hinted, modifier = Modifier.dragSource(dnd, { c }, null, canAdd), onClick = { add(c) })
+                    CommandCard(c, size = (62 * TouchBoost).toInt(), hinted = hinted, modifier = Modifier.dragSource(dnd, { c }, null, canAdd), onClick = { add(c) })
                 }
                 if (!set.relative) {
                     for (d in listOf(Dir.NORTH, Dir.SOUTH, Dir.WEST, Dir.EAST)) tray(Command.Move(d))
@@ -523,7 +535,7 @@ private fun Picker(card: @Composable () -> Unit, canDec: Boolean, canInc: Boolea
 private fun StepButton(label: String, enabled: Boolean, onClick: () -> Unit) {
     Box(
         Modifier
-            .size(28.dp)
+            .size((28 * TouchBoost * TouchBoost).dp)
             .background(if (enabled) Ink else Ink.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
