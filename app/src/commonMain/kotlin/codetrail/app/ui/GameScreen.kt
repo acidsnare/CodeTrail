@@ -52,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -167,17 +168,19 @@ fun GameScreen(app: AppState, state: GameState) {
                             onCellClick = if (state.mode == GameMode.PREDICT) ({ state.selectGuess(it) }) else null,
                         )
                         }
-                        if (!state.completed) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        // Keep the row in the layout after a win so the board does not jump; only hide its contents.
+                        val done = state.completed
+                        Row(Modifier.fillMaxWidth().alpha(if (done) 0f else 1f), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (state.mode == GameMode.FORWARD) {
                                 // After a hint the button shows the best rating still possible.
                                 val cap = if (state.hintsUsed > 0) "  ·  ${"★".repeat(state.maxStars)}" else ""
-                                SmallAction("💡  " + stringResource(Res.string.hint) + cap, enabled = state.canEdit) { state.hint() }
+                                SmallAction("💡  " + stringResource(Res.string.hint) + cap, enabled = state.canEdit && !done) { state.hint() }
                             }
                             Spacer(Modifier.weight(1f))
                             if (state.mode == GameMode.FORWARD) {
-                                SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty()) { state.clearProgram() }
+                                SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty() && !done) { state.clearProgram() }
                             }
-                            SmallAction("✦  " + stringResource(Res.string.new_level), enabled = state.phase != Phase.RUNNING, filled = true) { state.newLevel() }
+                            SmallAction("✦  " + stringResource(Res.string.new_level), enabled = state.phase != Phase.RUNNING && !done, filled = true) { state.newLevel() }
                         }
                     }
                     ProgramPanel(state, Modifier.weight(1f), onLegend = { legend = true })
