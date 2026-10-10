@@ -39,9 +39,9 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 - **Hints** that point at the next card, failure scenes (splash, bump, head shake), confetti
   and star bursts on a win.
 - **English, Danish, Romanian, Russian and Ukrainian** UI.
-- **Runs on the desktop, in the browser and on Android** from the same code: native
-  installers for macOS, Windows and Linux, a Kotlin/Wasm build served from GitHub Pages, and
-  an APK for tablets.
+- **Runs on the desktop, in the browser, on Android and on iOS** from the same code: native
+  installers for macOS, Windows and Linux, a Kotlin/Wasm build served from GitHub Pages, an
+  APK for tablets and an Xcode project for iPhone and iPad.
 
 ## Project layout
 
@@ -55,7 +55,9 @@ app/       Compose Multiplatform app.
            snapshot and render tools.
            wasmJsMain: browser entry point, localStorage saves, Web Audio, index.html.
            androidMain: file storage, AudioTrack output, locale.
+           iosMain: file storage, AVAudioPlayer output, locale, UIViewController entry point.
 android/   Thin Android application module: activity, manifest, launcher icons, APK packaging.
+iosApp/    Thin Xcode project: SwiftUI shell, Info.plist, app icon; links the Kotlin framework.
 assets/    App icon sources and the hero SVG masters (converted to XML vectors by tools/svg2vd.py).
 tools/     Build-time helpers.
 ```
@@ -141,6 +143,26 @@ ANDROID_KEY_PASSWORD
 Locally, export the same values plus `ANDROID_KEYSTORE_FILE=/path/to/release.jks` before running
 `:android:bundleRelease`. The privacy policy required by Play is served with the web build at
 `/privacy.html`. A one-page guide for teachers is served at `/school.html` (English), `/skole.html` (Danish) and `/school-<lang>.html` for ro, ru, uk; all are rendered from `tools/school_pages.py`.
+
+## iOS
+
+`app` also builds a static framework for `iosArm64` and `iosSimulatorArm64`; `iosApp/` is the
+Xcode project around it. Open `iosApp/iosApp.xcodeproj` and run, or from the terminal:
+
+```bash
+xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
+  -sdk iphonesimulator -arch arm64 -derivedDataPath iosApp/build \
+  CODE_SIGNING_ALLOWED=NO build
+xcrun simctl install booted iosApp/build/Build/Products/Debug-iphonesimulator/CodeTrail.app
+```
+
+The "Build Kotlin framework" phase runs `:app:embedAndSignAppleFrameworkForXcode`, the last
+phase copies the version from `gradle.properties` into the bundle (build number = Android
+`versionCode`). Running on a real device or shipping through TestFlight needs an Apple Developer
+account: set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`. The release workflow builds an
+unsigned simulator app (`codetrail-ios-simulator.zip`) to keep the target compiling.
+
+Language on iOS is applied through the `AppleLanguages` default and takes effect on the next launch.
 
 ## Installers
 

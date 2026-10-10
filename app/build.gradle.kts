@@ -28,6 +28,14 @@ kotlin {
         binaries.executable()
     }
 
+    // iOS: a static framework the thin Xcode project in iosApp/ links against.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "CodeTrail"
+            isStatic = true
+        }
+    }
+
     sourceSets {
         // Everything a player sees lives here: screens, board art, game and app state, sound synthesis.
         // Platform code (window, files, audio device, locale) sits in the target source sets.

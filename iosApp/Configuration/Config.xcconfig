@@ -1,0 +1,7 @@
+// Shared build settings. The version comes from gradle.properties (codetrail.version) through the
+// "Sync version" build phase, which writes Version.xcconfig next to this file.
+#include? "Version.xcconfig"
+
+TEAM_ID =
+BUNDLE_ID = dk.codetrail.app
+APP_NAME = CodeTrail
