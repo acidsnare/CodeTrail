@@ -159,8 +159,10 @@ xcrun simctl install booted iosApp/build/Build/Products/Debug-iphonesimulator/Co
 The "Build Kotlin framework" phase runs `:app:embedAndSignAppleFrameworkForXcode`, the last
 phase copies the version from `gradle.properties` into the bundle (build number = Android
 `versionCode`). Running on a real device or shipping through TestFlight needs an Apple Developer
-account: set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`. The release workflow builds an
-unsigned simulator app (`codetrail-ios-simulator.zip`) to keep the target compiling.
+account: set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`. The "iOS (manual)" workflow
+builds an unsigned simulator app (`codetrail-ios-simulator.zip`) on demand from the Actions tab,
+optionally attaching it to a release tag; it is not part of the tag release because macOS runner
+minutes are expensive.
 
 Language switching on iOS bypasses the system locale: `AppLocale.ios.kt` provides its own
 `ComposeEnvironment` to Compose Resources (internal API, hence the suppressed visibility errors),

@@ -1,0 +1,45 @@
+# iOS simulator build, on demand only: macOS runner minutes cost ten times Linux ones and there
+# is nothing to sign for real devices without an Apple Developer account. Run it from the Actions
+# tab; give it a tag to attach the zip to that release.
+name: iOS (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach the build to (e.g. v1.6.0); empty keeps it as a workflow artifact"
+        required: false
+        default: ""
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build simulator app
+        run: |
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release \
+            -sdk iphonesimulator -arch arm64 -derivedDataPath iosApp/build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build | tail -40
+          test -d iosApp/build/Build/Products/Release-iphonesimulator/CodeTrail.app
+      - name: Zip
+        run: cd iosApp/build/Build/Products/Release-iphonesimulator && zip -qry "$GITHUB_WORKSPACE/codetrail-ios-simulator.zip" CodeTrail.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codetrail-ios-simulator
+          path: codetrail-ios-simulator.zip
+      - name: Attach to release
+        if: inputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          files: codetrail-ios-simulator.zip
