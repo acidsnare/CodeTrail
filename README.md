@@ -146,7 +146,7 @@ Locally, export the same values plus `ANDROID_KEYSTORE_FILE=/path/to/release.jks
 
 ## iOS
 
-`app` also builds a static framework for `iosArm64` and `iosSimulatorArm64`; `iosApp/` is the
+`app` also builds a dynamic framework for `iosArm64` and `iosSimulatorArm64`; `iosApp/` is the
 Xcode project around it. Open `iosApp/iosApp.xcodeproj` and run, or from the terminal:
 
 ```bash
@@ -162,7 +162,9 @@ phase copies the version from `gradle.properties` into the bundle (build number 
 account: set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`. The release workflow builds an
 unsigned simulator app (`codetrail-ios-simulator.zip`) to keep the target compiling.
 
-Language on iOS is applied through the `AppleLanguages` default and takes effect on the next launch.
+Language switching on iOS bypasses the system locale: `AppLocale.ios.kt` provides its own
+`ComposeEnvironment` to Compose Resources (internal API, hence the suppressed visibility errors),
+so the chosen language applies immediately like on the other targets.
 
 ## Installers
 

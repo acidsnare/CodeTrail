@@ -12,7 +12,9 @@ import platform.UIKit.UIViewController
 fun MainViewController(): UIViewController = ComposeUIViewController {
     val storage = remember { IosStorage() }
     val app = remember { AppState(storage, storage, IosSoundPlayer()) }
-    FitScene {
-        Root(app, onQuit = { app.exitToMenu() })
+    ProvideResourceLanguage {
+        FitScene {
+            Root(app, onQuit = { app.exitToMenu() })
+        }
     }
 }

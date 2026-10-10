@@ -28,11 +28,13 @@ kotlin {
         binaries.executable()
     }
 
-    // iOS: a static framework the thin Xcode project in iosApp/ links against.
+    // iOS: a framework the thin Xcode project in iosApp/ links against. Dynamic on purpose: Xcode
+    // does not track a static framework as a linker input, so Kotlin changes would not reach the
+    // app without a clean build; a dynamic one is re-copied into the bundle on every build.
     listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
         target.binaries.framework {
             baseName = "CodeTrail"
-            isStatic = true
+            isStatic = false
         }
     }
 
