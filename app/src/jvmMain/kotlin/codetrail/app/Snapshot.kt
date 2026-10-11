@@ -4,6 +4,8 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.use
 import codetrail.core.command.Command
 import codetrail.core.engine.Solver
+import codetrail.core.engine.CardAddress
+import codetrail.core.engine.RepairPuzzles
 import codetrail.core.progress.Profile
 import codetrail.core.progress.ProfileRepository
 import codetrail.core.progress.Progress
@@ -64,6 +66,20 @@ fun main(args: Array<String>) {
                 state.selectGuess(state.predict!!.answer)
                 if (solve) runBlocking { state.run() }
                 println("predict program=${state.program.size} answer=${state.predict!!.answer} phase=${state.phase}")
+            } else if (mode == GameMode.REPAIR) {
+                if (args.getOrNull(3) == "hint") state.hint()
+                if (solve) {
+                    val puzzle = state.repair!!
+                    val selection = when (val at = puzzle.changedCard) {
+                        is CardAddress.Main -> if (state.program[at.index] is Command.Repeat) Selection.Loop(at.index) else Selection.Card(Slot.Top(at.index))
+                        is CardAddress.Loop -> Selection.Card(Slot.InLoop(at.index, at.bodyIndex))
+                        is CardAddress.Block -> Selection.Card(Slot.InFunction(at.index))
+                    }
+                    state.select(selection)
+                    state.addCommand(RepairPuzzles.cardAt(puzzle.solution, puzzle.changedCard))
+                    runBlocking { state.run() }
+                } else if (args.getOrNull(3) == "fail") runBlocking { state.run() }
+                println("repair changes=${state.repairChanges} hint=${state.repairHintSlot} phase=${state.phase} stars=${state.stars} payout=${state.payout}")
             } else if (args.getOrNull(3) == "dnd") {
                 // Exercise the editing model: selection-based insert, drops into a loop and into block A, moves, undo.
                 fun show(label: String) = println("$label: ${codetrail.core.engine.Ascii.program(state.program)}   A=[${codetrail.core.engine.Ascii.program(state.function)}]  sel=${state.selection}")
@@ -120,7 +136,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    ImageComposeScene(width = 1280, height = 800).use { scene ->
+    ImageComposeScene(width = 1280, height = args.getOrNull(11)?.toIntOrNull() ?: 800).use { scene ->
         scene.setContent { Root(app, onQuit = {}) }
         scene.render(nanoTime = 0L)
         // Step through intermediate frames so animations driven by frame clocks advance.

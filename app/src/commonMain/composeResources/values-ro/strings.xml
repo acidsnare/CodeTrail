@@ -176,4 +176,16 @@
     <string name="legend_repeat">Cardurile dinăuntru rulează de atâtea ori. Apasă pe ramă, apoi adaugă carduri în ea.</string>
     <string name="legend_call">Rulează blocul A. Construiește blocul o dată, jos, apoi cheamă-l de câte ori vrei.</string>
     <string name="legend_goal">Eroul trebuie să se oprească exact pe țintă. Mai puține carduri înseamnă mai multe stele.</string>
+    <string name="mode_repair">Repară programul</string>
+    <string name="mode_repair_desc">Găsește și înlocuiește un cartonaș greșit</string>
+    <string name="repair_prompt">Un cartonaș este greșit. Selectează-l și înlocuiește-l. Rulează programul ca să verifici.</string>
+    <string name="repair_program_title">Modificări  %1$d / 1</string>
+    <string name="repair_restore">Restabilește</string>
+    <string name="repair_hint_card">Verifică cartonașul evidențiat.</string>
+    <string name="repair_hint_replace">Încearcă să-l înlocuiești cu „%1$s”.</string>
+    <string name="repair_one_change">Repară exact un cartonaș. Lasă restul așa cum era.</string>
+    <string name="repair_correct">Reparat!</string>
+    <string name="repair_legend">Repară exact un cartonaș: selectează-l în program, apoi apasă pe înlocuitorul din tavă. Folosește −/+ pentru a schimba numerele.</string>
+    <string name="repair_hint_restore">Readu acest cartonaș la forma inițială.</string>
+    <string name="repair_hint_restore_card">Restabilește cartonașul inițial: „%1$s”.</string>
 </resources>

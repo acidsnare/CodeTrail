@@ -44,6 +44,8 @@ import codetrail.app.res.mode_forward
 import codetrail.app.res.mode_forward_desc
 import codetrail.app.res.mode_predict
 import codetrail.app.res.mode_predict_desc
+import codetrail.app.res.mode_repair
+import codetrail.app.res.mode_repair_desc
 import codetrail.app.res.play_mode
 import codetrail.app.res.Res
 import codetrail.app.res.back
@@ -101,11 +103,11 @@ fun PlayScreen(app: AppState) {
             Spacer(Modifier.height(20.dp))
             Text(stringResource(Res.string.play_mode), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(10.dp))
-            // Intrinsic height so both mode cards are as tall as the one whose description wraps.
+            // Intrinsic height so all mode cards are as tall as the one whose description wraps.
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD) { mode = GameMode.FORWARD }
-                ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT) { mode = GameMode.PREDICT }
-                Spacer(Modifier.weight(1f))
+                ModeCard("🧩", stringResource(Res.string.mode_forward), stringResource(Res.string.mode_forward_desc), selected = mode == GameMode.FORWARD, modifier = Modifier.weight(1f)) { mode = GameMode.FORWARD }
+                ModeCard("🔍", stringResource(Res.string.mode_predict), stringResource(Res.string.mode_predict_desc), selected = mode == GameMode.PREDICT, modifier = Modifier.weight(1f)) { mode = GameMode.PREDICT }
+                ModeCard("🛠", stringResource(Res.string.mode_repair), stringResource(Res.string.mode_repair_desc), selected = mode == GameMode.REPAIR, modifier = Modifier.weight(1f)) { mode = GameMode.REPAIR }
                 MenuButton(stringResource(Res.string.play_start), color = Accent, textColor = Color.White, width = 200.dp) { app.startGame(world, tier, mode) }
             }
         }
@@ -163,10 +165,9 @@ private fun TierCard(tier: Int, name: String, solved: Int, selected: Boolean, on
 }
 
 @Composable
-private fun ModeCard(icon: String, title: String, desc: String, selected: Boolean, onClick: () -> Unit) {
+private fun ModeCard(icon: String, title: String, desc: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Row(
-        Modifier
-            .width(380.dp)
+        modifier
             .fillMaxHeight()
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) Color.White else Panel)
@@ -178,7 +179,7 @@ private fun ModeCard(icon: String, title: String, desc: String, selected: Boolea
         Spacer(Modifier.width(12.dp))
         Column {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (selected) Ink else Color.White)
-            Text(desc, fontSize = 14.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(desc, fontSize = 14.sp, color = (if (selected) Ink else Color.White).copy(alpha = 0.75f), maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
     }
 }

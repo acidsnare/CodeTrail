@@ -175,4 +175,16 @@
     <string name="legend_repeat">Kortene indeni køres så mange gange. Tryk på rammen, og læg derefter kort ind i den.</string>
     <string name="legend_call">Kører blok A. Byg blokken én gang nederst, og kald den så lige så tit du vil.</string>
     <string name="legend_goal">Helten skal stoppe præcis på målet. Færre kort giver flere stjerner.</string>
+    <string name="mode_repair">Ret programmet</string>
+    <string name="mode_repair_desc">Find og udskift ét forkert kort</string>
+    <string name="repair_prompt">Ét kort er forkert. Vælg et kort, og udskift det. Kør programmet for at tjekke.</string>
+    <string name="repair_program_title">Ændringer  %1$d / 1</string>
+    <string name="repair_restore">Gendan</string>
+    <string name="repair_hint_card">Tjek det fremhævede kort.</string>
+    <string name="repair_hint_replace">Prøv at udskifte det med »%1$s«.</string>
+    <string name="repair_one_change">Ret præcis ét kort. Lad resten være som før.</string>
+    <string name="repair_correct">Rettet!</string>
+    <string name="repair_legend">Ret præcis ét kort: vælg det i programmet, og tryk på erstatningen i bakken. Brug −/+ til at ændre tal.</string>
+    <string name="repair_hint_restore">Gendan dette kort til det oprindelige.</string>
+    <string name="repair_hint_restore_card">Gendan det oprindelige kort: »%1$s«.</string>
 </resources>

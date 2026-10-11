@@ -128,6 +128,7 @@ tasks.register<JavaExec>("snapshot") {
         providers.gradleProperty("frame").getOrElse("16"),
         providers.gradleProperty("hero").getOrElse("turtle"),
         providers.gradleProperty("mode").getOrElse("forward"),
+        providers.gradleProperty("height").getOrElse("800"),
     )
 }
 

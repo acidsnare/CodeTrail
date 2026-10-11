@@ -177,4 +177,16 @@
     <string name="legend_repeat">Карточки внутри выполняются столько раз. Нажми на рамку, потом добавляй карточки внутрь.</string>
     <string name="legend_call">Выполняет блок A. Собери блок один раз внизу, а потом вызывай сколько хочешь.</string>
     <string name="legend_goal">Герой должен остановиться точно на цели. Чем меньше карточек, тем больше звёзд.</string>
+    <string name="mode_repair">Почини программу</string>
+    <string name="mode_repair_desc">Найди и замени одну неверную карточку</string>
+    <string name="repair_prompt">В программе одна ошибка. Выбери карточку и замени её. Запускай, чтобы проверить.</string>
+    <string name="repair_program_title">Правки  %1$d / 1</string>
+    <string name="repair_restore">Вернуть исходную</string>
+    <string name="repair_hint_card">Проверь выделенную карточку.</string>
+    <string name="repair_hint_replace">Попробуй заменить её на «%1$s».</string>
+    <string name="repair_one_change">Исправь ровно одну карточку. Остальное оставь как было.</string>
+    <string name="repair_correct">Исправлено!</string>
+    <string name="repair_legend">Исправь ровно одну карточку: выбери её в программе и нажми на замену в лотке. Числа меняются кнопками −/+.</string>
+    <string name="repair_hint_restore">Верни эту карточку к исходной.</string>
+    <string name="repair_hint_restore_card">Верни исходную карточку: «%1$s».</string>
 </resources>

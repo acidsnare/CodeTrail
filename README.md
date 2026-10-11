@@ -24,7 +24,14 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
   5. loops: "repeat N times" on a bigger board with more obstacles and a slot budget that
      only fits a looping program
   6. blocks: one reusable "block A" of 3-4 cards, defined once and called from several places
-- **Two modes** - build the path, or read a given program and guess where the hero stops.
+- **Three modes** - build the path, read a given program and guess where the hero stops,
+  or **fix the program**: find and replace one wrong card in an otherwise working program.
+  Repair tasks cover all six tiers, including loop counts and cards inside block A. Select
+  a card to replace it, use -/+ for numbers, Undo or Restore to retrace your changes. Any
+  successful one-card repair counts. Practice runs do not lower the three-star rating;
+  the first hint locates a card (two stars), the second suggests a replacement (one star).
+  Edits and the hint rating cap survive saving and profile transfer. Repair rewards are
+  separate from building the same level.
 - **Six worlds** - Islands, Forest, Space, Ice, City, Lava - all drawn procedurally on a Canvas.
 - **Five heroes** unlocked with stars: turtle, penguin, fox, bear and the red panda.
   Harder tiers pay more stars (rating x tier).
@@ -47,7 +54,7 @@ Inspired by the Danish "Programmering" worksheets by mattip.dk.
 
 ```
 core/      Kotlin Multiplatform, no UI: grid model, commands, interpreter, solver,
-           level generator, predict puzzles, progress model.
+           level generator, predict and repair puzzles, progress model.
 app/       Compose Multiplatform app.
            commonMain: screens, board rendering, world art, game and app state, sound
            synthesis, strings, font and hero SVGs (Compose Resources).
@@ -83,12 +90,13 @@ Print sample levels for every tier and stress-test the generator:
 Render any screen to a PNG without opening a window (handy for checking layout):
 
 ```bash
+./gradlew :app:snapshot -Pmode=repair -Ptier=5 -Plang=ru -Pframe=600 -Pout=build/repair.png
 ./gradlew :app:snapshot -Pscreen=play -Pstars=30 -Plang=ru -Pout=build/play.png
 ./gradlew :app:snapshot -Ptier=4 -Pseed=7 -Pworld=lava -Phero=fox -Psolve -Pframe=700 -Pout=build/win.png
 ```
 
 Options: `screen` (menu, profiles, play, settings, stats, quit, pause, game), `tier`, `seed`,
-`world`, `hero`, `mode` (forward, predict), `lang`, `stars`, `frame` (animation time in ms),
+`world`, `hero`, `mode` (forward, predict, repair), `lang`, `stars`, `frame` (animation time in ms), `height` (scene height, default 800),
 `solve` / `fail` / `hint`.
 
 ## Web build

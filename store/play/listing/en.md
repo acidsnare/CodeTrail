@@ -17,9 +17,10 @@ Six difficulty levels, one new idea at a time:
 • Loops - "repeat 3 times" instead of the same cards again and again
 • Blocks - name a group of cards once, use it anywhere
 
-Two ways to play:
+Three ways to play:
 • Build the path - pick the cards that bring the hero home
 • Guess the finish - read a program and tap where the hero will stop
+• Fix the program - find and replace one wrong card; run it as often as you need
 
 Every level is generated, so the puzzles never run out, and every level is guaranteed solvable. Shorter programs earn more stars; stars unlock new heroes: turtle, penguin, fox, bear and the red panda. Six worlds to explore: islands, forest, space, ice, city and lava.
 

@@ -50,6 +50,7 @@ object ProfileCodec {
             put("autosave.program", ProgramCodec.encode(a.program))
             put("autosave.mode", a.mode)
             put("autosave.function", ProgramCodec.encode(a.function))
+            put("autosave.hintsUsed", a.hintsUsed.toString())
         }
     }
 
@@ -69,6 +70,7 @@ object ProfileCodec {
                 program = ProgramCodec.decode(p["autosave.program"] ?: ""),
                 mode = p["autosave.mode"] ?: "forward",
                 function = ProgramCodec.decode(p["autosave.function"] ?: ""),
+                hintsUsed = p["autosave.hintsUsed"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0,
             )
         }
         return Profile(

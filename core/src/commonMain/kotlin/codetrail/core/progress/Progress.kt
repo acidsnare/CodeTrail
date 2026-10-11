@@ -11,16 +11,16 @@ data class Progress(
     val wonPerTier: Map<Int, Int> = emptyMap(),
     /** Levels won per world id. */
     val wonPerWorld: Map<String, Int> = emptyMap(),
-    /** Seeds of levels already paid out, keyed as "tier:seed". Bounded, oldest dropped. */
+    /** Reward keys: legacy "tier:seed", or "namespace:tier:seed". Bounded, oldest dropped. */
     val rewarded: Set<String> = emptySet(),
 ) {
-    fun key(tier: Int, seed: Long) = "$tier:$seed"
+    fun key(tier: Int, seed: Long, namespace: String? = null) = if (namespace == null) "$tier:$seed" else "$namespace:$tier:$seed"
 
-    fun isRewarded(tier: Int, seed: Long) = key(tier, seed) in rewarded
+    fun isRewarded(tier: Int, seed: Long, namespace: String? = null) = key(tier, seed, namespace) in rewarded
 
-    fun reward(tier: Int, seed: Long, stars: Int, worldId: String? = null): Progress {
-        if (isRewarded(tier, seed) || stars <= 0) return this
-        val keys = (rewarded + key(tier, seed)).let { if (it.size > MAX_REWARDED) it.drop(it.size - MAX_REWARDED).toSet() else it }
+    fun reward(tier: Int, seed: Long, stars: Int, worldId: String? = null, namespace: String? = null): Progress {
+        if (isRewarded(tier, seed, namespace) || stars <= 0) return this
+        val keys = (rewarded + key(tier, seed, namespace)).let { if (it.size > MAX_REWARDED) it.drop(it.size - MAX_REWARDED).toSet() else it }
         return copy(
             totalStars = totalStars + stars,
             levelsWon = levelsWon + 1,

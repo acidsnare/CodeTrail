@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -58,6 +59,7 @@ import codetrail.app.res.block_hint
 import codetrail.app.res.new_level
 import codetrail.app.res.predict_check
 import codetrail.app.res.program_title
+import codetrail.app.res.repair_program_title
 import codetrail.app.res.run
 import codetrail.app.res.undo
 import androidx.compose.foundation.layout.Spacer
@@ -91,7 +93,8 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
     val level = state.level
     val scope = rememberCoroutineScope()
     val slotSize = (58 * TouchBoost).toInt()
-    val editable = state.mode == GameMode.FORWARD
+    val editable = state.mode.editsProgram
+    val repairing = state.mode == GameMode.REPAIR
     val dnd = remember(state) { DragController(state, scope) }
     // The controller keeps bounds of cards that are gone after an edit; refresh from scratch each time.
     LaunchedEffect(state.program.toList(), state.function.toList()) { dnd.cards.clear() }
@@ -105,7 +108,11 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.program_title, state.slotsUsed, level.maxSlots), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    if (repairing) stringResource(Res.string.repair_program_title, state.repairChanges) else stringResource(Res.string.program_title, state.slotsUsed, level.maxSlots),
+                    fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                    color = if (repairing && (!state.repairShapeOk || state.repairChanges > 1)) Danger else LocalContentColor.current,
+                )
                 Spacer(Modifier.weight(1f))
                 if (editable) {
                     // Undo lives next to what it undoes.
@@ -129,7 +136,7 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = (rows * (slotSize + 8)).dp)
+                    .heightIn(min = if (repairing) 0.dp else (rows * (slotSize + 8)).dp)
                     .onGloballyPositioned { c -> dnd.toRoot(c)?.let { dnd.containers[Container.Top] = it } },
             ) {
                 for ((i, cmd) in state.program.withIndex()) {
@@ -160,7 +167,7 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
                         }
                     }
                 }
-                for (k in state.slotsUsed until level.maxSlots) EmptySlot(k, slotSize)
+                if (!repairing) for (k in state.slotsUsed until level.maxSlots) EmptySlot(k, slotSize)
             }
 
             if (level.commandSet.functions) {
@@ -180,7 +187,7 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
                 ) { Text("✦  " + stringResource(Res.string.new_level), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             } else Button(
                 onClick = { scope.launch { state.run() } },
-                enabled = state.phase != Phase.RUNNING && state.program.isNotEmpty() &&
+                enabled = state.phase != Phase.RUNNING && (state.program.isNotEmpty() || (repairing && !state.repairShapeOk)) &&
                     (editable || state.guess != null),
                 colors = ButtonDefaults.buttonColors(containerColor = Accent, disabledContainerColor = Accent.copy(alpha = 0.35f)),
                 shape = RoundedCornerShape(18.dp),
@@ -273,21 +280,22 @@ private fun ProgramCard(
             highlighted = highlighted,
             failed = failed,
             selected = selected,
+            hinted = state.repairHintSlot == slot,
             modifier = Modifier
                 .graphicsLayer { alpha = if (dragging) 0.3f else 1f }
-                .dragSource(dnd, { cmd }, slot, { editable && state.canEdit }, onBounds = { dnd.cards[slot] = it }),
+                .dragSource(dnd, { cmd }, slot, { editable && state.canEdit && state.mode != GameMode.REPAIR }, onBounds = { dnd.cards[slot] = it }),
             onClick = if (editable) ({ state.select(Selection.Card(slot)) }) else null,
         )
-        if (selected && state.canEdit) SelectionControls(cmd, size, onDelete = { state.removeSelected() }, onAdjust = { state.adjustSelected(it) })
+        if (selected && state.canEdit) SelectionControls(cmd, size, deletable = state.mode != GameMode.REPAIR, onDelete = { state.removeSelected() }, onAdjust = { state.adjustSelected(it) })
     }
 }
 
 /** Delete badge in the top-right corner and, for numbered cards, -/+ at the bottom corners. */
 @Composable
-private fun androidx.compose.foundation.layout.BoxScope.SelectionControls(cmd: Command, size: Int, onDelete: () -> Unit, onAdjust: (Int) -> Unit) {
+private fun androidx.compose.foundation.layout.BoxScope.SelectionControls(cmd: Command, size: Int, deletable: Boolean, onDelete: () -> Unit, onAdjust: (Int) -> Unit) {
     // Big enough to hit with a finger: a third of the card, at least 28dp.
     val badge = maxOf(28.dp, (size * 0.42f * TouchBoost).dp)
-    Box(
+    if (deletable) Box(
         Modifier
             .align(Alignment.TopEnd)
             .offset(x = badge / 3, y = -badge / 3)
@@ -337,9 +345,11 @@ private fun LoopCard(
     val selected = editable && state.selection == Selection.Loop(index)
     val dropHere = dnd.drag?.target.let { it is Slot.InLoop && it.loop == index }
     val dragging = dnd.drag?.source == Slot.Top(index)
+    val hinted = state.repairHintSlot == Slot.Top(index)
     val frame = when {
         failedWhole -> Color(0xFFFFCDD2)
         running -> Color(0xFFFFF59D)
+        hinted -> Color(0xFFA5D6A7)
         selected || dropHere -> LoopOpenFill
         else -> LoopFill
     }
@@ -361,7 +371,7 @@ private fun LoopCard(
                 Modifier
                     .size(inner.dp)
                     .background(if (selected) Accent2 else Color.Transparent, RoundedCornerShape(10.dp))
-                    .dragSource(dnd, { loop }, Slot.Top(index), { editable && state.canEdit }),
+                    .dragSource(dnd, { loop }, Slot.Top(index), { editable && state.canEdit && state.mode != GameMode.REPAIR }),
                 contentAlignment = Alignment.Center,
             ) {
                 RepeatGlyph(loop.times, iteration, inner, tint = if (selected) Color.White else Ink)
@@ -381,7 +391,7 @@ private fun LoopCard(
                 ) { Text("+", color = Accent2, fontWeight = FontWeight.ExtraBold, fontSize = (inner * 0.4f).sp) }
             }
         }
-        if (selected && state.canEdit) SelectionControls(loop, size, onDelete = { state.removeSelected() }, onAdjust = { state.adjustSelected(it) })
+        if (selected && state.canEdit) SelectionControls(loop, size, deletable = state.mode != GameMode.REPAIR, onDelete = { state.removeSelected() }, onAdjust = { state.adjustSelected(it) })
     }
 }
 
@@ -412,7 +422,7 @@ private fun FunctionPanel(state: GameState, dnd: DragController, size: Int, edit
             .fillMaxWidth()
             .background(fill, shape)
             .border(if (selected || running || dropHere) 3.dp else 2.dp, BlockColor, shape)
-            .then(if (editable) Modifier.clickable { state.select(Selection.Function) } else Modifier)
+            .then(if (editable && state.mode != GameMode.REPAIR) Modifier.clickable { state.select(Selection.Function) } else Modifier)
             .onGloballyPositioned { c -> dnd.toRoot(c)?.let { dnd.containers[Container.Function] = it } }
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -468,7 +478,13 @@ private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet, 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 @Composable
                 fun tray(c: Command, hinted: Boolean = state.hintCommand == c) {
-                    CommandCard(c, size = (62 * TouchBoost).toInt(), hinted = hinted, modifier = Modifier.dragSource(dnd, { c }, null, canAdd), onClick = { add(c) })
+                    val available = state.mode != GameMode.REPAIR || state.canReplaceSelected(c)
+                    CommandCard(
+                        c, size = (62 * TouchBoost).toInt(), hinted = hinted,
+                        modifier = Modifier.alpha(if (available) 1f else 0.35f)
+                            .dragSource(dnd, { c }, null, { state.mode != GameMode.REPAIR && canAdd() }),
+                        onClick = if (available) ({ add(c) }) else null,
+                    )
                 }
                 if (!set.relative) {
                     for (d in listOf(Dir.NORTH, Dir.SOUTH, Dir.WEST, Dir.EAST)) tray(Command.Move(d))
@@ -476,9 +492,10 @@ private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet, 
                     val maxRun = minOf(maxOf(state.level.grid.width, state.level.grid.height) - 1, set.maxForward)
                     val hintForward = state.hintCommand as? Command.Forward
                     if (hintForward != null && state.forwardCount != hintForward.cells) state.forwardCount = hintForward.cells
+                    val forwardFits = state.mode != GameMode.REPAIR || state.fitsSelected(Command.Forward(state.forwardCount))
                     Picker(
                         card = { tray(Command.Forward(state.forwardCount), hinted = hintForward != null) },
-                        canDec = state.forwardCount > 1, canInc = state.forwardCount < maxRun,
+                        canDec = forwardFits && state.forwardCount > 1, canInc = forwardFits && state.forwardCount < maxRun,
                         onChange = { state.forwardCount += it },
                     )
                     tray(Command.TurnLeft)
@@ -488,9 +505,10 @@ private fun CommandTray(state: GameState, dnd: DragController, set: CommandSet, 
                     if (set.loops) {
                         val hintLoop = state.hintCommand as? Command.Repeat
                         if (hintLoop != null && state.repeatCount != hintLoop.times) state.repeatCount = hintLoop.times
+                        val repeatFits = state.mode != GameMode.REPAIR || state.fitsSelected(Command.Repeat(state.repeatCount, emptyList()))
                         Picker(
                             card = { tray(Command.Repeat(state.repeatCount, emptyList()), hinted = hintLoop != null) },
-                            canDec = state.repeatCount > 2, canInc = state.repeatCount < CommandSet.MAX_REPEAT,
+                            canDec = repeatFits && state.repeatCount > 2, canInc = repeatFits && state.repeatCount < CommandSet.MAX_REPEAT,
                             onChange = { state.repeatCount += it },
                         )
                     }

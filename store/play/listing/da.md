@@ -17,9 +17,10 @@ Seks sværhedsgrader, én ny idé ad gangen:
 • Løkker - "gentag 3 gange" i stedet for de samme kort igen og igen
 • Blokke - navngiv en gruppe kort én gang og brug den overalt
 
-To måder at spille på:
+Tre måder at spille på:
 • Byg vejen - vælg de kort, der fører helten hjem
 • Gæt målet - læs et program og tryk der, hvor helten stopper
+• Ret programmet - find og udskift ét forkert kort; kør det så ofte, du vil
 
 Hver bane bliver genereret, så opgaverne slipper aldrig op, og hver bane kan garanteret løses. Kortere programmer giver flere stjerner; stjerner låser nye helte op: skildpadde, pingvin, ræv, bjørn og den røde panda. Seks verdener: øer, skov, rummet, is, by og lava.
 

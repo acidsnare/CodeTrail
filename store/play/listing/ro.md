@@ -17,9 +17,10 @@ CodeTrail este un joc de puzzle care predă primele idei ale programării fără
 • Bucle - „repetă de 3 ori” în loc de aceleași carduri iar și iar
 • Blocuri - dă un nume unui grup de carduri o dată și folosește-l oriunde
 
-Două moduri de joc:
+Trei moduri de joc:
 • Construiește drumul - alege cardurile care duc eroul acasă
 • Ghicește finalul - citește un program și apasă acolo unde se va opri eroul
+• Repară programul - găsește și înlocuiește un cartonaș greșit; rulează-l de câte ori ai nevoie
 
 Fiecare nivel este generat, așa că puzzle-urile nu se termină niciodată, iar fiecare nivel are garantat o soluție. Programele mai scurte aduc mai multe stele; stelele deblochează eroi noi: țestoasa, pinguinul, vulpea, ursul și panda roșu. Șase lumi de explorat: insule, pădure, spațiu, gheață, oraș și lavă.
 

@@ -6,9 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import codetrail.core.command.Command
 import codetrail.core.command.CommandSet
+import codetrail.core.command.Compiled
 import codetrail.core.command.Program
 import codetrail.core.command.slotCount
 import codetrail.core.engine.CommandRef
+import codetrail.core.engine.CardAddress
+import codetrail.core.engine.RepairPuzzle
+import codetrail.core.engine.RepairPuzzles
 import codetrail.core.engine.PredictPuzzle
 import codetrail.core.engine.PredictPuzzles
 import codetrail.core.engine.Solver
@@ -45,7 +49,8 @@ sealed interface Selection {
     data object Function : Selection
 }
 
-enum class GameMode(val id: String) { FORWARD("forward"), PREDICT("predict");
+enum class GameMode(val id: String) { FORWARD("forward"), PREDICT("predict"), REPAIR("repair");
+    val editsProgram: Boolean get() = this != PREDICT
     companion object { fun of(id: String?) = entries.firstOrNull { it.id == id } ?: FORWARD }
 }
 
@@ -92,7 +97,7 @@ class GameState(
 
     var tier by mutableStateOf(tier)
         private set
-    var level by mutableStateOf(generator.generate(tier, resume?.seed ?: Random.nextLong(), obstacles = mode == GameMode.FORWARD))
+    var level by mutableStateOf(generator.generate(tier, resume?.seed ?: Random.nextLong(), obstacles = mode != GameMode.PREDICT))
         private set
 
     // ---- predict mode ----
@@ -104,6 +109,27 @@ class GameState(
         private set
     var predictResult by mutableStateOf<Boolean?>(null)
         private set
+
+    // ---- repair mode ----
+    var repair by mutableStateOf<RepairPuzzle?>(null)
+        private set
+    var repairHintSlot by mutableStateOf<Slot?>(null)
+        private set
+    var repairNeedsOneChange by mutableStateOf(false)
+        private set
+
+    val repairShapeOk: Boolean get() = repair?.let {
+        RepairPuzzles.sameShape(it.broken, Compiled(program.toList(), function.toList()))
+    } ?: true
+
+    val repairChanges: Int get() {
+        if (!repairShapeOk) return 0
+        return repair?.let {
+            RepairPuzzles.differences(it.broken, Compiled(program.toList(), function.toList())).size
+        } ?: 0
+    }
+
+    val repairHintRestore: Boolean get() = repairHintSlot?.let { it.address() != repair?.changedCard } ?: false
 
     // ---- hints ----
     private var solution: Solver.Solution? = null
@@ -177,15 +203,18 @@ class GameState(
 
     /** A level is locked once it has been solved, in this session or earlier: no edits, no reruns, only New level. */
     val completed: Boolean
-        get() = phase == Phase.WON || profile.progress.isRewarded(level.difficulty, rewardKey())
+        get() = phase == Phase.WON || profile.progress.isRewarded(level.difficulty, rewardKey(), rewardNamespace)
 
-    val canEdit: Boolean get() = phase != Phase.RUNNING && mode == GameMode.FORWARD && !completed
+    val canEdit: Boolean get() = phase != Phase.RUNNING && mode.editsProgram && !completed
 
     private fun rewardKey() = if (mode == GameMode.PREDICT) level.seed xor 0x5EED else level.seed
+    private val rewardNamespace: String? get() = if (mode == GameMode.REPAIR) "repair" else null
 
     init {
         if (mode == GameMode.PREDICT) {
             setupPredict()
+        } else if (mode == GameMode.REPAIR) {
+            setupRepair(resume)
         } else {
             resume?.function?.filter { level.commandSet.acceptsInFunction(it) }?.let { function.addAll(it) }
             resume?.program?.filter { level.commandSet.accepts(it) }?.let { program.addAll(it) }
@@ -206,6 +235,97 @@ class GameState(
         predictResult = null
     }
 
+    private fun setupRepair(resume: SaveSlot? = null) {
+        val puzzle = RepairPuzzles.make(level)
+        repair = puzzle
+        val saved = resume?.let { Compiled(
+            it.program.filter(level.commandSet::accepts),
+            it.function.filter(level.commandSet::acceptsInFunction),
+        ) }
+        val initial = saved?.takeIf { RepairPuzzles.sameShape(puzzle.broken, it) } ?: puzzle.broken
+        program.clear(); program.addAll(initial.program)
+        function.clear(); function.addAll(initial.function)
+        hintsUsed = resume?.hintsUsed?.coerceIn(0, 2) ?: 0
+    }
+
+    private fun CardAddress.slot(): Slot = when (this) {
+        is CardAddress.Main -> Slot.Top(index)
+        is CardAddress.Loop -> Slot.InLoop(index, bodyIndex)
+        is CardAddress.Block -> Slot.InFunction(index)
+    }
+
+    private fun Slot.address(): CardAddress = when (this) {
+        is Slot.Top -> CardAddress.Main(index)
+        is Slot.InLoop -> CardAddress.Loop(loop, index)
+        is Slot.InFunction -> CardAddress.Block(index)
+    }
+
+    private fun hintRepair() {
+        val puzzle = repair ?: return
+        val current = Compiled(program.toList(), function.toList())
+        clearHint()
+        if (phase != Phase.EDITING) resetRun()
+        sounds.play(Sfx.HINT)
+        if (!repairShapeOk) {
+            phase = Phase.FAILED
+            repairNeedsOneChange = true
+            return
+        }
+        if (repairChanges == 1 && Interpreter.run(level, current.program, current.function).succeeded) {
+            hintReady = true
+            return
+        }
+        hintsUsed = minOf(2, hintsUsed + 1)
+        val at = RepairPuzzles.differences(puzzle.solution, current).firstOrNull() ?: return
+        val slot = at.slot()
+        repairHintSlot = slot
+        selection = if (commandAt(slot) is Command.Repeat) Selection.Loop((slot as Slot.Top).index) else Selection.Card(slot)
+        // First locate the card; a second hint reveals a suggested replacement.
+        if (hintsUsed >= 2) hintCommand = RepairPuzzles.cardAt(puzzle.solution, at)
+        persist()
+    }
+
+    /** Repair keeps all containers intact: tray taps replace a selected card rather than add. */
+    fun fitsSelected(c: Command): Boolean {
+        val at = selectedSlot() ?: return false
+        val old = commandAt(at) ?: return false
+        return canEdit && repairShapeOk && canPlace(c, at) && (old is Command.Repeat) == (c is Command.Repeat)
+    }
+
+    fun canReplaceSelected(c: Command): Boolean {
+        if (!fitsSelected(c)) return false
+        val old = commandAt(selectedSlot() ?: return false) ?: return false
+        return if (old is Command.Repeat && c is Command.Repeat) old.times != c.times else old != c
+    }
+
+    private fun selectedSlot(): Slot? = (selection as? Selection.Card)?.slot
+        ?: (selection as? Selection.Loop)?.let { Slot.Top(it.index) }
+
+    private fun replaceSelected(c: Command) {
+        if (!canReplaceSelected(c)) return
+        val at = selectedSlot() ?: return
+        val old = commandAt(at) ?: return
+        val replacement = if (old is Command.Repeat && c is Command.Repeat) c.copy(body = old.body) else c
+        if (replacement == old) return
+        if (phase != Phase.EDITING) resetRun()
+        remember()
+        val updated = RepairPuzzles.replace(Compiled(program.toList(), function.toList()), at.address(), replacement)
+        program.clear(); program.addAll(updated.program)
+        function.clear(); function.addAll(updated.function)
+        afterEdit(Sfx.CARD_ADD)
+    }
+
+    fun restoreRepair() {
+        val original = repair?.broken ?: return
+        if (!canEdit || (repairShapeOk && repairChanges == 0)) return
+        remember()
+        program.clear(); program.addAll(original.program)
+        function.clear(); function.addAll(original.function)
+        selection = null
+        resetRun()
+        afterEdit(Sfx.CARD_REMOVE)
+    }
+
     /** Predict mode: the player points at the cell where the hero will stop. */
     fun selectGuess(p: Pos) {
         if (mode != GameMode.PREDICT || phase == Phase.RUNNING || completed) return
@@ -217,6 +337,7 @@ class GameState(
 
     /** Hint: compare the program with the shortest solution and point at the next step. Caps the level at 2 stars. */
     fun hint() {
+        if (mode == GameMode.REPAIR) { if (canEdit) hintRepair(); return }
         if (mode != GameMode.FORWARD || !canEdit) return
         val full = solution ?: Solver.solve(level.grid, level.start, level.startDir, level.goal, level.commandSet)?.also { solution = it } ?: return
         hintsUsed++
@@ -265,13 +386,14 @@ class GameState(
         hintRemoveLast = false
         hintRemoveLastFunction = false
         hintReady = false
+        repairHintSlot = null
     }
 
     fun isUnlocked(c: Character) = profile.progress.totalStars >= c.unlockStars
 
     fun newLevel(newTier: Int = tier, seed: Long = Random.nextLong()) {
         tier = newTier
-        level = generator.generate(newTier, seed, obstacles = mode == GameMode.FORWARD)
+        level = generator.generate(newTier, seed, obstacles = mode != GameMode.PREDICT)
         solution = null
         hintsUsed = 0
         clearHint()
@@ -282,13 +404,16 @@ class GameState(
         canUndo = false
         resetRun()
         if (mode == GameMode.PREDICT) setupPredict()
+        if (mode == GameMode.REPAIR) setupRepair()
         justUnlocked = null
+        unlockSplash = false
         persist()
     }
 
     /** Same level, empty program. */
     fun restartLevel() {
         if (completed) { newLevel(); return }
+        if (mode == GameMode.REPAIR) { restoreRepair(); return }
         if (mode == GameMode.PREDICT) { resetRun(); setupPredict(); persist(); return }
         remember()
         program.clear()
@@ -359,6 +484,7 @@ class GameState(
 
     /** Tap on a tray card. */
     fun addCommand(c: Command) {
+        if (mode == GameMode.REPAIR) { replaceSelected(c); return }
         if (!canEdit || slotsUsed >= level.maxSlots) return
         val at = insertionPoint(c)
         if (!canPlace(c, at)) return
@@ -368,6 +494,7 @@ class GameState(
 
     /** Drop of a tray card at [at]. Returns false when nothing was inserted. */
     fun insertCommand(c: Command, at: Slot): Boolean {
+        if (mode == GameMode.REPAIR) return false
         if (!canEdit || slotsUsed >= level.maxSlots || !canPlace(c, at)) return false
         insert(c, at)
         selection = null
@@ -395,6 +522,7 @@ class GameState(
      * card is still in place). Returns false when the move is not allowed; nothing changes then.
      */
     fun moveCommand(from: Slot, to: Slot): Boolean {
+        if (mode == GameMode.REPAIR) return false
         if (!canEdit) return false
         val c = commandAt(from) ?: return false
         if (!canPlace(c, to)) return false
@@ -466,6 +594,7 @@ class GameState(
 
     /** The delete badge on the selected card, or the Delete key. */
     fun removeSelected() {
+        if (mode == GameMode.REPAIR) return
         when (val sel = selection) {
             is Selection.Card -> removeCommand(sel.slot)
             is Selection.Loop -> removeCommand(Slot.Top(sel.index))
@@ -474,6 +603,7 @@ class GameState(
     }
 
     fun removeCommand(slot: Slot) {
+        if (mode == GameMode.REPAIR) return
         if (!canEdit || commandAt(slot) == null) return
         if (phase != Phase.EDITING) resetRun()
         remember()
@@ -507,6 +637,7 @@ class GameState(
     }
 
     fun clearProgram() {
+        if (mode == GameMode.REPAIR) { restoreRepair(); return }
         if (!canEdit || (program.isEmpty() && function.isEmpty())) return
         remember()
         program.clear()
@@ -523,11 +654,19 @@ class GameState(
         activeCommand = null
         failure = null
         stars = 0
+        repairNeedsOneChange = false
     }
 
     /** Plays the trace step by step. Suspends until the run is over. */
     suspend fun run() {
-        if (phase == Phase.RUNNING || program.isEmpty() || completed) return
+        if (phase == Phase.RUNNING || completed) return
+        if (mode == GameMode.REPAIR && !repairShapeOk) {
+            resetRun()
+            selection = null
+            rejectRepair()
+            return
+        }
+        if (program.isEmpty()) return
         if (mode == GameMode.PREDICT && guess == null) return
         resetRun()
         selection = null
@@ -547,9 +686,13 @@ class GameState(
 
         val f = trace.failure
         if (f == null) {
+            if (mode == GameMode.REPAIR && (!repairShapeOk || repairChanges != 1)) {
+                rejectRepair()
+                return
+            }
             runId++
             phase = Phase.WON
-            stars = minOf(rate(slotsUsed, level.optimalLength), maxStars)
+            stars = if (mode == GameMode.REPAIR) maxStars else minOf(rate(slotsUsed, level.optimalLength), maxStars)
             activeCommand = null
             award(stars)
             sounds.play(if (stars == 3) Sfx.WIN_BIG else Sfx.WIN)
@@ -561,6 +704,14 @@ class GameState(
             activeCommand = trace.failedAt
             playFailure(f)
         }
+    }
+
+    private suspend fun rejectRepair() {
+        phase = Phase.FAILED
+        repairNeedsOneChange = true
+        activeCommand = null
+        sounds.play(Sfx.SAD)
+        headShake()
     }
 
     /**
@@ -710,11 +861,11 @@ class GameState(
         // predict puzzles are rewarded separately from building the same level
         val seedKey = rewardKey()
         payout = 0
-        if (!progress.isRewarded(level.difficulty, seedKey)) {
+        if (!progress.isRewarded(level.difficulty, seedKey, rewardNamespace)) {
             // harder tiers pay more: the 1-3 rating is multiplied by the tier number
             payout = stars * level.difficulty
             val before = progress.totalStars
-            val after = progress.reward(level.difficulty, seedKey, payout, theme.id)
+            val after = progress.reward(level.difficulty, seedKey, payout, theme.id, rewardNamespace)
             profile = profile.copy(progress = after)
             justUnlocked = Character.All.firstOrNull { it.unlockStars in (before + 1)..after.totalStars }
         }
@@ -723,8 +874,11 @@ class GameState(
 
     /** Writes the profile back: progress, choices, and the level in progress (none once it is won). */
     fun persist() {
-        val forward = mode == GameMode.FORWARD
-        val slot = if (phase == Phase.WON) null else SaveSlot(tier, level.seed, theme.id, if (forward) program.toList() else emptyList(), mode.id, if (forward) function.toList() else emptyList())
+        val editable = mode.editsProgram
+        val slot = if (phase == Phase.WON) null else SaveSlot(
+            tier, level.seed, theme.id, if (editable) program.toList() else emptyList(), mode.id,
+            if (editable) function.toList() else emptyList(), if (mode == GameMode.REPAIR) hintsUsed else 0,
+        )
         profile = profile.copy(
             lastPlayedAt = Platform.currentTimeMillis(),
             worldId = theme.id,

@@ -72,6 +72,15 @@ import codetrail.app.res.level_done
 import codetrail.app.res.predict_correct
 import codetrail.app.res.predict_prompt
 import codetrail.app.res.predict_wrong
+import codetrail.app.res.repair_prompt
+import codetrail.app.res.repair_restore
+import codetrail.app.res.repair_hint_card
+import codetrail.app.res.repair_hint_replace
+import codetrail.app.res.repair_hint_restore
+import codetrail.app.res.repair_hint_restore_card
+import codetrail.app.res.repair_one_change
+import codetrail.app.res.repair_correct
+import codetrail.app.res.repair_legend
 import codetrail.app.Phase
 import codetrail.app.res.Res
 import codetrail.app.res.clear
@@ -171,14 +180,14 @@ fun GameScreen(app: AppState, state: GameState) {
                         // Keep the row in the layout after a win so the board does not jump; only hide its contents.
                         val done = state.completed
                         Row(Modifier.fillMaxWidth().alpha(if (done) 0f else 1f), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            if (state.mode == GameMode.FORWARD) {
+                            if (state.mode.editsProgram) {
                                 // After a hint the button shows the best rating still possible.
                                 val cap = if (state.hintsUsed > 0) "  ·  ${"★".repeat(state.maxStars)}" else ""
                                 SmallAction("💡  " + stringResource(Res.string.hint) + cap, enabled = state.canEdit && !done) { state.hint() }
                             }
                             Spacer(Modifier.weight(1f))
-                            if (state.mode == GameMode.FORWARD) {
-                                SmallAction("✕  " + stringResource(Res.string.clear), enabled = state.canEdit && state.program.isNotEmpty() && !done) { state.clearProgram() }
+                            if (state.mode.editsProgram) {
+                                SmallAction(if (state.mode == GameMode.REPAIR) "↺  " + stringResource(Res.string.repair_restore) else "✕  " + stringResource(Res.string.clear), enabled = state.canEdit && (if (state.mode == GameMode.REPAIR) !state.repairShapeOk || state.repairChanges > 0 else state.program.isNotEmpty()) && !done) { state.clearProgram() }
                             }
                             SmallAction("✦  " + stringResource(Res.string.new_level), enabled = state.phase != Phase.RUNNING && !done, filled = true) { state.newLevel() }
                         }
@@ -260,6 +269,7 @@ private fun LegendOverlay(state: GameState, onDismiss: () -> Unit) {
             Text(stringResource(Res.string.legend_title), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             Spacer(Modifier.height(16.dp))
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (state.mode == GameMode.REPAIR) Text(stringResource(Res.string.repair_legend), color = Color.White, fontSize = 16.sp)
                 if (!set.relative) {
                     LegendRow(stringResource(Res.string.legend_move)) {
                         for (d in listOf(Dir.NORTH, Dir.SOUTH, Dir.WEST, Dir.EAST)) CommandCard(Command.Move(d), size = 48)
@@ -339,6 +349,7 @@ private fun SpeechBubble(state: GameState) {
 private fun statusText(state: GameState): String {
     if (state.completed && state.phase != Phase.WON) return stringResource(Res.string.level_done)
     if (state.mode == GameMode.PREDICT) return predictText(state)
+    if (state.mode == GameMode.REPAIR) return repairText(state)
     if (state.phase == Phase.EDITING) {
         // Hints only make sense while editing; after a run the outcome speaks.
         state.hintCommand?.let { return stringResource(Res.string.hint_next, commandLabel(it)) }
@@ -347,6 +358,22 @@ private fun statusText(state: GameState): String {
         if (state.hintReady) return stringResource(Res.string.hint_ready)
     }
     return forwardText(state)
+}
+
+@Composable
+private fun repairText(state: GameState): String = when (state.phase) {
+    Phase.EDITING -> when {
+        state.hintReady -> stringResource(Res.string.hint_ready)
+        state.hintCommand != null && state.repairHintRestore -> stringResource(Res.string.repair_hint_restore_card, commandLabel(state.hintCommand!!))
+        state.hintCommand != null -> stringResource(Res.string.repair_hint_replace, commandLabel(state.hintCommand!!))
+        state.repairHintRestore -> stringResource(Res.string.repair_hint_restore)
+        state.repairHintSlot != null -> stringResource(Res.string.repair_hint_card)
+        else -> stringResource(Res.string.repair_prompt)
+    }
+    Phase.WON -> stringResource(Res.string.repair_correct) + " " + "★".repeat(state.stars) + "☆".repeat(3 - state.stars) +
+        (if (state.payout > 0) "  " + stringResource(Res.string.won_payout, state.payout) else "")
+    Phase.FAILED -> if (state.repairNeedsOneChange) stringResource(Res.string.repair_one_change) else forwardText(state)
+    Phase.RUNNING -> stringResource(Res.string.status_running)
 }
 
 @Composable

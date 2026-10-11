@@ -25,10 +25,12 @@ data class SaveSlot(
     val seed: Long,
     val worldId: String,
     val program: Program,
-    /** "forward" (build the program) or "predict" (guess where a given program ends). */
+    /** "forward" (build), "predict" (read), or "repair" (fix one card). */
     val mode: String = "forward",
     /** Block A on the block tier. */
     val function: Program = emptyList(),
+    /** Keep the hint rating cap when a repair task is resumed or transferred. */
+    val hintsUsed: Int = 0,
 )
 
 /** App-wide settings that are not tied to a profile. */

@@ -175,4 +175,16 @@
     <string name="legend_repeat">Runs the cards inside it that many times. Tap the frame, then add cards into it.</string>
     <string name="legend_call">Runs block A. Build the block once at the bottom, then call it as often as you like.</string>
     <string name="legend_goal">The hero must stop exactly on the goal. Fewer cards means more stars.</string>
+    <string name="mode_repair">Fix the program</string>
+    <string name="mode_repair_desc">Find and replace one wrong card</string>
+    <string name="repair_prompt">One card is wrong. Select a card and replace it. Run the program to check.</string>
+    <string name="repair_program_title">Changes  %1$d / 1</string>
+    <string name="repair_restore">Restore</string>
+    <string name="repair_hint_card">Check the highlighted card.</string>
+    <string name="repair_hint_replace">Try replacing it with “%1$s”.</string>
+    <string name="repair_one_change">Fix exactly one card. Leave the rest as it was.</string>
+    <string name="repair_correct">Fixed!</string>
+    <string name="repair_legend">Fix exactly one card: select it in the program, then tap its replacement in the tray. Use −/+ to change numbers.</string>
+    <string name="repair_hint_restore">Restore this card to its original value.</string>
+    <string name="repair_hint_restore_card">Restore the original card: “%1$s”.</string>
 </resources>
