@@ -4,6 +4,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -130,7 +132,11 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
                 }
             }
 
-            val rows = (level.maxSlots + 4) / 5
+            // Program and block A scroll when a large system font or a tall tier needs more height than the
+            // screen has; the tray and the Run button below always stay in view.
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            // At least 7 slots fit a row on every supported scene, so reserve height for that many.
+            val rows = (level.maxSlots + 6) / 7
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -172,6 +178,7 @@ fun ProgramPanel(state: GameState, modifier: Modifier = Modifier, onLegend: () -
 
             if (level.commandSet.functions) {
                 FunctionPanel(state, dnd, slotSize, editable)
+            }
             }
 
             if (editable && !state.completed) CommandTray(state, dnd, level.commandSet, onLegend)
