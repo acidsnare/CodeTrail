@@ -105,6 +105,7 @@
     <string name="pause_exit">Salvează și ieși</string>
 
     <string name="settings_title">Setări</string>
+    <string name="settings_version">CodeTrail · versiunea %1$s</string>
     <string name="settings_language">Limbă</string>
     <string name="settings_data">Fișiere salvate: %1$s</string>
     <string name="unlock_title">Prieten nou!</string>

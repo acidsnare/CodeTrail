@@ -106,6 +106,7 @@
     <string name="pause_exit">Сохранить и выйти</string>
 
     <string name="settings_title">Настройки</string>
+    <string name="settings_version">CodeTrail · версия %1$s</string>
     <string name="settings_language">Язык</string>
     <string name="settings_data">Файлы сохранений: %1$s</string>
     <string name="unlock_title">Новый друг!</string>

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import codetrail.app.AppLanguage
 import codetrail.app.AppState
+import codetrail.app.APP_VERSION
 import codetrail.app.res.Res
 import codetrail.app.res.back
 import codetrail.app.res.cancel
@@ -46,6 +47,7 @@ import codetrail.app.AnimSpeed
 import codetrail.app.res.on
 import codetrail.app.res.off
 import codetrail.app.res.settings_title
+import codetrail.app.res.settings_version
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -114,6 +116,13 @@ fun SettingsScreen(app: AppState) {
                         )
                     }
                 }
+                Spacer(Modifier.weight(1f))
+                Text(
+                    stringResource(Res.string.settings_version, APP_VERSION),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 20.dp),
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.6f),
+                )
             }
         }
         val profile = app.current

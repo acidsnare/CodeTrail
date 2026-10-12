@@ -1,11 +1,35 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
     id("com.android.kotlin.multiplatform.library")
+}
+
+abstract class GenerateAppVersion : DefaultTask() {
+    @get:Input
+    abstract val appVersion: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val version = appVersion.get().replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\\$")
+        val source = outputDirectory.file("codetrail/app/AppVersion.kt").get().asFile
+        source.parentFile.mkdirs()
+        source.writeText("package codetrail.app\n\ninternal const val APP_VERSION = \"$version\"\n")
+    }
+}
+
+val generateAppVersion = tasks.register<GenerateAppVersion>("generateAppVersion") {
+    appVersion.set(providers.gradleProperty("codetrail.version"))
+    outputDirectory.set(layout.buildDirectory.dir("generated/appVersion"))
 }
 
 kotlin {
@@ -39,6 +63,9 @@ kotlin {
     }
 
     sourceSets {
+        commonMain {
+            kotlin.srcDir(generateAppVersion.flatMap { it.outputDirectory })
+        }
         // Everything a player sees lives here: screens, board art, game and app state, sound synthesis.
         // Platform code (window, files, audio device, locale) sits in the target source sets.
         commonMain.dependencies {

@@ -104,6 +104,7 @@
     <string name="pause_exit">Save and exit</string>
 
     <string name="settings_title">Settings</string>
+    <string name="settings_version">CodeTrail · version %1$s</string>
     <string name="settings_language">Language</string>
     <string name="settings_data">Save files: %1$s</string>
     <string name="unlock_title">New friend!</string>
